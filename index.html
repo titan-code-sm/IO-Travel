@@ -510,15 +510,15 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
       <div class="create-section">
         <div class="create-lbl">Tipo di viaggio</div>
         <div class="type-grid">
-          <div class="type-btn" data-type="walking" onclick="selType(this)"><div class="ticon">🥾</div><div class="tname">A piedi</div></div>
-          <div class="type-btn" data-type="camper" onclick="selType(this)"><div class="ticon">🚐</div><div class="tname">Camper</div></div>
-          <div class="type-btn" data-type="boat" onclick="selType(this)"><div class="ticon">⛵</div><div class="tname">Barca</div></div>
-          <div class="type-btn" data-type="sup" onclick="selType(this)"><div class="ticon">🏄</div><div class="tname">SUP</div></div>
-          <div class="type-btn" data-type="car" onclick="selType(this)"><div class="ticon">🚗</div><div class="tname">Auto</div></div>
-          <div class="type-btn" data-type="flight" onclick="selType(this)"><div class="ticon">✈️</div><div class="tname">Volo</div></div>
-          <div class="type-btn" data-type="bike" onclick="selType(this)"><div class="ticon">🚲</div><div class="tname">Bici</div></div>
-          <div class="type-btn" data-type="train" onclick="selType(this)"><div class="ticon">🚂</div><div class="tname">Treno</div></div>
-          <div class="type-btn" data-type="moto" onclick="selType(this)"><div class="ticon">🏍️</div><div class="tname">Moto</div></div>
+          <div class="type-btn" data-type="walking" onclick="pickType(this)"><div class="ticon">🥾</div><div class="tname">A piedi</div></div>
+          <div class="type-btn" data-type="camper" onclick="pickType(this)"><div class="ticon">🚐</div><div class="tname">Camper</div></div>
+          <div class="type-btn" data-type="boat" onclick="pickType(this)"><div class="ticon">⛵</div><div class="tname">Barca</div></div>
+          <div class="type-btn" data-type="sup" onclick="pickType(this)"><div class="ticon">🏄</div><div class="tname">SUP</div></div>
+          <div class="type-btn" data-type="car" onclick="pickType(this)"><div class="ticon">🚗</div><div class="tname">Auto</div></div>
+          <div class="type-btn" data-type="flight" onclick="pickType(this)"><div class="ticon">✈️</div><div class="tname">Volo</div></div>
+          <div class="type-btn" data-type="bike" onclick="pickType(this)"><div class="ticon">🚲</div><div class="tname">Bici</div></div>
+          <div class="type-btn" data-type="train" onclick="pickType(this)"><div class="ticon">🚂</div><div class="tname">Treno</div></div>
+          <div class="type-btn" data-type="moto" onclick="pickType(this)"><div class="ticon">🏍️</div><div class="tname">Moto</div></div>
         </div>
       </div>
       <div class="create-section">
@@ -963,7 +963,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 // ══════════════════════════════════════════════════════
 let db,auth,cu=null; // current user
 let ct=null; // current trip
-let selType=null,selColor='#3d6df8';
+let tripType=null,selColor='#3d6df8';
 let unsubChat=null,unsubTrips=null;
 let calY=new Date().getFullYear(),calM=new Date().getMonth();
 let calSelDate=null,allCalEvs=[];
@@ -1144,15 +1144,15 @@ function renderCountdowns(trips){
 // ══════════════════════════════════════════════════════
 // CREATE TRIP
 // ══════════════════════════════════════════════════════
-function selType(el){document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');selType=el.dataset.type;}
+function pickType(el){document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');tripType=el.dataset.type;}
 function selColor(el){document.querySelectorAll('.cdot').forEach(d=>d.classList.remove('sel'));el.classList.add('sel');selColor=el.dataset.c;}
 async function createTrip(){
-  if(!selType){toast('⚠️ Seleziona il tipo di viaggio');return;}
+  if(!tripType){toast('⚠️ Seleziona il tipo di viaggio');return;}
   const name=document.getElementById('c-name').value.trim();
   if(!name){toast('⚠️ Inserisci il nome del viaggio');return;}
   const code=Math.random().toString(36).substr(2,6).toUpperCase();
   const data={
-    name,type:selType,
+    name,type:tripType,
     destination:document.getElementById('c-dest').value.trim(),
     startDate:document.getElementById('c-start').value,
     endDate:document.getElementById('c-end').value,
@@ -1168,7 +1168,7 @@ async function createTrip(){
   document.getElementById('c-name').value='';document.getElementById('c-dest').value='';
   document.getElementById('c-start').value='';document.getElementById('c-end').value='';
   document.getElementById('c-desc').value='';document.getElementById('c-budget').value='';
-  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('selected'));selType=null;
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('selected'));tripType=null;
   setTimeout(()=>openTrip({id:ref.id,...data}),200);
 }
 
