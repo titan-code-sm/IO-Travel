@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#3d6df8">
 <title>Travel IO</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -834,7 +835,7 @@ select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns
 // ══════════════════════════════════════════════════════
 let db,auth,cu=null; 
 let ct=null; 
-let tripType=null,selColor='#3d6df8';
+let tripType=null, currentColor='#3d6df8';
 let unsubChat=null,unsubTrips=null;
 let calY=new Date().getFullYear(),calM=new Date().getMonth();
 let calSelDate=null,allCalEvs=[];
@@ -959,7 +960,7 @@ function renderTrips(trips){
 }
 
 function pickType(el){document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');tripType=el.dataset.type;}
-function selColor(el){document.querySelectorAll('.cdot').forEach(d=>d.classList.remove('sel'));el.classList.add('sel');selColor=el.dataset.c;}
+function selColor(el){document.querySelectorAll('.cdot').forEach(d=>d.classList.remove('sel'));el.classList.add('sel');currentColor=el.dataset.c;}
 
 async function createTrip(){
   if(!tripType) return toast('Seleziona il tipo');
@@ -969,7 +970,7 @@ async function createTrip(){
     name,type:tripType,
     startDate:document.getElementById('c-start').value,
     endDate:document.getElementById('c-end').value,
-    color:selColor,inviteCode:Math.random().toString(36).substr(2,6).toUpperCase(),
+    color:currentColor,inviteCode:Math.random().toString(36).substr(2,6).toUpperCase(),
     createdBy:cu.uid,participants:[cu.uid],
     createdAt:firebase.firestore.FieldValue.serverTimestamp()
   };
