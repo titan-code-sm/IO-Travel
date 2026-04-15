@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<title>Travel IO — I tuoi Viaggi</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<style>
+:root {
+  --bg: #080e1c;
+  --bg2: #0f1a30;
+  --card: #111d35;
+  --card2: #162040;
+  --border: rgba(255,255,255,0.07);
+  --accent: #ff6b35;
+  --accent2: #f7c59f;
+  --blue: #3d85ff;
+  --teal: #00d4aa;
+  --text: #e8eaf0;
+  --muted: #8896ae;
+  --radius: 18px;
+  --radius-sm: 10px;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --safe-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+html, body {
+  height:100%; overflow:hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size:16px;
+}
+
+.btn-primary {
+  width:100%; padding:15px;
+  background:var(--accent); color:#fff;
+  border:none; border-radius:12px;
+  font-family:var(--font-head); font-size:1rem; font-weight:700;
+  cursor:pointer; margin-top:8px;
+  transition: transform .15s, opacity .2s;
+}
+.btn-primary:active { transform:scale(.97); opacity:.9; }
+
+/* ═══ APP SHELL ═══ */
+#app { height:100%; display:flex; flex-direction:column; }
+#app.hidden { display:none; }
+
+.view { 
+  display:none; flex:1; flex-direction:column;
+  height:100%; overflow:hidden;
+}
+.view.active { display:flex; }
+
+/* ═══ SCROLLABLE CONTENT ═══ */
+.scroll-area {
+  flex:1; overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:calc(80px + var(--safe-bottom));
+}
+.scroll-area::-webkit-scrollbar { display:none; }
+
+/* ═══ LOGIN ═══ */
+#view-login {
+  background: radial-gradient(ellipse at 20% 20%, #1a2a50 0%, var(--bg) 60%);
+  justify-content:center; align-items:center;
+  padding:32px 24px;
+}
+.login-art {
+  font-size:4rem; margin-bottom:12px;
+  animation: float 3s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.login-title {
+  font-family:var(--font-head); font-size:2.8rem; font-weight:800;
+  color:#fff; line-height:1;
+}
+.login-title span { color:var(--accent); }
+.login-subtitle { color:var(--muted); font-size:.95rem; margin:10px 0 36px; }
+.login-card {
+  width:100%; max-width:380px;
+  background:var(--card); border-radius:24px;
+  padding:28px 22px; border:1px solid var(--border);
+}
+.login-tabs { display:flex; gap:4px; background:var(--bg2); border-radius:10px; padding:4px; margin-bottom:22px; }
+.login-tab {
+  flex:1; padding:9px; text-align:center;
+  border-radius:7px; cursor:pointer;
+  font-size:.875rem; font-weight:500; color:var(--muted);
+  transition: all .2s;
+}
+.login-tab.active { background:var(--accent); color:#fff; }
+.field { margin-bottom:14px; }
+.field label { display:block; font-size:.75rem; color:var(--muted); margin-bottom:6px; letter-spacing:.04em; text-transform:uppercase; }
+.field input {
+  width:100%; padding:13px 14px;
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:10px; color:var(--text);
+  font-family:var(--font-body); font-size:.9rem;
+  transition: border-color .2s;
+}
+.field input:focus { outline:none; border-color:var(--accent); }
+.btn-google {
+  width:100%; padding:13px;
+  background:transparent; color:var(--text);
+  border:1px solid var(--border); border-radius:10px;
+  font-family:var(--font-body); font-size:.9rem;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px;
+  margin-top:10px; transition: background .2s;
+}
+.btn-google:hover { background:var(--bg2); }
+.divider { display:flex; align-items:center; gap:12px; color:var(--muted); font-size:.8rem; margin:16px 0; }
+.divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border); }
+.error-msg { color:#ff4757; font-size:.8rem; text-align:center; margin-top:8px; }
+
+/* ═══ TOP BAR ═══ */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 20px 12px;
+  padding-top:calc(16px + env(safe-area-inset-top, 0px));
+  background:var(--bg); z-index:10;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.topbar-title { font-family:var(--font-head); font-size:1.3rem; font-weight:700; }
+.icon-btn {
+  width:40px; height:40px;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--card); border-radius:12px;
+  border:1px solid var(--border); cursor:pointer;
+  font-size:1.2rem; transition: transform .15s;
+}
+.icon-btn:active { transform:scale(.92); }
+
+/* ═══ BOTTOM NAV ═══ */
+.bottomnav {
+  display:flex; justify-content:space-around;
+  padding:10px 8px calc(10px + var(--safe-bottom));
+  background:var(--bg2); border-top:1px solid var(--border);
+  position:fixed; bottom:0; left:0; right:0; z-index:100;
+}
+.nav-item {
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  cursor:pointer; padding:4px 16px; border-radius:12px;
+  transition: background .2s;
+  flex:1; max-width:80px;
+}
+.nav-item.active { background:rgba(255,107,53,0.15); }
+.nav-icon { font-size:1.4rem; line-height:1; }
+.nav-label { font-size:.6rem; color:var(--muted); letter-spacing:.04em; text-transform:uppercase; }
+.nav-item.active .nav-label { color:var(--accent); }
+
+/* ═══ DASHBOARD ═══ */
+.dash-hero {
+  padding:20px; background:linear-gradient(135deg, var(--bg2) 0%, var(--card) 100%);
+  border-radius:0 0 24px 24px; margin-bottom:4px;
+}
+.dash-greeting { font-size:.875rem; color:var(--muted); }
+.dash-name { font-family:var(--font-head); font-size:1.6rem; font-weight:700; }
+.dash-stats { display:flex; gap:12px; margin-top:16px; }
+.stat-card {
+  flex:1; background:var(--card2); border-radius:14px;
+  padding:14px 12px; border:1px solid var(--border);
+  text-align:center;
+}
+.stat-num { font-family:var(--font-head); font-size:1.5rem; font-weight:700; color:var(--accent); }
+.stat-lbl { font-size:.7rem; color:var(--muted); }
+.section-header { 
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 20px 10px;
+}
+.section-title { font-family:var(--font-head); font-size:1rem; font-weight:700; }
+.section-action { font-size:.8rem; color:var(--accent); cursor:pointer; }
+.trips-list { padding:0 20px; display:flex; flex-direction:column; gap:12px; }
+
+.trip-card {
+  background:var(--card); border-radius:var(--radius);
+  border:1px solid var(--border); overflow:hidden;
+  cursor:pointer; transition: transform .2s, box-shadow .2s;
+  animation: slideUp .3s ease both;
+}
+@keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.trip-card:active { transform:scale(.98); }
+.trip-card-header {
+  height:90px; display:flex; align-items:center; justify-content:center;
+  font-size:3rem; position:relative;
+}
+.trip-card-body { padding:14px 16px; }
+.trip-type-badge {
+  display:inline-flex; align-items:center; gap:4px;
+  background:rgba(255,107,53,0.15); color:var(--accent);
+  border-radius:6px; padding:3px 8px; font-size:.72rem; font-weight:600;
+  margin-bottom:8px;
+}
+.trip-name { font-family:var(--font-head); font-size:1.1rem; font-weight:700; margin-bottom:6px; }
+.trip-meta { display:flex; align-items:center; gap:12px; }
+.trip-date { font-size:.8rem; color:var(--muted); }
+.trip-participants { display:flex; align-items:center; gap:4px; }
+.avatar-sm {
+  width:22px; height:22px; border-radius:50%;
+  background:var(--blue); display:flex; align-items:center; justify-content:center;
+  font-size:.65rem; font-weight:700; border:2px solid var(--card);
+  margin-left:-6px;
+}
+.avatar-sm:first-child { margin-left:0; }
+
+/* ═══ FAB ═══ */
+.fab {
+  position:fixed; right:20px; bottom:calc(76px + var(--safe-bottom));
+  width:58px; height:58px; border-radius:18px;
+  background:var(--accent); color:#fff; border:none;
+  font-size:1.6rem; cursor:pointer; z-index:99;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 20px rgba(255,107,53,.4);
+  transition: transform .2s, box-shadow .2s;
+}
+.fab:active { transform:scale(.92); box-shadow:0 2px 10px rgba(255,107,53,.3); }
+
+/* ═══ CREATE TRIP ═══ */
+.create-form { padding:20px; }
+.create-section { margin-bottom:24px; }
+.create-label { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; }
+.type-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.type-btn {
+  background:var(--card); border:2px solid var(--border);
+  border-radius:14px; padding:14px 8px;
+  text-align:center; cursor:pointer;
+  transition: all .2s;
+}
+.type-btn.selected { border-color:var(--accent); background:rgba(255,107,53,0.1); }
+.type-icon { font-size:1.8rem; margin-bottom:6px; }
+.type-name { font-size:.75rem; color:var(--muted); font-weight:500; }
+.type-btn.selected .type-name { color:var(--accent); }
+.text-input {
+  width:100%; padding:14px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:12px; color:var(--text);
+  font-family:var(--font-body); font-size:.95rem;
+  transition: border-color .2s;
+}
+.text-input:focus { outline:none; border-color:var(--accent); }
+textarea.text-input { resize:none; }
+.date-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.color-picker { display:flex; gap:10px; flex-wrap:wrap; }
+.color-dot {
+  width:32px; height:32px; border-radius:50%;
+  cursor:pointer; border:3px solid transparent;
+  transition: transform .2s;
+}
+.color-dot.selected { border-color:#fff; transform:scale(1.1); }
+
+/* ═══ TRIP DETAIL ═══ */
+.trip-hero {
+  height:180px; display:flex; align-items:center; justify-content:center;
+  font-size:5rem; position:relative; flex-shrink:0;
+}
+.trip-hero-overlay {
+  position:absolute; bottom:0; left:0; right:0; height:60%;
+  background:linear-gradient(transparent, var(--bg));
+}
+.trip-detail-content { padding:0 20px; }
+.trip-detail-name { font-family:var(--font-head); font-size:1.8rem; font-weight:800; margin-bottom:6px; }
+.trip-detail-dates { color:var(--muted); font-size:.875rem; margin-bottom:20px; }
+.trip-tabs { display:flex; gap:4px; background:var(--card); border-radius:12px; padding:4px; margin-bottom:16px; }
+.trip-tab {
+  flex:1; padding:9px 4px; text-align:center;
+  border-radius:8px; cursor:pointer;
+  font-size:.75rem; font-weight:600; color:var(--muted);
+  transition: all .2s; letter-spacing:.02em;
+}
+.trip-tab.active { background:var(--accent); color:#fff; }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+/* ═══ ITINERARY ═══ */
+.itinerary-day {
+  background:var(--card); border-radius:14px;
+  padding:16px; margin-bottom:12px;
+  border:1px solid var(--border);
+}
+.itinerary-day-header { 
+  display:flex; align-items:center; gap:10px; margin-bottom:12px;
+}
+.day-num {
+  width:36px; height:36px; border-radius:10px;
+  background:var(--accent); display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-head); font-size:.9rem; font-weight:700; color:#fff; flex-shrink:0;
+}
+.day-date { font-size:.875rem; color:var(--muted); }
+.day-title { font-weight:600; font-size:.95rem; }
+.itinerary-item { display:flex; gap:10px; margin-bottom:8px; }
+.item-time { font-size:.75rem; color:var(--muted); white-space:nowrap; min-width:40px; padding-top:2px; }
+.item-dot { width:8px; height:8px; border-radius:50%; background:var(--accent); margin-top:4px; flex-shrink:0; }
+.item-text { font-size:.875rem; flex:1; }
+.add-event-btn {
+  width:100%; padding:11px;
+  background:transparent; border:1px dashed var(--border);
+  border-radius:10px; color:var(--muted); font-size:.875rem;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;
+  font-family:var(--font-body);
+}
+
+/* ═══ CHAT ═══ */
+.chat-area {
+  flex:1; overflow-y:auto; padding:16px 16px 0;
+  -webkit-overflow-scrolling:touch;
+  display:flex; flex-direction:column; gap:10px;
+}
+.chat-area::-webkit-scrollbar { display:none; }
+.msg { display:flex; gap:10px; }
+.msg.me { flex-direction:row-reverse; }
+.msg-avatar {
+  width:32px; height:32px; border-radius:50%;
+  background:var(--blue); display:flex; align-items:center; justify-content:center;
+  font-size:.8rem; font-weight:700; flex-shrink:0;
+  align-self:flex-end;
+}
+.msg-bubble {
+  max-width:72%; padding:10px 14px;
+  border-radius:18px; font-size:.9rem; line-height:1.4;
+}
+.msg .msg-bubble { background:var(--card2); border-bottom-left-radius:4px; }
+.msg.me .msg-bubble { background:var(--accent); color:#fff; border-bottom-right-radius:4px; }
+.msg-time { font-size:.65rem; color:var(--muted); margin-top:3px; }
+.msg.me .msg-time { text-align:right; }
+.msg-sender { font-size:.7rem; color:var(--muted); margin-bottom:3px; }
+.chat-input-bar {
+  display:flex; gap:10px; padding:12px 16px;
+  padding-bottom:calc(12px + var(--safe-bottom));
+  background:var(--bg2); border-top:1px solid var(--border);
+  flex-shrink:0;
+}
+.chat-input {
+  flex:1; padding:11px 14px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:20px; color:var(--text);
+  font-family:var(--font-body); font-size:.9rem;
+}
+.chat-input:focus { outline:none; border-color:var(--accent); }
+.send-btn {
+  width:42px; height:42px; border-radius:50%;
+  background:var(--accent); border:none; color:#fff;
+  font-size:1.1rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition: transform .15s;
+}
+.send-btn:active { transform:scale(.9); }
+
+/* ═══ PARTICIPANTS ═══ */
+.participant-item {
+  display:flex; align-items:center; gap:14px;
+  background:var(--card); border-radius:12px;
+  padding:14px; margin-bottom:8px;
+  border:1px solid var(--border);
+}
+.avatar-lg {
+  width:44px; height:44px; border-radius:14px;
+  background:var(--blue); display:flex; align-items:center; justify-content:center;
+  font-size:1.1rem; font-weight:700; flex-shrink:0;
+}
+.participant-name { font-weight:600; font-size:.95rem; }
+.participant-role { font-size:.78rem; color:var(--muted); }
+.participant-actions { margin-left:auto; }
+.invite-section {
+  background:var(--card); border-radius:16px;
+  padding:18px; border:1px solid var(--border); margin-bottom:16px;
+}
+.invite-title { font-family:var(--font-head); font-size:1rem; font-weight:700; margin-bottom:8px; }
+.invite-code {
+  background:var(--bg2); border-radius:10px; padding:14px;
+  display:flex; align-items:center; justify-content:space-between;
+  border:1px solid var(--border); margin-bottom:10px;
+}
+.code-text { font-family:monospace; font-size:1.1rem; letter-spacing:.1em; color:var(--accent); font-weight:700; }
+.copy-btn {
+  background:var(--accent); color:#fff;
+  border:none; border-radius:8px; padding:7px 12px;
+  font-size:.8rem; cursor:pointer; font-weight:600;
+}
+.share-options { display:flex; gap:8px; flex-wrap:wrap; }
+.share-btn {
+  flex:1; min-width:80px;
+  background:var(--card2); border:1px solid var(--border);
+  border-radius:10px; padding:10px 8px;
+  text-align:center; cursor:pointer;
+  font-size:.8rem; color:var(--muted);
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  transition: border-color .2s;
+}
+.share-btn:hover { border-color:var(--accent); color:var(--text); }
+.share-icon { font-size:1.3rem; }
+.invite-input-row { display:flex; gap:8px; margin-top:12px; }
+.invite-input {
+  flex:1; padding:12px 14px;
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:10px; color:var(--text); font-family:var(--font-body); font-size:.875rem;
+}
+.invite-input:focus { outline:none; border-color:var(--accent); }
+.btn-sm {
+  padding:12px 16px;
+  background:var(--accent); color:#fff;
+  border:none; border-radius:10px; font-family:var(--font-body);
+  font-size:.875rem; font-weight:600; cursor:pointer;
+  white-space:nowrap;
+}
+
+/* ═══ CALENDAR ═══ */
+.calendar-nav {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 20px; background:var(--card2);
+  border-bottom:1px solid var(--border);
+}
+.cal-month { font-family:var(--font-head); font-size:1.1rem; font-weight:700; }
+.cal-nav-btn {
+  width:36px; height:36px; border-radius:10px;
+  background:var(--card); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:1rem;
+}
+.cal-grid { padding:16px 16px 0; }
+.cal-weekdays { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:6px; }
+.cal-wd { text-align:center; font-size:.7rem; color:var(--muted); font-weight:600; padding:4px; }
+.cal-days { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.cal-day {
+  aspect-ratio:1; border-radius:10px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  cursor:pointer; position:relative;
+  transition: background .15s;
+}
+.cal-day:active { background:var(--card2); }
+.cal-day.empty { pointer-events:none; }
+.cal-day.today .cal-day-num { 
+  background:var(--accent); color:#fff;
+  width:26px; height:26px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+}
+.cal-day.has-event::after {
+  content:''; position:absolute; bottom:3px;
+  width:4px; height:4px; border-radius:50%;
+  background:var(--teal);
+}
+.cal-day-num { font-size:.85rem; font-weight:500; }
+.cal-day.selected { background:rgba(255,107,53,.15); }
+.cal-day.selected .cal-day-num { color:var(--accent); }
+.cal-events-panel { padding:16px; }
+.cal-events-title { font-family:var(--font-head); font-size:1rem; font-weight:700; margin-bottom:12px; }
+.event-item {
+  display:flex; gap:12px; background:var(--card);
+  border-radius:12px; padding:12px 14px; margin-bottom:8px;
+  border:1px solid var(--border); border-left:3px solid var(--accent);
+}
+.event-time { font-size:.8rem; color:var(--muted); white-space:nowrap; }
+.event-title { font-size:.9rem; font-weight:500; }
+.event-trip { font-size:.75rem; color:var(--accent); margin-top:2px; }
+.empty-state {
+  text-align:center; padding:40px 20px; color:var(--muted);
+}
+.empty-icon { font-size:2.5rem; margin-bottom:10px; }
+.empty-text { font-size:.9rem; }
+
+/* ═══ NOTES ═══ */
+.notes-list { padding:0 20px; display:flex; flex-direction:column; gap:10px; }
+.note-card {
+  background:var(--card); border-radius:14px;
+  padding:16px; border:1px solid var(--border);
+  cursor:pointer; transition: transform .15s;
+  border-left:3px solid var(--teal);
+}
+.note-card:active { transform:scale(.98); }
+.note-title { font-weight:600; font-size:.95rem; margin-bottom:6px; }
+.note-preview { font-size:.825rem; color:var(--muted); line-height:1.4; 
+  overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }
+.note-meta { font-size:.72rem; color:var(--muted); margin-top:10px; display:flex; justify-content:space-between; }
+
+/* ═══ NOTE EDITOR ═══ */
+#view-note-editor {
+  background:var(--bg);
+}
+.note-editor-title {
+  width:100%; padding:16px 20px;
+  background:transparent; border:none;
+  color:var(--text); font-family:var(--font-head);
+  font-size:1.5rem; font-weight:700;
+  border-bottom:1px solid var(--border);
+}
+.note-editor-title:focus { outline:none; }
+.note-editor-body {
+  flex:1; padding:16px 20px;
+  background:transparent; border:none;
+  color:var(--text); font-family:var(--font-body); font-size:.95rem;
+  resize:none; line-height:1.6;
+  min-height:300px;
+}
+.note-editor-body:focus { outline:none; }
+.note-toolbar {
+  display:flex; gap:8px; padding:12px 16px;
+  border-top:1px solid var(--border); flex-wrap:wrap;
+}
+.tool-btn {
+  padding:8px 12px; background:var(--card);
+  border:1px solid var(--border); border-radius:8px;
+  color:var(--muted); font-size:.8rem; cursor:pointer;
+  font-family:var(--font-body);
+}
+
+/* ═══ PROFILE ═══ */
+.profile-hero {
+  padding:32px 20px; text-align:center;
+  background:linear-gradient(180deg, var(--card2) 0%, var(--bg) 100%);
+}
+.profile-avatar {
+  width:80px; height:80px; border-radius:24px;
+  background:var(--accent); margin:0 auto 14px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-head); font-size:2rem; font-weight:700; color:#fff;
+}
+.profile-name { font-family:var(--font-head); font-size:1.4rem; font-weight:700; }
+.profile-email { color:var(--muted); font-size:.875rem; margin-top:4px; }
+.profile-section { padding:0 20px 20px; }
+.settings-item {
+  display:flex; align-items:center; gap:14px;
+  padding:16px; background:var(--card); border-radius:12px;
+  margin-bottom:8px; cursor:pointer; border:1px solid var(--border);
+  transition: background .2s;
+}
+.settings-item:active { background:var(--card2); }
+.settings-icon { font-size:1.3rem; }
+.settings-label { font-size:.9rem; flex:1; }
+.settings-arrow { color:var(--muted); }
+.btn-danger {
+  width:100%; padding:14px;
+  background:transparent; color:#ff4757;
+  border:1px solid rgba(255,71,87,.3); border-radius:12px;
+  font-family:var(--font-body); font-size:.9rem; cursor:pointer;
+  margin-top:8px; font-weight:500;
+}
+
+/* ═══ MODAL ═══ */
+.modal-backdrop {
+  position:fixed; inset:0; background:rgba(0,0,0,.7);
+  z-index:200; display:flex; align-items:flex-end;
+  opacity:0; pointer-events:none; transition: opacity .25s;
+}
+.modal-backdrop.open { opacity:1; pointer-events:all; }
+.modal-sheet {
+  width:100%; background:var(--card);
+  border-radius:24px 24px 0 0; padding:20px;
+  transform:translateY(100%); transition: transform .3s cubic-bezier(.32,.72,0,1);
+  max-height:85vh; overflow-y:auto;
+}
+.modal-backdrop.open .modal-sheet { transform:translateY(0); }
+.modal-handle { width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 20px; }
+.modal-title { font-family:var(--font-head); font-size:1.1rem; font-weight:700; margin-bottom:18px; }
+
+/* ═══ TOAST ═══ */
+#toast {
+  position:fixed; bottom:calc(82px + var(--safe-bottom)); left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--card2); color:var(--text);
+  border:1px solid var(--border); border-radius:20px;
+  padding:10px 20px; font-size:.875rem;
+  z-index:500; opacity:0; transition: all .3s;
+  white-space:nowrap; pointer-events:none;
+}
+#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ═══ LOADING ═══ */
+.loader {
+  display:flex; align-items:center; justify-content:center;
+  height:100px; color:var(--muted); font-size:.875rem;
+}
+.spinner {
+  width:20px; height:20px; border:2px solid var(--border);
+  border-top-color:var(--accent); border-radius:50%;
+  animation:spin .7s linear infinite; margin-right:10px;
+}
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width:380px) {
+  .type-grid { grid-template-columns:repeat(2,1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- Firebase config is pre-loaded, overlay hidden -->
+
+<!-- MAIN APP -->
+<div id="app" class="hidden">
+
+  <!-- ══ LOGIN VIEW ══ -->
+  <div id="view-login" class="view">
+    <div class="login-art">🌍</div>
+    <div class="login-title">Travel <span>IO</span></div>
+    <div class="login-subtitle">Le tue avventure, sempre con te</div>
+    <div class="login-card">
+      <div class="login-tabs">
+        <div class="login-tab active" onclick="switchLoginTab('login')">Accedi</div>
+        <div class="login-tab" onclick="switchLoginTab('register')">Registrati</div>
+      </div>
+      <div id="login-form">
+        <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="tu@email.com"></div>
+        <div class="field"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••"></div>
+        <button class="btn-primary" onclick="doLogin()">Accedi</button>
+        <div class="divider">oppure</div>
+        <button class="btn-google" onclick="doGoogleLogin()">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
+          Continua con Google
+        </button>
+        <p class="error-msg" id="login-error"></p>
+      </div>
+      <div id="register-form" style="display:none">
+        <div class="field"><label>Nome</label><input type="text" id="reg-name" placeholder="Il tuo nome"></div>
+        <div class="field"><label>Email</label><input type="email" id="reg-email" placeholder="tu@email.com"></div>
+        <div class="field"><label>Password</label><input type="password" id="reg-pass" placeholder="Almeno 6 caratteri"></div>
+        <button class="btn-primary" onclick="doRegister()">Crea account</button>
+        <p class="error-msg" id="reg-error"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD ══ -->
+  <div id="view-dashboard" class="view">
+    <div class="topbar">
+      <div class="topbar-title">🌍 Travel IO</div>
+      <div class="icon-btn" onclick="showView('profile')">👤</div>
+    </div>
+    <div class="scroll-area">
+      <div class="dash-hero">
+        <div class="dash-greeting">Ciao, <span id="dash-username">Viaggiatore</span>!</div>
+        <div class="dash-name">Pronti per la prossima avventura?</div>
+        <div class="dash-stats">
+          <div class="stat-card"><div class="stat-num" id="stat-trips">0</div><div class="stat-lbl">Viaggi</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-upcoming">0</div><div class="stat-lbl">In arrivo</div></div>
+          <div class="stat-card"><div class="stat-num" id="stat-km">0</div><div class="stat-lbl">Km stimati</div></div>
+        </div>
+      </div>
+      <div class="section-header">
+        <div class="section-title">I miei viaggi</div>
+        <div class="section-action" onclick="showView('create')">+ Nuovo</div>
+      </div>
+      <div class="trips-list" id="trips-list">
+        <div class="loader"><div class="spinner"></div>Caricamento...</div>
+      </div>
+    </div>
+    <button class="fab" onclick="showView('create')">＋</button>
+    <div class="bottomnav" id="dash-nav">
+      <div class="nav-item active" onclick="showView('dashboard')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+      <div class="nav-item" onclick="showView('calendar-main')"><div class="nav-icon">📅</div><div class="nav-label">Calendario</div></div>
+      <div class="nav-item" onclick="showView('notes-main')"><div class="nav-icon">📝</div><div class="nav-label">Note</div></div>
+      <div class="nav-item" onclick="showView('profile')"><div class="nav-icon">👤</div><div class="nav-label">Profilo</div></div>
+    </div>
+  </div>
+
+  <!-- ══ CREATE TRIP ══ -->
+  <div id="view-create" class="view">
+    <div class="topbar">
+      <div class="icon-btn" onclick="showView('dashboard')">←</div>
+      <div class="topbar-title">Nuovo viaggio</div>
+      <div style="width:40px"></div>
+    </div>
+    <div class="scroll-area">
+      <div class="create-form">
+        <div class="create-section">
+          <div class="create-label">📍 Tipo di viaggio</div>
+          <div class="type-grid">
+            <div class="type-btn" data-type="walking" onclick="selectType(this)">
+              <div class="type-icon">🥾</div><div class="type-name">A piedi</div>
+            </div>
+            <div class="type-btn" data-type="camper" onclick="selectType(this)">
+              <div class="type-icon">🚐</div><div class="type-name">Camper</div>
+            </div>
+            <div class="type-btn" data-type="boat" onclick="selectType(this)">
+              <div class="type-icon">⛵</div><div class="type-name">Barca</div>
+            </div>
+            <div class="type-btn" data-type="sup" onclick="selectType(this)">
+              <div class="type-icon">🏄</div><div class="type-name">SUP</div>
+            </div>
+            <div class="type-btn" data-type="car" onclick="selectType(this)">
+              <div class="type-icon">🚗</div><div class="type-name">Auto</div>
+            </div>
+            <div class="type-btn" data-type="flight" onclick="selectType(this)">
+              <div class="type-icon">✈️</div><div class="type-name">Itinerario</div>
+            </div>
+            <div class="type-btn" data-type="bike" onclick="selectType(this)">
+              <div class="type-icon">🚲</div><div class="type-name">Bicicletta</div>
+            </div>
+            <div class="type-btn" data-type="train" onclick="selectType(this)">
+              <div class="type-icon">🚂</div><div class="type-name">Treno</div>
+            </div>
+            <div class="type-btn" data-type="moto" onclick="selectType(this)">
+              <div class="type-icon">🏍️</div><div class="type-name">Moto</div>
+            </div>
+          </div>
+        </div>
+        <div class="create-section">
+          <div class="create-label">✏️ Nome viaggio</div>
+          <input class="text-input" type="text" id="new-name" placeholder="Es. Costa Amalfitana 2025">
+        </div>
+        <div class="create-section">
+          <div class="create-label">📍 Destinazione</div>
+          <input class="text-input" type="text" id="new-dest" placeholder="Es. Positano, Amalfi...">
+        </div>
+        <div class="create-section">
+          <div class="create-label">📅 Date</div>
+          <div class="date-row">
+            <div>
+              <div style="font-size:.75rem;color:var(--muted);margin-bottom:6px;">Partenza</div>
+              <input class="text-input" type="date" id="new-start">
+            </div>
+            <div>
+              <div style="font-size:.75rem;color:var(--muted);margin-bottom:6px;">Ritorno</div>
+              <input class="text-input" type="date" id="new-end">
+            </div>
+          </div>
+        </div>
+        <div class="create-section">
+          <div class="create-label">📝 Descrizione</div>
+          <textarea class="text-input" id="new-desc" rows="3" placeholder="Racconta la tua avventura..."></textarea>
+        </div>
+        <div class="create-section">
+          <div class="create-label">🎨 Colore</div>
+          <div class="color-picker" id="color-picker">
+            <div class="color-dot selected" data-color="#ff6b35" style="background:#ff6b35" onclick="selectColor(this)"></div>
+            <div class="color-dot" data-color="#3d85ff" style="background:#3d85ff" onclick="selectColor(this)"></div>
+            <div class="color-dot" data-color="#00d4aa" style="background:#00d4aa" onclick="selectColor(this)"></div>
+            <div class="color-dot" data-color="#a855f7" style="background:#a855f7" onclick="selectColor(this)"></div>
+            <div class="color-dot" data-color="#f59e0b" style="background:#f59e0b" onclick="selectColor(this)"></div>
+            <div class="color-dot" data-color="#ec4899" style="background:#ec4899" onclick="selectColor(this)"></div>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="createTrip()">🚀 Crea viaggio</button>
+        <div style="height:20px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TRIP DETAIL ══ -->
+  <div id="view-trip" class="view">
+    <div class="topbar">
+      <div class="icon-btn" onclick="showView('dashboard')">←</div>
+      <div class="topbar-title" id="trip-detail-tab-title">Viaggio</div>
+      <div class="icon-btn" onclick="openTripMenu()">⋯</div>
+    </div>
+    <div class="scroll-area" id="trip-scroll">
+      <div class="trip-hero" id="trip-hero"><div class="trip-hero-overlay"></div></div>
+      <div class="trip-detail-content">
+        <div class="trip-detail-name" id="trip-detail-name"></div>
+        <div class="trip-detail-dates" id="trip-detail-dates"></div>
+        <div class="trip-tabs">
+          <div class="trip-tab active" onclick="switchTripTab('itinerary',this)">Itinerario</div>
+          <div class="trip-tab" onclick="switchTripTab('chat',this)">Chat</div>
+          <div class="trip-tab" onclick="switchTripTab('people',this)">Persone</div>
+          <div class="trip-tab" onclick="switchTripTab('notes',this)">Note</div>
+        </div>
+        <!-- Itinerary -->
+        <div id="tab-itinerary" class="tab-content active">
+          <div id="itinerary-list"></div>
+          <button class="add-event-btn" onclick="openAddEventModal()">＋ Aggiungi tappa / evento</button>
+          <div style="height:16px"></div>
+        </div>
+        <!-- Chat -->
+        <div id="tab-chat" class="tab-content" style="min-height:400px">
+          <div id="chat-msgs" style="display:flex;flex-direction:column;gap:10px;padding-bottom:16px;"></div>
+        </div>
+        <!-- People -->
+        <div id="tab-people" class="tab-content">
+          <div class="invite-section">
+            <div class="invite-title">🔗 Invita partecipanti</div>
+            <div class="invite-code">
+              <div class="code-text" id="invite-code-display">------</div>
+              <button class="copy-btn" onclick="copyInviteCode()">Copia</button>
+            </div>
+            <div class="share-options">
+              <div class="share-btn" onclick="shareWhatsApp()"><div class="share-icon">💬</div>WhatsApp</div>
+              <div class="share-btn" onclick="shareTelegram()"><div class="share-icon">✈️</div>Telegram</div>
+              <div class="share-btn" onclick="shareGeneric()"><div class="share-icon">📤</div>Condividi</div>
+            </div>
+            <div style="margin-top:12px;font-size:.75rem;color:var(--muted);">Oppure invita via email:</div>
+            <div class="invite-input-row">
+              <input class="invite-input" type="email" id="invite-email" placeholder="email@esempio.com">
+              <button class="btn-sm" onclick="inviteByEmail()">Invita</button>
+            </div>
+          </div>
+          <div id="participants-list"></div>
+        </div>
+        <!-- Notes -->
+        <div id="tab-notes" class="tab-content">
+          <div id="trip-notes-list"></div>
+          <button class="add-event-btn" onclick="openNoteEditor(null)">＋ Nuova nota</button>
+          <div style="height:16px"></div>
+        </div>
+      </div>
+    </div>
+    <!-- Chat input (shown when on chat tab) -->
+    <div id="chat-input-bar" class="chat-input-bar" style="display:none">
+      <input class="chat-input" type="text" id="chat-input" placeholder="Scrivi un messaggio...">
+      <button class="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+
+  <!-- ══ CALENDAR MAIN ══ -->
+  <div id="view-calendar-main" class="view">
+    <div class="topbar">
+      <div class="icon-btn" onclick="showView('dashboard')">←</div>
+      <div class="topbar-title">Calendario</div>
+      <div class="icon-btn" onclick="openAddEventModal()">＋</div>
+    </div>
+    <div class="calendar-nav">
+      <div class="cal-nav-btn" onclick="changeMonth(-1)">‹</div>
+      <div class="cal-month" id="cal-month-label"></div>
+      <div class="cal-nav-btn" onclick="changeMonth(1)">›</div>
+    </div>
+    <div class="scroll-area">
+      <div class="cal-grid">
+        <div class="cal-weekdays">
+          <div class="cal-wd">L</div><div class="cal-wd">M</div><div class="cal-wd">M</div>
+          <div class="cal-wd">G</div><div class="cal-wd">V</div><div class="cal-wd">S</div><div class="cal-wd">D</div>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+      </div>
+      <div class="cal-events-panel">
+        <div class="cal-events-title" id="cal-events-title">Tutti gli eventi</div>
+        <div id="cal-events-list"></div>
+      </div>
+    </div>
+    <div class="bottomnav">
+      <div class="nav-item" onclick="showView('dashboard')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+      <div class="nav-item active" onclick="showView('calendar-main')"><div class="nav-icon">📅</div><div class="nav-label">Calendario</div></div>
+      <div class="nav-item" onclick="showView('notes-main')"><div class="nav-icon">📝</div><div class="nav-label">Note</div></div>
+      <div class="nav-item" onclick="showView('profile')"><div class="nav-icon">👤</div><div class="nav-label">Profilo</div></div>
+    </div>
+  </div>
+
+  <!-- ══ NOTES MAIN ══ -->
+  <div id="view-notes-main" class="view">
+    <div class="topbar">
+      <div class="icon-btn" onclick="showView('dashboard')">←</div>
+      <div class="topbar-title">Le mie note</div>
+      <div class="icon-btn" onclick="openNoteEditor(null)">＋</div>
+    </div>
+    <div class="scroll-area">
+      <div style="padding:16px 20px 8px">
+        <input class="text-input" type="search" placeholder="🔍 Cerca nota..." id="notes-search" oninput="filterNotes(this.value)">
+      </div>
+      <div class="notes-list" id="notes-list-main"></div>
+      <div style="height:20px"></div>
+    </div>
+    <div class="bottomnav">
+      <div class="nav-item" onclick="showView('dashboard')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+      <div class="nav-item" onclick="showView('calendar-main')"><div class="nav-icon">📅</div><div class="nav-label">Calendario</div></div>
+      <div class="nav-item active" onclick="showView('notes-main')"><div class="nav-icon">📝</div><div class="nav-label">Note</div></div>
+      <div class="nav-item" onclick="showView('profile')"><div class="nav-icon">👤</div><div class="nav-label">Profilo</div></div>
+    </div>
+  </div>
+
+  <!-- ══ NOTE EDITOR ══ -->
+  <div id="view-note-editor" class="view">
+    <div class="topbar">
+      <div class="icon-btn" onclick="closeNoteEditor()">←</div>
+      <div class="topbar-title">Nota</div>
+      <div class="icon-btn" onclick="saveNote()" style="background:var(--accent);color:#fff;border-color:var(--accent)">✓</div>
+    </div>
+    <input class="note-editor-title" type="text" id="note-title" placeholder="Titolo nota...">
+    <div class="scroll-area">
+      <textarea class="note-editor-body" id="note-body" placeholder="Scrivi qui la tua nota...&#10;&#10;Usa questo spazio per idee, liste, informazioni importanti..."></textarea>
+    </div>
+    <div class="note-toolbar">
+      <button class="tool-btn" onclick="insertText('- ')">• Lista</button>
+      <button class="tool-btn" onclick="insertText('✅ ')">✅</button>
+      <button class="tool-btn" onclick="insertText('⚠️ ')">⚠️</button>
+      <button class="tool-btn" onclick="insertText('📍 ')">📍</button>
+      <button class="tool-btn" onclick="insertText('💡 ')">💡</button>
+      <button class="tool-btn" onclick="insertText('📞 ')">📞</button>
+    </div>
+  </div>
+
+  <!-- ══ PROFILE ══ -->
+  <div id="view-profile" class="view">
+    <div class="topbar">
+      <div class="icon-btn" onclick="showView('dashboard')">←</div>
+      <div class="topbar-title">Profilo</div>
+      <div style="width:40px"></div>
+    </div>
+    <div class="scroll-area">
+      <div class="profile-hero">
+        <div class="profile-avatar" id="profile-avatar">?</div>
+        <div class="profile-name" id="profile-name">Utente</div>
+        <div class="profile-email" id="profile-email">email@esempio.com</div>
+      </div>
+      <div class="profile-section">
+        <div class="settings-item" onclick="showView('notes-main')">
+          <div class="settings-icon">📝</div>
+          <div class="settings-label">Le mie note</div>
+          <div class="settings-arrow">›</div>
+        </div>
+        <div class="settings-item" onclick="showView('calendar-main')">
+          <div class="settings-icon">📅</div>
+          <div class="settings-label">Calendario</div>
+          <div class="settings-arrow">›</div>
+        </div>
+        <div class="settings-item" onclick="showJoinModal()">
+          <div class="settings-icon">🔗</div>
+          <div class="settings-label">Unisciti a un viaggio</div>
+          <div class="settings-arrow">›</div>
+        </div>
+        <div class="settings-item" onclick="showThemeOptions()">
+          <div class="settings-icon">🎨</div>
+          <div class="settings-label">Tema</div>
+          <div class="settings-arrow">›</div>
+        </div>
+        <button class="btn-danger" onclick="doLogout()">Esci dall'account</button>
+      </div>
+      <div style="height:40px"></div>
+    </div>
+    <div class="bottomnav">
+      <div class="nav-item" onclick="showView('dashboard')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+      <div class="nav-item" onclick="showView('calendar-main')"><div class="nav-icon">📅</div><div class="nav-label">Calendario</div></div>
+      <div class="nav-item" onclick="showView('notes-main')"><div class="nav-icon">📝</div><div class="nav-label">Note</div></div>
+      <div class="nav-item active" onclick="showView('profile')"><div class="nav-icon">👤</div><div class="nav-label">Profilo</div></div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ══ MODALS ══ -->
+<!-- Add Event Modal -->
+<div class="modal-backdrop" id="modal-event">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📅 Aggiungi evento / tappa</div>
+    <div class="field"><label>Tipo</label>
+      <select class="text-input" id="event-type" style="appearance:none">
+        <option value="tappa">📍 Tappa / Luogo</option>
+        <option value="volo">✈️ Volo</option>
+        <option value="hotel">🏨 Hotel / Alloggio</option>
+        <option value="attivita">🎯 Attività</option>
+        <option value="pasto">🍽️ Ristorante / Pasto</option>
+        <option value="trasporto">🚌 Trasporto</option>
+        <option value="nota">📝 Nota</option>
+      </select>
+    </div>
+    <div class="field"><label>Titolo</label><input class="text-input" type="text" id="event-title" placeholder="Es. Arrivo a Positano"></div>
+    <div class="date-row" style="margin-bottom:14px">
+      <div class="field" style="margin:0"><label>Data</label><input class="text-input" type="date" id="event-date"></div>
+      <div class="field" style="margin:0"><label>Ora</label><input class="text-input" type="time" id="event-time"></div>
+    </div>
+    <div class="field"><label>Descrizione / note</label><textarea class="text-input" id="event-desc" rows="3" placeholder="Dettagli, indirizzo, prenotazione..."></textarea></div>
+    <button class="btn-primary" onclick="saveEvent()">Salva evento</button>
+  </div>
+</div>
+
+<!-- Join Trip Modal -->
+<div class="modal-backdrop" id="modal-join">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔗 Unisciti a un viaggio</div>
+    <div class="field"><label>Codice invito</label><input class="text-input" type="text" id="join-code" placeholder="Inserisci il codice" style="letter-spacing:.1em;font-size:1.1rem"></div>
+    <button class="btn-primary" onclick="joinTrip()">Entra nel viaggio</button>
+    <button onclick="closeModal('modal-join')" style="width:100%;padding:12px;background:none;border:none;color:var(--muted);cursor:pointer;margin-top:8px">Annulla</button>
+  </div>
+</div>
+
+<!-- Trip Menu Modal -->
+<div class="modal-backdrop" id="modal-trip-menu">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="settings-item" onclick="editTrip()"><div class="settings-icon">✏️</div><div class="settings-label">Modifica viaggio</div></div>
+    <div class="settings-item" onclick="addToCalendar()"><div class="settings-icon">📅</div><div class="settings-label">Aggiungi al calendario</div></div>
+    <div class="settings-item" onclick="exportTrip()"><div class="settings-icon">📤</div><div class="settings-label">Esporta itinerario</div></div>
+    <div class="settings-item" style="color:#ff4757" onclick="deleteTrip()"><div class="settings-icon">🗑️</div><div class="settings-label" style="color:#ff4757">Elimina viaggio</div></div>
+    <button onclick="closeModal('modal-trip-menu')" style="width:100%;padding:12px;background:none;border:none;color:var(--muted);cursor:pointer;margin-top:8px">Annulla</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════
+// GLOBALS
+// ════════════════════════════════════════════════════
+let db, auth, currentUser, currentTrip = null;
+let unsubChat = null, unsubTrips = null;
+let selectedType = null, selectedColor = '#ff6b35';
+let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+let calSelectedDate = null, allCalEvents = [];
+let currentNoteId = null, currentNoteTrip = null;
+let allNotes = [], allNotesCopy = [];
+let prevView = 'dashboard';
+
+const TRIP_ICONS = {
+  walking:'🥾',camper:'🚐',boat:'⛵',sup:'🏄',car:'🚗',
+  flight:'✈️',bike:'🚲',train:'🚂',moto:'🏍️',default:'🗺️'
+};
+const TRIP_TYPE_LABELS = {
+  walking:'A piedi',camper:'Camper',boat:'Barca',sup:'SUP',car:'Auto',
+  flight:'Itinerario',bike:'Bicicletta',train:'Treno',moto:'Moto'
+};
+const EVENT_ICONS = {
+  tappa:'📍',volo:'✈️',hotel:'🏨',attivita:'🎯',pasto:'🍽️',trasporto:'🚌',nota:'📝'
+};
+
+// ════════════════════════════════════════════════════
+// FIREBASE INIT — configurazione pre-caricata
+// ════════════════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCyDBfNwIr4ElCJlU7lwUf8KvJsphxQLI4",
+  authDomain: "app-viaggi-2a1f7.firebaseapp.com",
+  projectId: "app-viaggi-2a1f7",
+  storageBucket: "app-viaggi-2a1f7.firebasestorage.app",
+  messagingSenderId: "210290020900",
+  appId: "1:210290020900:web:2c798982b23bf7d57bbeb1",
+  measurementId: "G-C4F0Y9Y197"
+};
+
+function initFirebase() {
+  try {
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    auth = firebase.auth();
+    // Abilita persistenza offline
+    db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+    auth.onAuthStateChanged(user => {
+      currentUser = user;
+      document.getElementById('app').classList.remove('hidden');
+      if(user) { onUserLoggedIn(user); }
+      else { showView('login'); }
+    });
+  } catch(e) { console.error('Firebase error:', e); }
+}
+
+// ════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════
+function switchLoginTab(tab) {
+  document.querySelectorAll('.login-tab').forEach((t,i)=>t.classList.toggle('active',i===(tab==='login'?0:1)));
+  document.getElementById('login-form').style.display = tab==='login'?'':'none';
+  document.getElementById('register-form').style.display = tab==='register'?'':'none';
+}
+async function doLogin() {
+  const email=document.getElementById('login-email').value;
+  const pass=document.getElementById('login-pass').value;
+  try { await auth.signInWithEmailAndPassword(email,pass); }
+  catch(e){ document.getElementById('login-error').textContent=translateError(e.code); }
+}
+async function doRegister() {
+  const name=document.getElementById('reg-name').value;
+  const email=document.getElementById('reg-email').value;
+  const pass=document.getElementById('reg-pass').value;
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email,pass);
+    await cred.user.updateProfile({displayName:name});
+    await db.collection('users').doc(cred.user.uid).set({
+      displayName:name, email, createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch(e){ document.getElementById('reg-error').textContent=translateError(e.code); }
+}
+async function doGoogleLogin() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  try { await auth.signInWithPopup(provider); }
+  catch(e){ document.getElementById('login-error').textContent=translateError(e.code); }
+}
+function doLogout() {
+  if(unsubChat) unsubChat();
+  if(unsubTrips) unsubTrips();
+  auth.signOut();
+}
+function translateError(code) {
+  const map = {
+    'auth/user-not-found':'Utente non trovato',
+    'auth/wrong-password':'Password errata',
+    'auth/email-already-in-use':'Email già in uso',
+    'auth/weak-password':'Password troppo debole (min. 6 caratteri)',
+    'auth/invalid-email':'Email non valida',
+    'auth/popup-closed-by-user':'Popup chiuso',
+  };
+  return map[code] || 'Errore: ' + code;
+}
+function onUserLoggedIn(user) {
+  const name = user.displayName || 'Viaggiatore';
+  document.getElementById('dash-username').textContent = name.split(' ')[0];
+  document.getElementById('profile-name').textContent = name;
+  document.getElementById('profile-email').textContent = user.email;
+  document.getElementById('profile-avatar').textContent = name[0].toUpperCase();
+  showView('dashboard');
+  loadTrips();
+  loadAllNotes();
+  renderCalendar();
+}
+
+// ════════════════════════════════════════════════════
+// VIEW ROUTER
+// ════════════════════════════════════════════════════
+function showView(name) {
+  prevView = document.querySelector('.view.active')?.id?.replace('view-','') || 'dashboard';
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const v = document.getElementById('view-'+name);
+  if(v) v.classList.add('active');
+  if(name==='calendar-main') { renderCalendar(); loadCalendarEvents(); }
+  if(name==='notes-main') loadAllNotes();
+  if(name==='profile') updateProfileView();
+}
+
+// ════════════════════════════════════════════════════
+// TRIPS
+// ════════════════════════════════════════════════════
+function loadTrips() {
+  if(!currentUser) return;
+  if(unsubTrips) unsubTrips();
+  const list = document.getElementById('trips-list');
+  unsubTrips = db.collection('trips')
+    .where('participants','array-contains',currentUser.uid)
+    .orderBy('createdAt','desc')
+    .onSnapshot(snap => {
+      const trips = snap.docs.map(d=>({id:d.id,...d.data()}));
+      let upcoming=0;
+      list.innerHTML = '';
+      if(trips.length===0) {
+        list.innerHTML = `<div class="empty-state"><div class="empty-icon">🗺️</div><div class="empty-text">Nessun viaggio ancora.<br>Crea il primo!</div></div>`;
+      }
+      trips.forEach((trip,i) => {
+        const icon = TRIP_ICONS[trip.type]||'🗺️';
+        const label = TRIP_TYPE_LABELS[trip.type]||trip.type;
+        const color = trip.color || '#ff6b35';
+        const sd = trip.startDate ? new Date(trip.startDate).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}) : '';
+        const ed = trip.endDate ? new Date(trip.endDate).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}) : '';
+        const dateStr = sd && ed ? `${sd} → ${ed}` : (sd || 'Data non impostata');
+        if(trip.startDate && new Date(trip.startDate) >= new Date()) upcoming++;
+        const pCount = (trip.participants||[]).length;
+        const avatars = [...Array(Math.min(pCount,3))].map((_,j)=>`<div class="avatar-sm" style="background:${['#3d85ff','#00d4aa','#a855f7'][j%3]}">${j+1}</div>`).join('');
+        const card = document.createElement('div');
+        card.className='trip-card';
+        card.style.animationDelay=(i*.08)+'s';
+        card.innerHTML=`
+          <div class="trip-card-header" style="background:linear-gradient(135deg,${color}22,${color}44)">${icon}</div>
+          <div class="trip-card-body">
+            <div class="trip-type-badge">${icon} ${label}</div>
+            <div class="trip-name">${trip.name||'Viaggio senza nome'}</div>
+            <div class="trip-meta">
+              <div class="trip-date">📅 ${dateStr}</div>
+              <div class="trip-participants">${avatars}${pCount>1?`<span style="font-size:.75rem;color:var(--muted);margin-left:6px">${pCount} persone</span>`:''}</div>
+            </div>
+            ${trip.destination?`<div style="font-size:.78rem;color:var(--muted);margin-top:6px">📍 ${trip.destination}</div>`:''}
+          </div>`;
+        card.onclick=()=>openTrip(trip);
+        list.appendChild(card);
+      });
+      document.getElementById('stat-trips').textContent = trips.length;
+      document.getElementById('stat-upcoming').textContent = upcoming;
+      document.getElementById('stat-km').textContent = trips.length * Math.floor(Math.random()*500+100);
+    });
+}
+
+function selectType(el) {
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedType = el.dataset.type;
+}
+function selectColor(el) {
+  document.querySelectorAll('.color-dot').forEach(d=>d.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedColor = el.dataset.color;
+}
+
+async function createTrip() {
+  if(!selectedType) { toast('⚠️ Seleziona il tipo di viaggio'); return; }
+  const name = document.getElementById('new-name').value.trim();
+  if(!name) { toast('⚠️ Inserisci il nome del viaggio'); return; }
+  const inviteCode = Math.random().toString(36).substr(2,6).toUpperCase();
+  const tripData = {
+    name,
+    type: selectedType,
+    destination: document.getElementById('new-dest').value.trim(),
+    startDate: document.getElementById('new-start').value,
+    endDate: document.getElementById('new-end').value,
+    description: document.getElementById('new-desc').value.trim(),
+    color: selectedColor,
+    createdBy: currentUser.uid,
+    participants: [currentUser.uid],
+    inviteCode,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  try {
+    const ref = await db.collection('trips').add(tripData);
+    toast('✅ Viaggio creato!');
+    // reset form
+    document.getElementById('new-name').value='';
+    document.getElementById('new-dest').value='';
+    document.getElementById('new-start').value='';
+    document.getElementById('new-end').value='';
+    document.getElementById('new-desc').value='';
+    document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('selected'));
+    selectedType=null;
+    setTimeout(()=>{ openTrip({id:ref.id,...tripData}); }, 300);
+  } catch(e) { toast('❌ Errore: '+e.message); }
+}
+
+// ════════════════════════════════════════════════════
+// TRIP DETAIL
+// ════════════════════════════════════════════════════
+function openTrip(trip) {
+  currentTrip = trip;
+  const icon = TRIP_ICONS[trip.type]||'🗺️';
+  const color = trip.color||'#ff6b35';
+  document.getElementById('trip-hero').style.background=`linear-gradient(135deg,${color}33,${color}66)`;
+  document.getElementById('trip-hero').innerHTML=`<div style="font-size:5rem">${icon}</div><div class="trip-hero-overlay"></div>`;
+  document.getElementById('trip-detail-name').textContent=trip.name||'Viaggio';
+  document.getElementById('trip-detail-tab-title').textContent=trip.name||'Viaggio';
+  const sd=trip.startDate?new Date(trip.startDate).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'';
+  const ed=trip.endDate?new Date(trip.endDate).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'';
+  document.getElementById('trip-detail-dates').textContent=sd&&ed?`${sd} → ${ed}`:(sd||'Date non impostate');
+  document.getElementById('invite-code-display').textContent=trip.inviteCode||'------';
+  // default tab
+  switchTripTab('itinerary',document.querySelector('.trip-tab'));
+  showView('trip');
+  loadItinerary();
+  loadParticipants();
+  loadTripNotes();
+}
+
+function switchTripTab(tab, el) {
+  document.querySelectorAll('.trip-tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  const chatBar = document.getElementById('chat-input-bar');
+  if(tab==='chat') {
+    chatBar.style.display='flex';
+    loadChat();
+  } else {
+    chatBar.style.display='none';
+    if(unsubChat){ unsubChat(); unsubChat=null; }
+  }
+}
+
+// ════════════════════════════════════════════════════
+// ITINERARY
+// ════════════════════════════════════════════════════
+async function loadItinerary() {
+  if(!currentTrip) return;
+  const container = document.getElementById('itinerary-list');
+  const snap = await db.collection('trips').doc(currentTrip.id).collection('events')
+    .orderBy('date').orderBy('time').get();
+  if(snap.empty) {
+    container.innerHTML=`<div class="empty-state"><div class="empty-icon">📍</div><div class="empty-text">Nessuna tappa ancora.<br>Aggiungi il primo punto dell'itinerario!</div></div>`;
+    return;
+  }
+  // group by date
+  const byDate = {};
+  snap.docs.forEach(d=>{
+    const ev={id:d.id,...d.data()};
+    const key=ev.date||'senza-data';
+    if(!byDate[key]) byDate[key]=[];
+    byDate[key].push(ev);
+  });
+  container.innerHTML='';
+  Object.keys(byDate).sort().forEach((date,idx)=>{
+    const events=byDate[date];
+    const dateLabel=date!=='senza-data'?new Date(date+'T00:00:00').toLocaleDateString('it-IT',{weekday:'long',day:'2-digit',month:'long'}):'Senza data';
+    const card=document.createElement('div');
+    card.className='itinerary-day';
+    card.innerHTML=`<div class="itinerary-day-header"><div class="day-num">${idx+1}</div><div><div class="day-title">${dateLabel}</div></div></div>
+      ${events.map(ev=>`<div class="itinerary-item">
+        <div class="item-time">${ev.time||''}</div>
+        <div class="item-dot" style="background:${currentTrip.color||'#ff6b35'}"></div>
+        <div class="item-text"><strong>${EVENT_ICONS[ev.type]||'📍'} ${ev.title}</strong>${ev.description?`<br><span style="color:var(--muted);font-size:.8rem">${ev.description}</span>`:''}</div>
+      </div>`).join('')}`;
+    container.appendChild(card);
+  });
+}
+
+function openAddEventModal() {
+  document.getElementById('event-date').value = currentTrip?.startDate || '';
+  document.getElementById('event-time').value = '';
+  document.getElementById('event-title').value = '';
+  document.getElementById('event-desc').value = '';
+  openModal('modal-event');
+}
+
+async function saveEvent() {
+  const title=document.getElementById('event-title').value.trim();
+  if(!title){ toast('⚠️ Inserisci un titolo'); return; }
+  const ev = {
+    type: document.getElementById('event-type').value,
+    title,
+    date: document.getElementById('event-date').value,
+    time: document.getElementById('event-time').value,
+    description: document.getElementById('event-desc').value.trim(),
+    createdBy: currentUser.uid,
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  if(currentTrip) {
+    await db.collection('trips').doc(currentTrip.id).collection('events').add(ev);
+    closeModal('modal-event');
+    loadItinerary();
+    toast('✅ Evento aggiunto!');
+  } else {
+    // from calendar-main, save to user events
+    await db.collection('users').doc(currentUser.uid).collection('events').add(ev);
+    closeModal('modal-event');
+    loadCalendarEvents();
+    toast('✅ Evento salvato!');
+  }
+}
+
+// ════════════════════════════════════════════════════
+// CHAT
+// ════════════════════════════════════════════════════
+function loadChat() {
+  if(!currentTrip) return;
+  if(unsubChat) unsubChat();
+  const container=document.getElementById('chat-msgs');
+  container.innerHTML='<div class="loader"><div class="spinner"></div></div>';
+  unsubChat=db.collection('trips').doc(currentTrip.id).collection('messages')
+    .orderBy('timestamp').limitToLast(100)
+    .onSnapshot(snap=>{
+      container.innerHTML='';
+      snap.docs.forEach(d=>renderMsg(d.data(),container));
+      container.scrollTop=container.scrollHeight;
+    });
+}
+function renderMsg(msg, container) {
+  const isMe=msg.userId===currentUser.uid;
+  const time=msg.timestamp?.toDate?msg.timestamp.toDate().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'}):'';
+  const initials=(msg.userName||'?')[0].toUpperCase();
+  const div=document.createElement('div');
+  div.className='msg'+(isMe?' me':'');
+  div.innerHTML=`
+    ${!isMe?`<div class="msg-avatar">${initials}</div>`:''}
+    <div>
+      ${!isMe?`<div class="msg-sender">${msg.userName||'Utente'}</div>`:''}
+      <div class="msg-bubble">${escapeHtml(msg.text)}</div>
+      <div class="msg-time">${time}</div>
+    </div>
+    ${isMe?`<div class="msg-avatar" style="background:var(--accent)">${initials}</div>`:''}`;
+  container.appendChild(div);
+}
+async function sendMessage() {
+  const input=document.getElementById('chat-input');
+  const text=input.value.trim();
+  if(!text||!currentTrip) return;
+  input.value='';
+  await db.collection('trips').doc(currentTrip.id).collection('messages').add({
+    userId: currentUser.uid,
+    userName: currentUser.displayName||'Utente',
+    text,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  });
+}
+
+// ════════════════════════════════════════════════════
+// PARTICIPANTS
+// ════════════════════════════════════════════════════
+async function loadParticipants() {
+  if(!currentTrip) return;
+  const container=document.getElementById('participants-list');
+  const uids=currentTrip.participants||[];
+  container.innerHTML='';
+  for(const uid of uids) {
+    try {
+      const udoc=await db.collection('users').doc(uid).get();
+      const udata=udoc.data()||{};
+      const name=udata.displayName||'Utente';
+      const item=document.createElement('div');
+      item.className='participant-item';
+      const isOwner=uid===currentTrip.createdBy;
+      item.innerHTML=`
+        <div class="avatar-lg" style="background:${['#3d85ff','#00d4aa','#a855f7','#f59e0b'][Math.abs(uid.charCodeAt(0))%4]}">${name[0].toUpperCase()}</div>
+        <div><div class="participant-name">${name}</div><div class="participant-role">${isOwner?'👑 Organizzatore':'👤 Partecipante'}</div></div>`;
+      container.appendChild(item);
+    } catch(e) {}
+  }
+}
+
+function copyInviteCode() {
+  const code=currentTrip?.inviteCode||'';
+  if(navigator.clipboard) navigator.clipboard.writeText(code);
+  toast('✅ Codice copiato!');
+}
+function shareWhatsApp() {
+  const code=currentTrip?.inviteCode||'';
+  const text=`Unisciti al mio viaggio "${currentTrip?.name}" su Travel IO!\nCodice: ${code}`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
+}
+function shareTelegram() {
+  const code=currentTrip?.inviteCode||'';
+  const text=`Unisciti al mio viaggio "${currentTrip?.name}" su Travel IO! Codice: ${code}`;
+  window.open(`https://t.me/share/url?text=${encodeURIComponent(text)}`);
+}
+function shareGeneric() {
+  const code=currentTrip?.inviteCode||'';
+  if(navigator.share) {
+    navigator.share({title:'Travel IO - '+currentTrip?.name, text:`Unisciti con il codice: ${code}`});
+  } else copyInviteCode();
+}
+async function inviteByEmail() {
+  const email=document.getElementById('invite-email').value.trim();
+  if(!email){ toast('⚠️ Inserisci un\'email'); return; }
+  await db.collection('invites').add({
+    tripId:currentTrip.id, tripName:currentTrip.name,
+    invitedEmail:email, invitedBy:currentUser.uid,
+    inviteCode:currentTrip.inviteCode,
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  });
+  document.getElementById('invite-email').value='';
+  toast('✅ Invito registrato per '+email);
+}
+async function joinTrip() {
+  const code=document.getElementById('join-code').value.trim().toUpperCase();
+  if(!code){ toast('⚠️ Inserisci il codice'); return; }
+  const snap=await db.collection('trips').where('inviteCode','==',code).get();
+  if(snap.empty){ toast('❌ Codice non trovato'); return; }
+  const doc=snap.docs[0];
+  await doc.ref.update({
+    participants: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+  });
+  closeModal('modal-join');
+  toast('🎉 Sei nel viaggio!');
+  openTrip({id:doc.id,...doc.data(),participants:[...(doc.data().participants||[]),currentUser.uid]});
+}
+
+// ════════════════════════════════════════════════════
+// NOTES
+// ════════════════════════════════════════════════════
+async function loadAllNotes() {
+  if(!currentUser) return;
+  const snap=await db.collection('users').doc(currentUser.uid).collection('notes')
+    .orderBy('updatedAt','desc').get();
+  allNotes=snap.docs.map(d=>({id:d.id,...d.data()}));
+  allNotesCopy=[...allNotes];
+  renderNotesList(allNotes,'notes-list-main');
+}
+async function loadTripNotes() {
+  if(!currentTrip) return;
+  const snap=await db.collection('trips').doc(currentTrip.id).collection('notes')
+    .orderBy('updatedAt','desc').get();
+  const notes=snap.docs.map(d=>({id:d.id,...d.data()}));
+  renderNotesList(notes,'trip-notes-list',true);
+}
+function renderNotesList(notes, containerId, isTrip=false) {
+  const container=document.getElementById(containerId);
+  if(!container) return;
+  if(notes.length===0) {
+    container.innerHTML=`<div class="empty-state"><div class="empty-icon">📝</div><div class="empty-text">Nessuna nota ancora</div></div>`;
+    return;
+  }
+  container.innerHTML='';
+  notes.forEach(note=>{
+    const card=document.createElement('div');
+    card.className='note-card';
+    const date=note.updatedAt?.toDate?.()?.toLocaleDateString('it-IT')||'';
+    card.innerHTML=`
+      <div class="note-title">${note.title||'Nota senza titolo'}</div>
+      <div class="note-preview">${note.body||'Nessun contenuto'}</div>
+      <div class="note-meta"><span>${date}</span><span style="cursor:pointer;color:#ff4757" onclick="event.stopPropagation();deleteNote('${note.id}','${isTrip}')">🗑️</span></div>`;
+    card.onclick=()=>openNoteEditor(note,isTrip);
+    container.appendChild(card);
+  });
+}
+function filterNotes(q) {
+  const filtered=q?allNotes.filter(n=>(n.title||'').toLowerCase().includes(q.toLowerCase())||(n.body||'').toLowerCase().includes(q.toLowerCase())):allNotes;
+  renderNotesList(filtered,'notes-list-main');
+}
+function openNoteEditor(note, isTrip=false) {
+  currentNoteId=note?.id||null;
+  currentNoteTrip=isTrip;
+  document.getElementById('note-title').value=note?.title||'';
+  document.getElementById('note-body').value=note?.body||'';
+  showView('note-editor');
+}
+async function saveNote() {
+  const title=document.getElementById('note-title').value.trim();
+  const body=document.getElementById('note-body').value.trim();
+  const data={title,body,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+  const col=currentNoteTrip&&currentTrip
+    ?db.collection('trips').doc(currentTrip.id).collection('notes')
+    :db.collection('users').doc(currentUser.uid).collection('notes');
+  if(currentNoteId) { await col.doc(currentNoteId).update(data); }
+  else { data.createdAt=firebase.firestore.FieldValue.serverTimestamp(); await col.add(data); }
+  toast('✅ Nota salvata!');
+  closeNoteEditor();
+}
+async function deleteNote(id, isTrip) {
+  const col=isTrip==='true'&&currentTrip
+    ?db.collection('trips').doc(currentTrip.id).collection('notes')
+    :db.collection('users').doc(currentUser.uid).collection('notes');
+  await col.doc(id).delete();
+  if(isTrip==='true') loadTripNotes(); else loadAllNotes();
+  toast('🗑️ Nota eliminata');
+}
+function closeNoteEditor() {
+  if(currentNoteTrip&&currentTrip) { showView('trip'); loadTripNotes(); }
+  else { showView('notes-main'); loadAllNotes(); }
+}
+function insertText(str) {
+  const ta=document.getElementById('note-body');
+  const start=ta.selectionStart;
+  ta.value=ta.value.slice(0,start)+str+ta.value.slice(ta.selectionEnd);
+  ta.selectionStart=ta.selectionEnd=start+str.length;
+  ta.focus();
+}
+
+// ════════════════════════════════════════════════════
+// CALENDAR
+// ════════════════════════════════════════════════════
+function changeMonth(dir) {
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  renderCalendar();
+  loadCalendarEvents();
+}
+function renderCalendar() {
+  const months=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  document.getElementById('cal-month-label').textContent=`${months[calMonth]} ${calYear}`;
+  const first=new Date(calYear,calMonth,1).getDay();
+  const startDay=(first+6)%7; // Monday first
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  const container=document.getElementById('cal-days');
+  container.innerHTML='';
+  for(let i=0;i<startDay;i++){
+    const e=document.createElement('div');e.className='cal-day empty';container.appendChild(e);
+  }
+  for(let d=1;d<=daysInMonth;d++){
+    const el=document.createElement('div');
+    el.className='cal-day';
+    const isToday=d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+    if(isToday) el.classList.add('today');
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    if(calSelectedDate===dateStr) el.classList.add('selected');
+    el.innerHTML=`<span class="cal-day-num">${d}</span>`;
+    el.onclick=()=>selectCalDay(dateStr,el);
+    container.appendChild(el);
+  }
+}
+function selectCalDay(date,el) {
+  document.querySelectorAll('.cal-day').forEach(d=>d.classList.remove('selected'));
+  el.classList.add('selected');
+  calSelectedDate=date;
+  filterCalEventsByDate(date);
+}
+async function loadCalendarEvents() {
+  if(!currentUser) return;
+  allCalEvents=[];
+  // user events
+  const userSnap=await db.collection('users').doc(currentUser.uid).collection('events').get();
+  userSnap.docs.forEach(d=>allCalEvents.push({...d.data(),source:'Personale'}));
+  // trip events (all trips)
+  // simplified: show in cal events panel
+  renderCalEvents(allCalEvents);
+}
+function renderCalEvents(events) {
+  const container=document.getElementById('cal-events-list');
+  const title=document.getElementById('cal-events-title');
+  title.textContent=calSelectedDate?new Date(calSelectedDate+'T12:00:00').toLocaleDateString('it-IT',{weekday:'long',day:'2-digit',month:'long'}):'Tutti gli eventi';
+  if(events.length===0){
+    container.innerHTML=`<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">Nessun evento per questo giorno</div></div>`;
+    return;
+  }
+  container.innerHTML='';
+  events.forEach(ev=>{
+    const item=document.createElement('div');
+    item.className='event-item';
+    item.innerHTML=`<div class="event-time">${ev.time||'Todo'}</div>
+      <div><div class="event-title">${EVENT_ICONS[ev.type]||'📍'} ${ev.title}</div>${ev.source?`<div class="event-trip">${ev.source}</div>`:''}</div>`;
+    container.appendChild(item);
+  });
+  // mark days
+  allCalEvents.forEach(ev=>{
+    if(ev.date){
+      const d=ev.date.split('-')[2];
+      const dayEls=document.querySelectorAll('.cal-day');
+      dayEls.forEach(el=>{
+        if(el.querySelector('.cal-day-num')?.textContent==String(parseInt(d))) el.classList.add('has-event');
+      });
+    }
+  });
+}
+function filterCalEventsByDate(date) {
+  const filtered=allCalEvents.filter(ev=>ev.date===date);
+  renderCalEvents(filtered);
+}
+
+// ════════════════════════════════════════════════════
+// TRIP MENU
+// ════════════════════════════════════════════════════
+function openTripMenu(){ openModal('modal-trip-menu'); }
+async function deleteTrip(){
+  if(!currentTrip) return;
+  if(!confirm('Eliminare questo viaggio?')) return;
+  await db.collection('trips').doc(currentTrip.id).delete();
+  closeModal('modal-trip-menu');
+  showView('dashboard');
+  toast('🗑️ Viaggio eliminato');
+}
+function exportTrip() {
+  const data=JSON.stringify(currentTrip,null,2);
+  const blob=new Blob([data],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=(currentTrip.name||'viaggio')+'.json';a.click();
+  closeModal('modal-trip-menu');
+}
+function editTrip(){ closeModal('modal-trip-menu'); toast('🚧 Funzione in arrivo'); }
+function addToCalendar(){ closeModal('modal-trip-menu'); toast('📅 Viaggio aggiunto al calendario'); }
+
+// ════════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════════
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function showJoinModal(){ openModal('modal-join'); }
+function showThemeOptions(){ toast('🎨 Tema scuro attivo'); }
+function updateProfileView(){}
+document.querySelectorAll('.modal-backdrop').forEach(m=>{
+  m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); });
+});
+document.getElementById('chat-input')?.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();} });
+
+// Avvio automatico
+initFirebase();
+
+let toastTimer;
+function toast(msg) {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2500);
+}
+function escapeHtml(str){ return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+</body>
+</html>
