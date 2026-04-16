@@ -3,1126 +3,2252 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#3d6df8">
-<title>Travel IO</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<title>VoyageApp — Gestione Viaggi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 <style>
-:root{
-  --bg:#f0f4ff;--bg2:#e8edfb;--card:#ffffff;--card2:#f4f7ff;
-  --border:rgba(61,109,248,0.12);--border2:rgba(0,0,0,0.08);
-  --accent:#ff6b35;--accent-light:#fff0eb;
-  --blue:#3d6df8;--blue-light:#eef1ff;
-  --teal:#00b894;--teal-light:#e0faf4;
-  --purple:#8b5cf6;--purple-light:#f3f0ff;
-  --red:#ef4444;--red-light:#fef2f2;
-  --yellow:#f59e0b;--yellow-light:#fffbeb;
-  --text:#1a2035;--text2:#3d4a6b;--muted:#7b8db0;
-  --shadow:0 2px 12px rgba(61,109,248,0.1);
-  --shadow-lg:0 8px 32px rgba(61,109,248,0.15);
-  --radius:18px;--radius-sm:10px;
-  --font-h:'Syne',sans-serif;--font-b:'DM Sans',sans-serif;
-  --safe-b:env(safe-area-inset-bottom,16px);
-  --nav-h:64px;
+:root {
+  --bg: #FFFCF7;
+  --bg2: #FFF8EE;
+  --bg3: #FFF3E0;
+  --card: #FFFFFF;
+  --card-hover: #FFFAF3;
+  --primary: #F97316;
+  --primary-light: #FFEDD5;
+  --primary-dark: #EA580C;
+  --secondary: #0EA5E9;
+  --secondary-light: #E0F2FE;
+  --accent: #10B981;
+  --accent-light: #D1FAE5;
+  --danger: #EF4444;
+  --danger-light: #FEE2E2;
+  --purple: #8B5CF6;
+  --purple-light: #EDE9FE;
+  --pink: #EC4899;
+  --pink-light: #FCE7F3;
+  --text: #1C1917;
+  --text2: #57534E;
+  --text3: #A8A29E;
+  --border: #F5F0EB;
+  --border2: #E7E0D8;
+  --shadow: 0 2px 12px rgba(249,115,22,0.08);
+  --shadow-lg: 0 8px 32px rgba(249,115,22,0.12);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --font: 'DM Sans', sans-serif;
+  --font-display: 'Outfit', sans-serif;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font-b);font-size:16px}
-#app{height:100%;display:flex;flex-direction:column}
-#app.hidden{display:none}
-.view{display:none;flex:1;flex-direction:column;height:100%;overflow:hidden;background:var(--bg)}
-.view.active{display:flex}
-.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav-h) + var(--safe-b) + 12px)}
-.scroll::-webkit-scrollbar{display:none}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { 
+  font-family:var(--font); background:var(--bg); color:var(--text); 
+  height:100%; overflow:hidden; overscroll-behavior:none;
+}
+input,textarea,select,button { font-family:var(--font); }
+::-webkit-scrollbar { width:0; height:0; }
 
-/* ── TOPBAR E UI GENERALE ── */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 10px;padding-top:calc(14px + env(safe-area-inset-top,0px));background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0;position:sticky;top:0;z-index:50}
-.topbar-title{font-family:var(--font-h);font-size:1.15rem;font-weight:700;color:var(--text)}
-.icon-btn{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border-radius:11px;border:1px solid var(--border);cursor:pointer;font-size:1.1rem;transition:transform .15s,background .2s;color:var(--text)}
-.icon-btn:active{transform:scale(.92);background:var(--border)}
+/* ========== APP SHELL ========== */
+#app { height:100%; display:flex; flex-direction:column; }
+.screen { display:none; flex:1; overflow-y:auto; flex-direction:column; }
+.screen.active { display:flex; }
 
-.bottomnav{display:flex;justify-content:space-around;padding:8px 4px calc(8px + var(--safe-b));background:var(--card);border-top:1px solid var(--border);position:fixed;bottom:0;left:0;right:0;z-index:100;box-shadow:0 -4px 20px rgba(61,109,248,0.08)}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:5px 14px;border-radius:12px;transition:background .2s;flex:1;max-width:80px}
-.nav-item.active{background:var(--blue-light)}
-.nav-icon{font-size:1.25rem;line-height:1}
-.nav-label{font-size:.58rem;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;font-weight:600}
-.nav-item.active .nav-label{color:var(--blue)}
-.nav-item.active .nav-icon{filter:none}
+/* ========== AUTH SCREEN ========== */
+.auth-screen {
+  background: linear-gradient(160deg, #FFF8EE 0%, #FFEDD5 50%, #FEF3C7 100%);
+  justify-content:center; align-items:center; padding:24px; min-height:100%;
+}
+.auth-logo {
+  width:80px; height:80px; border-radius:24px; 
+  background:linear-gradient(135deg, var(--primary), #F59E0B);
+  display:flex; align-items:center; justify-content:center;
+  font-size:36px; margin-bottom:12px;
+  box-shadow: 0 8px 32px rgba(249,115,22,0.3);
+}
+.auth-title { font-family:var(--font-display); font-size:28px; font-weight:800; margin-bottom:4px; }
+.auth-sub { color:var(--text2); margin-bottom:32px; font-size:14px; }
+.auth-card {
+  background:var(--card); border-radius:24px; padding:28px; width:100%; max-width:380px;
+  box-shadow:var(--shadow-lg);
+}
+.auth-tabs { display:flex; gap:4px; background:var(--bg2); border-radius:12px; padding:4px; margin-bottom:24px; }
+.auth-tab {
+  flex:1; padding:10px; border:none; background:none; border-radius:10px;
+  font-weight:600; font-size:14px; color:var(--text3); cursor:pointer; transition:.2s;
+}
+.auth-tab.active { background:var(--card); color:var(--primary); box-shadow:0 2px 8px rgba(0,0,0,.06); }
+.form-group { margin-bottom:16px; }
+.form-group label { display:block; font-size:12px; font-weight:600; color:var(--text2); margin-bottom:6px; text-transform:uppercase; letter-spacing:.5px; }
+.form-input {
+  width:100%; padding:14px 16px; border:2px solid var(--border); border-radius:var(--radius-sm);
+  font-size:16px; transition:.2s; background:var(--bg);
+}
+.form-input:focus { outline:none; border-color:var(--primary); background:var(--card); }
+.btn {
+  width:100%; padding:14px; border:none; border-radius:var(--radius-sm); font-size:15px;
+  font-weight:600; cursor:pointer; transition:all .2s; display:flex; align-items:center;
+  justify-content:center; gap:8px;
+}
+.btn-primary { background:linear-gradient(135deg, var(--primary), #F59E0B); color:white; }
+.btn-primary:active { transform:scale(.97); }
+.btn-secondary { background:var(--primary-light); color:var(--primary-dark); }
+.btn-outline { background:none; border:2px solid var(--border2); color:var(--text2); }
+.btn-sm { padding:8px 16px; width:auto; font-size:13px; border-radius:var(--radius-xs); }
+.btn-danger { background:var(--danger-light); color:var(--danger); }
+.btn-icon {
+  width:40px; height:40px; border-radius:50%; border:none; background:var(--primary-light);
+  color:var(--primary); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  font-size:18px; transition:.2s; padding:0;
+}
+.btn-icon:active { transform:scale(.9); }
+.divider { display:flex; align-items:center; gap:12px; margin:20px 0; color:var(--text3); font-size:13px; }
+.divider::before,.divider::after { content:''; flex:1; height:1px; background:var(--border2); }
 
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:12px;border:none;cursor:pointer;font-family:var(--font-b);font-size:.9rem;font-weight:600;transition:transform .15s,box-shadow .2s}
-.btn:active{transform:scale(.97)}
-.btn-primary{background:var(--blue);color:#fff;box-shadow:0 4px 16px rgba(61,109,248,.3)}
-.btn-accent{background:var(--accent);color:#fff;box-shadow:0 4px 16px rgba(255,107,53,.3)}
-.btn-ghost{background:var(--bg2);color:var(--text);border:1px solid var(--border)}
-.btn-danger{background:var(--red-light);color:var(--red);border:1px solid rgba(239,68,68,.2)}
-.btn-sm{padding:9px 14px;font-size:.82rem;border-radius:9px}
-.btn-xs{padding:6px 11px;font-size:.75rem;border-radius:8px}
-.btn-icon{width:38px;height:38px;padding:0;border-radius:10px}
-.btn-full{width:100%}
+/* Join code section */
+.join-section {
+  margin-top:16px; padding-top:16px; border-top:2px dashed var(--border2);
+}
+.join-section .form-input { text-align:center; font-size:20px; letter-spacing:4px; font-weight:700; text-transform:uppercase; }
 
-.field{margin-bottom:14px}
-.field label{display:block;font-size:.72rem;color:var(--muted);margin-bottom:5px;letter-spacing:.05em;text-transform:uppercase;font-weight:600}
-.inp{width:100%;padding:12px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:11px;color:var(--text);font-family:var(--font-b);font-size:.9rem;transition:border-color .2s,box-shadow .2s}
-.inp:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(61,109,248,.1)}
-textarea.inp{resize:none}
-select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237b8db0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+/* ========== HEADER ========== */
+.header {
+  background:var(--card); padding:12px 20px; display:flex; align-items:center; gap:12px;
+  border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100;
+  min-height:56px;
+}
+.header-title { font-family:var(--font-display); font-weight:700; font-size:18px; flex:1; }
+.header-back { width:36px; height:36px; border-radius:50%; border:none; background:var(--bg2); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; }
 
-.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow)}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.72rem;font-weight:600}
-.section-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px}
-.section-title{font-family:var(--font-h);font-size:.95rem;font-weight:700;color:var(--text)}
-.section-action{font-size:.82rem;color:var(--blue);cursor:pointer;font-weight:500}
-.divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.8rem;margin:14px 0}
-.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
-.empty{text-align:center;padding:36px 20px}
-.empty-icon{font-size:2.4rem;margin-bottom:8px}
-.empty-text{font-size:.875rem;color:var(--muted);line-height:1.5}
+/* ========== HOME SCREEN ========== */
+.home-content { padding:20px; padding-bottom:calc(80px + var(--safe-bottom)); }
+.welcome-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; }
+.welcome-text h2 { font-family:var(--font-display); font-size:22px; font-weight:700; }
+.welcome-text p { color:var(--text2); font-size:13px; margin-top:2px; }
+.avatar {
+  width:44px; height:44px; border-radius:50%; 
+  background:linear-gradient(135deg, var(--primary), #F59E0B);
+  display:flex; align-items:center; justify-content:center; color:white;
+  font-weight:700; font-size:16px; cursor:pointer;
+}
 
-#toast{position:fixed;bottom:calc(var(--nav-h) + var(--safe-b) + 12px);left:50%;transform:translateX(-50%) translateY(16px);background:var(--text);color:#fff;border-radius:20px;padding:10px 20px;font-size:.875rem;z-index:999;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.2)}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* Countdown Cards */
+.countdown-section { margin-bottom:24px; }
+.section-label { font-family:var(--font-display); font-size:14px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; }
+.countdown-scroll { display:flex; gap:12px; overflow-x:auto; padding-bottom:8px; margin:0 -20px; padding:0 20px 8px; }
+.countdown-card {
+  min-width:260px; border-radius:var(--radius); padding:20px; color:white; position:relative; overflow:hidden; flex-shrink:0;
+}
+.countdown-card.walking { background:linear-gradient(135deg, #10B981, #34D399); }
+.countdown-card.camper { background:linear-gradient(135deg, #F97316, #FBBF24); }
+.countdown-card.boat { background:linear-gradient(135deg, #0EA5E9, #38BDF8); }
+.countdown-card.sup { background:linear-gradient(135deg, #06B6D4, #22D3EE); }
+.countdown-card.car { background:linear-gradient(135deg, #8B5CF6, #A78BFA); }
+.countdown-card.flight { background:linear-gradient(135deg, #EC4899, #F472B6); }
+.countdown-card .trip-type-icon { font-size:40px; position:absolute; right:16px; top:16px; opacity:.3; }
+.countdown-card h3 { font-family:var(--font-display); font-size:18px; font-weight:700; margin-bottom:4px; }
+.countdown-card .date { font-size:13px; opacity:.85; margin-bottom:12px; }
+.countdown-nums { display:flex; gap:8px; }
+.countdown-num {
+  background:rgba(255,255,255,.2); backdrop-filter:blur(8px); border-radius:10px;
+  padding:8px 10px; text-align:center; min-width:48px;
+}
+.countdown-num .num { font-family:var(--font-display); font-size:22px; font-weight:800; }
+.countdown-num .lbl { font-size:9px; text-transform:uppercase; letter-spacing:.5px; opacity:.8; }
 
-.modal-bd{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(2px)}
-.modal-bd.open{opacity:1;pointer-events:all}
-.modal-sheet{width:100%;background:var(--card);border-radius:24px 24px 0 0;padding:16px 20px 20px;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1);max-height:92vh;overflow-y:auto}
-.modal-bd.open .modal-sheet{transform:translateY(0)}
-.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px}
-.modal-title{font-family:var(--font-h);font-size:1.05rem;font-weight:700;margin-bottom:16px}
-.modal-sheet::-webkit-scrollbar{display:none}
+/* Trip Cards */
+.trip-card {
+  background:var(--card); border-radius:var(--radius); padding:16px; margin-bottom:12px;
+  box-shadow:var(--shadow); cursor:pointer; transition:all .2s; border:1px solid var(--border);
+}
+.trip-card:active { transform:scale(.98); background:var(--card-hover); }
+.trip-card-header { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.trip-type-badge {
+  width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+  font-size:22px; flex-shrink:0;
+}
+.trip-type-badge.walking { background:#D1FAE5; }
+.trip-type-badge.camper { background:#FFEDD5; }
+.trip-type-badge.boat { background:#E0F2FE; }
+.trip-type-badge.sup { background:#CFFAFE; }
+.trip-type-badge.car { background:#EDE9FE; }
+.trip-type-badge.flight { background:#FCE7F3; }
+.trip-card-info { flex:1; }
+.trip-card-info h3 { font-family:var(--font-display); font-size:16px; font-weight:700; }
+.trip-card-info .trip-dates { font-size:12px; color:var(--text3); margin-top:2px; }
+.trip-card-footer { display:flex; align-items:center; justify-content:space-between; }
+.trip-participants {
+  display:flex; align-items:center;
+}
+.trip-participant-avatar {
+  width:28px; height:28px; border-radius:50%; border:2px solid var(--card);
+  display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700;
+  color:white; margin-left:-8px;
+}
+.trip-participant-avatar:first-child { margin-left:0; }
+.trip-stops-count { font-size:12px; color:var(--text3); display:flex; align-items:center; gap:4px; }
 
-/* ══════════ LOGIN ══════════ */
-#view-login{background:linear-gradient(160deg,#f0f4ff 0%,#e8eeff 100%);justify-content:flex-start;overflow-y:auto}
-#view-login::-webkit-scrollbar{display:none}
-.login-wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 22px}
-.login-logo{font-family:var(--font-h);font-size:2rem;font-weight:800;color:var(--blue);letter-spacing:-.02em;margin-bottom:4px}
-.login-logo span{color:var(--accent)}
-.login-tagline{color:var(--muted);font-size:.875rem;margin-bottom:28px;text-align:center}
-.login-hero{font-size:3.5rem;margin-bottom:16px;animation:float 3s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.login-card{width:100%;max-width:400px;background:var(--card);border-radius:22px;padding:24px 20px;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
-.login-tabs{display:flex;gap:4px;background:var(--bg2);border-radius:10px;padding:4px;margin-bottom:20px}
-.ltab{flex:1;padding:9px;text-align:center;border-radius:7px;cursor:pointer;font-size:.85rem;font-weight:600;color:var(--muted);transition:all .2s}
-.ltab.active{background:var(--card);color:var(--blue);box-shadow:0 2px 8px rgba(0,0,0,.08)}
-.btn-google{width:100%;padding:12px;background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:11px;font-family:var(--font-b);font-size:.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:background .2s,box-shadow .2s}
-.btn-google:hover{background:var(--bg2);box-shadow:var(--shadow)}
-.err-msg{color:var(--red);font-size:.8rem;text-align:center;margin-top:8px;min-height:18px}
+/* ========== TAB BAR ========== */
+.tab-bar {
+  background:var(--card); border-top:1px solid var(--border); display:flex;
+  padding:8px 12px calc(8px + var(--safe-bottom)); position:fixed; bottom:0; left:0; right:0; z-index:200;
+}
+.tab-item {
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+  padding:6px; border:none; background:none; cursor:pointer; color:var(--text3);
+  font-size:10px; font-weight:500; transition:.2s;
+}
+.tab-item.active { color:var(--primary); }
+.tab-item .tab-icon { font-size:22px; }
 
-/* ══════════ DASHBOARD ══════════ */
-.dash-hero{background:linear-gradient(135deg,var(--blue) 0%,#6b48ff 100%);padding:22px 18px 24px;color:#fff;border-radius:0 0 28px 28px;margin-bottom:4px}
-.dash-greeting{font-size:.8rem;opacity:.8;letter-spacing:.02em}
-.dash-name{font-family:var(--font-h);font-size:1.5rem;font-weight:800;margin-bottom:14px}
-.dash-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.dstat{background:rgba(255,255,255,.15);border-radius:14px;padding:12px;text-align:center;backdrop-filter:blur(4px)}
-.dstat-num{font-family:var(--font-h);font-size:1.4rem;font-weight:800}
-.dstat-lbl{font-size:.65rem;opacity:.8;font-weight:500;letter-spacing:.03em}
+/* ========== FAB ========== */
+.fab {
+  position:fixed; bottom:calc(76px + var(--safe-bottom)); right:20px; z-index:150;
+  width:56px; height:56px; border-radius:50%; border:none;
+  background:linear-gradient(135deg, var(--primary), #F59E0B); color:white;
+  font-size:28px; display:flex; align-items:center; justify-content:center;
+  box-shadow:0 4px 20px rgba(249,115,22,.4); cursor:pointer; transition:.2s;
+}
+.fab:active { transform:scale(.9); }
 
-.countdown-scroll{display:flex;gap:12px;padding:4px 18px 4px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.countdown-scroll::-webkit-scrollbar{display:none}
-.countdown-card{flex-shrink:0;width:160px;background:var(--card);border-radius:16px;padding:14px;border:1px solid var(--border);box-shadow:var(--shadow)}
-.countdown-icon{font-size:1.6rem;margin-bottom:8px}
-.countdown-name{font-weight:700;font-size:.85rem;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.countdown-days{font-family:var(--font-h);font-size:1.8rem;font-weight:800;color:var(--blue);line-height:1}
-.countdown-lbl{font-size:.68rem;color:var(--muted);font-weight:600}
-.countdown-today{color:var(--accent)}
+/* ========== MODAL ========== */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:500;
+  display:none; align-items:flex-end; justify-content:center;
+  animation:fadeIn .2s;
+}
+.modal-overlay.active { display:flex; }
+.modal {
+  background:var(--card); border-radius:24px 24px 0 0; width:100%; max-width:500px;
+  max-height:90vh; overflow-y:auto; padding:24px; padding-bottom:calc(24px + var(--safe-bottom));
+  animation:slideUp .3s ease;
+}
+@keyframes slideUp { from { transform:translateY(100%); } to { transform:translateY(0); } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+.modal-handle { width:40px; height:4px; background:var(--border2); border-radius:2px; margin:0 auto 20px; }
+.modal h3 { font-family:var(--font-display); font-size:20px; font-weight:700; margin-bottom:20px; }
 
-.join-dash{margin:4px 18px 0;background:linear-gradient(135deg,var(--blue-light),#f0ebff);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;border:1.5px dashed rgba(61,109,248,.3);cursor:pointer;transition:box-shadow .2s}
-.join-dash:active{box-shadow:var(--shadow)}
+/* Type selector */
+.type-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:20px; }
+.type-option {
+  padding:14px 8px; border-radius:var(--radius-sm); border:2px solid var(--border);
+  text-align:center; cursor:pointer; transition:.2s; background:var(--bg);
+}
+.type-option:active { transform:scale(.95); }
+.type-option.selected { border-color:var(--primary); background:var(--primary-light); }
+.type-option .type-emoji { font-size:28px; display:block; margin-bottom:4px; }
+.type-option .type-name { font-size:11px; font-weight:600; color:var(--text2); }
 
-.trips-grid{padding:4px 18px;display:flex;flex-direction:column;gap:12px}
-.trip-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform .2s,box-shadow .2s;animation:slideUp .3s ease both}
-.trip-card:active{transform:scale(.98)}
-@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-.trip-card-top{height:80px;display:flex;align-items:center;padding:0 20px;gap:14px}
-.trip-emoji-big{font-size:2.5rem}
-.trip-card-info{flex:1;min-width:0}
-.trip-card-name{font-family:var(--font-h);font-size:1rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.trip-card-dest{font-size:.78rem;color:var(--muted);margin-top:2px}
-.trip-card-bottom{padding:10px 16px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg)}
-.trip-card-dates{font-size:.78rem;color:var(--muted)}
-.avatars{display:flex}
-.av{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;border:2px solid var(--card);margin-left:-5px;color:#fff}
-.av:first-child{margin-left:0}
+/* ========== TRIP DETAIL ========== */
+.trip-detail-header {
+  padding:20px; padding-top:12px; position:relative;
+}
+.trip-detail-hero {
+  border-radius:var(--radius); padding:24px; color:white; margin-bottom:16px; position:relative; overflow:hidden;
+}
+.trip-detail-hero h1 { font-family:var(--font-display); font-size:24px; font-weight:800; margin-bottom:4px; }
+.trip-detail-hero .hero-date { opacity:.85; font-size:13px; }
+.trip-detail-hero .hero-icon { position:absolute; right:20px; bottom:16px; font-size:60px; opacity:.2; }
+.trip-code-bar {
+  display:flex; align-items:center; gap:10px; background:var(--bg2); padding:10px 14px;
+  border-radius:var(--radius-sm); margin-bottom:16px;
+}
+.trip-code-bar .code { font-family:monospace; font-size:18px; font-weight:700; letter-spacing:3px; color:var(--primary); flex:1; }
+.trip-code-bar button { padding:6px 14px; border:none; border-radius:var(--radius-xs); background:var(--primary); color:white; font-size:12px; font-weight:600; cursor:pointer; }
 
-.fab{position:fixed;right:18px;bottom:calc(var(--nav-h) + var(--safe-b) + 14px);width:52px;height:52px;border-radius:16px;background:var(--accent);color:#fff;border:none;font-size:1.5rem;cursor:pointer;z-index:99;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(255,107,53,.4);transition:transform .2s,box-shadow .2s}
-.fab:active{transform:scale(.92);box-shadow:0 2px 10px rgba(255,107,53,.3)}
+/* Detail tabs */
+.detail-tabs {
+  display:flex; gap:2px; overflow-x:auto; padding:0 20px 12px; background:var(--card);
+  border-bottom:1px solid var(--border);
+}
+.detail-tab {
+  padding:8px 14px; border:none; background:none; border-radius:20px;
+  font-size:13px; font-weight:500; color:var(--text3); cursor:pointer; white-space:nowrap; transition:.2s;
+}
+.detail-tab.active { background:var(--primary-light); color:var(--primary-dark); font-weight:600; }
 
-/* ══════════ CREATE TRIP ══════════ */
-.create-body{padding:18px}
-.create-section{margin-bottom:22px}
-.create-lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:10px}
-.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.type-btn{background:var(--bg);border:2px solid var(--border);border-radius:13px;padding:13px 6px;text-align:center;cursor:pointer;transition:all .2s}
-.type-btn.selected{border-color:var(--blue);background:var(--blue-light)}
-.type-btn .ticon{font-size:1.7rem;margin-bottom:5px}
-.type-btn .tname{font-size:.7rem;color:var(--muted);font-weight:600}
-.type-btn.selected .tname{color:var(--blue)}
-.date-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.color-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.cdot{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:transform .2s,box-shadow .2s}
-.cdot.sel{border-color:var(--text);transform:scale(1.15);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.detail-content { padding:20px; flex:1; overflow-y:auto; padding-bottom:calc(80px + var(--safe-bottom)); }
 
-/* ══════════ TRIP DETAIL ══════════ */
-.trip-hero{flex-shrink:0;position:relative;padding:20px 18px 16px;padding-top:calc(20px + env(safe-area-inset-top,0px))}
-.trip-hero-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.trip-hero-name{font-family:var(--font-h);font-size:1.6rem;font-weight:800;color:#fff;line-height:1.1;margin-bottom:4px}
-.trip-hero-sub{font-size:.85rem;color:rgba(255,255,255,.8)}
-.trip-hero-badges{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.trip-hero-badge{background:rgba(255,255,255,.2);color:#fff;padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:600;backdrop-filter:blur(4px)}
-.trip-hero-countdown{background:rgba(255,255,255,.25);border-radius:16px;padding:12px 16px;margin-top:14px;backdrop-filter:blur(8px);display:flex;align-items:center;gap:12px}
-.hero-cd-num{font-family:var(--font-h);font-size:2rem;font-weight:800;color:#fff;line-height:1}
-.hero-cd-lbl{font-size:.75rem;color:rgba(255,255,255,.85);font-weight:500}
+/* ========== PARTICIPANTS ========== */
+.participant-row { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); }
+.participant-row:last-child { border:none; }
+.participant-name { flex:1; font-weight:500; }
+.participant-role { font-size:11px; color:var(--text3); background:var(--bg2); padding:2px 8px; border-radius:10px; }
 
-.trip-tabs-wrap{background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.trip-tabs-wrap::-webkit-scrollbar{display:none}
-.trip-tabs{display:flex;padding:0 6px}
-.ttab{flex-shrink:0;padding:13px 14px;font-size:.8rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;transition:all .2s;white-space:nowrap}
-.ttab.active{color:var(--blue);border-bottom-color:var(--blue)}
-.tab-pane{display:none;flex:1;overflow:hidden;flex-direction:column}
-.tab-pane.active{display:flex}
+/* ========== STOPS ========== */
+.stop-card {
+  background:var(--bg); border-radius:var(--radius-sm); padding:14px; margin-bottom:10px;
+  border-left:4px solid var(--primary); position:relative;
+}
+.stop-card .stop-num { font-family:var(--font-display); font-size:12px; font-weight:700; color:var(--primary); margin-bottom:4px; }
+.stop-card h4 { font-family:var(--font-display); font-size:15px; font-weight:600; margin-bottom:4px; }
+.stop-card .stop-coords { font-size:11px; color:var(--text3); font-family:monospace; }
+.stop-card .stop-note { font-size:13px; color:var(--text2); margin-top:6px; }
+.search-box {
+  display:flex; gap:8px; margin-bottom:16px;
+}
+.search-box input { flex:1; }
 
-.overview-body{padding:16px 18px}
-.quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
-.qa-btn{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:14px 6px;text-align:center;cursor:pointer;transition:all .2s;box-shadow:var(--shadow)}
-.qa-btn:active{transform:scale(.95)}
-.qa-icon{font-size:1.5rem;margin-bottom:5px}
-.qa-lbl{font-size:.65rem;color:var(--muted);font-weight:600}
-.info-row{display:flex;gap:10px;flex-direction:column}
-.info-item{background:var(--card);border-radius:12px;padding:14px;border:1px solid var(--border);display:flex;align-items:center;gap:12px}
-.info-item-icon{font-size:1.3rem;width:36px;text-align:center}
-.info-item-lbl{font-size:.75rem;color:var(--muted);margin-bottom:2px}
-.info-item-val{font-size:.9rem;font-weight:600;color:var(--text)}
+/* ========== CHAT ========== */
+.chat-container { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.chat-messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:8px; }
+.chat-bubble {
+  max-width:80%; padding:10px 14px; border-radius:16px; font-size:14px; line-height:1.4;
+  animation:fadeIn .2s;
+}
+.chat-bubble.mine { background:var(--primary); color:white; align-self:flex-end; border-bottom-right-radius:4px; }
+.chat-bubble.other { background:var(--bg2); color:var(--text); align-self:flex-start; border-bottom-left-radius:4px; }
+.chat-bubble .chat-sender { font-size:11px; font-weight:600; margin-bottom:2px; opacity:.8; }
+.chat-bubble .chat-time { font-size:10px; opacity:.6; margin-top:4px; text-align:right; }
+.chat-input-bar {
+  display:flex; gap:8px; padding:12px 16px; background:var(--card); border-top:1px solid var(--border);
+  padding-bottom:calc(12px + var(--safe-bottom));
+}
+.chat-input-bar input { flex:1; padding:10px 16px; border:2px solid var(--border); border-radius:24px; font-size:14px; background:var(--bg); }
+.chat-input-bar input:focus { outline:none; border-color:var(--primary); }
+.chat-input-bar button { width:40px; height:40px; border-radius:50%; border:none; background:var(--primary); color:white; font-size:18px; cursor:pointer; }
 
-/* ── MAP TAB ── */
-#trip-map-container{flex:1;position:relative;min-height:300px; display: flex; flex-direction: column;}
-#trip-leaflet-map{flex: 1; width:100%; height:100%}
-.map-controls{position:absolute;top:10px;right:10px;z-index:1000;display:flex;flex-direction:column;gap:8px}
-.map-ctrl-btn{width:40px;height:40px;background:var(--card);border:1px solid var(--border);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;box-shadow:var(--shadow)}
-.map-search-bar{position:absolute;top:10px;left:10px;right:60px;z-index:1000}
-.map-search-input{width:100%;padding:10px 14px;background:var(--card);border:1.5px solid var(--border);border-radius:11px;font-family:var(--font-b);font-size:.85rem;color:var(--text);box-shadow:var(--shadow)}
-.map-search-input:focus{outline:none;border-color:var(--blue)}
-.map-suggestions{background:var(--card);border:1px solid var(--border);border-radius:11px;margin-top:4px;overflow:hidden;box-shadow:var(--shadow-lg);max-height:200px;overflow-y:auto}
-.map-sug-item{padding:10px 14px;font-size:.85rem;cursor:pointer;border-bottom:1px solid var(--border);color:var(--text)}
-.map-sug-item:hover{background:var(--bg2)}
-.map-add-panel{position:absolute;bottom:0;left:0;right:0;background:var(--card);border-radius:20px 20px 0 0;padding:16px;z-index:1000;transform:translateY(100%);transition:transform .3s;box-shadow:0 -4px 20px rgba(0,0,0,.1)}
-.map-add-panel.open{transform:translateY(0)}
-.emoji-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.emoji-opt{width:36px;height:36px;border-radius:10px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:1.2rem;cursor:pointer;border:2px solid transparent;transition:all .2s}
-.emoji-opt.sel{border-color:var(--blue);background:var(--blue-light)}
-.leaflet-popup-content-wrapper{border-radius:14px!important;border:1px solid var(--border);box-shadow:var(--shadow-lg)!important}
-.leaflet-popup-content{font-family:var(--font-b)!important;margin:12px 14px!important}
-.popup-title{font-weight:700;font-size:.95rem;color:var(--text);margin-bottom:4px}
-.popup-note{font-size:.8rem;color:var(--muted);line-height:1.4}
-.popup-actions{display:flex;gap:6px;margin-top:8px}
-.popup-btn{padding:5px 10px;border-radius:7px;border:none;font-size:.75rem;cursor:pointer;font-family:var(--font-b);font-weight:600}
+/* ========== EXPENSES ========== */
+.expense-summary {
+  background:linear-gradient(135deg, var(--primary), #F59E0B); border-radius:var(--radius);
+  padding:20px; color:white; margin-bottom:16px; text-align:center;
+}
+.expense-summary .total { font-family:var(--font-display); font-size:36px; font-weight:800; }
+.expense-summary .total-label { font-size:13px; opacity:.8; margin-bottom:8px; }
+.expense-balances { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:12px; }
+.balance-chip {
+  background:rgba(255,255,255,.2); border-radius:20px; padding:4px 12px; font-size:12px;
+  backdrop-filter:blur(4px);
+}
+.balance-chip.positive { color:#D1FAE5; }
+.balance-chip.negative { color:#FEE2E2; }
+.expense-item {
+  background:var(--card); border-radius:var(--radius-sm); padding:14px; margin-bottom:8px;
+  box-shadow:var(--shadow); display:flex; align-items:center; gap:12px; border:1px solid var(--border);
+}
+.expense-icon {
+  width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+  font-size:18px; background:var(--bg2); flex-shrink:0;
+}
+.expense-info { flex:1; }
+.expense-info h4 { font-size:14px; font-weight:600; }
+.expense-info .expense-meta { font-size:12px; color:var(--text3); }
+.expense-amount { font-family:var(--font-display); font-size:16px; font-weight:700; color:var(--primary); }
+.settlement-card {
+  background:var(--accent-light); border-radius:var(--radius-sm); padding:12px 14px;
+  margin-bottom:8px; display:flex; align-items:center; gap:10px; font-size:13px;
+}
+.settlement-arrow { color:var(--accent); font-weight:700; font-size:16px; }
 
-/* ── ITINERARY TAB ── */
-.itinerary-body{padding:14px 18px}
-.itin-day{margin-bottom:16px}
-.itin-day-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.itin-day-num{width:32px;height:32px;border-radius:9px;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:.85rem;font-weight:700;flex-shrink:0}
-.itin-day-lbl{font-size:.85rem;font-weight:600;color:var(--text2)}
-.itin-item{display:flex;gap:10px;padding:12px;background:var(--card);border-radius:12px;border:1px solid var(--border);margin-bottom:7px;cursor:pointer;transition:box-shadow .2s}
-.itin-item-icon{font-size:1.3rem;width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--bg2);border-radius:9px;flex-shrink:0}
-.itin-item-time{font-size:.72rem;color:var(--muted);margin-bottom:2px;font-weight:500}
-.itin-item-title{font-size:.9rem;font-weight:600;color:var(--text)}
-.itin-item-desc{font-size:.78rem;color:var(--muted);line-height:1.3;margin-top:2px}
-.itin-item-del{margin-left:auto;font-size:1rem;color:var(--muted);cursor:pointer;padding:4px;flex-shrink:0;align-self:flex-start}
-.add-stop-btn{width:100%;padding:12px;background:var(--bg2);border:1.5px dashed rgba(61,109,248,.3);border-radius:12px;color:var(--blue);font-size:.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--font-b);font-weight:600;transition:background .2s}
+/* ========== CALENDAR ========== */
+.calendar-grid {
+  display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:16px;
+}
+.cal-header { text-align:center; font-size:11px; font-weight:600; color:var(--text3); padding:8px 0; }
+.cal-day {
+  aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  border-radius:10px; font-size:14px; cursor:pointer; transition:.2s; position:relative;
+}
+.cal-day:active { background:var(--bg2); }
+.cal-day.today { background:var(--primary-light); color:var(--primary); font-weight:700; }
+.cal-day.has-event::after {
+  content:''; width:5px; height:5px; border-radius:50%; background:var(--primary);
+  position:absolute; bottom:4px;
+}
+.cal-day.other-month { color:var(--text3); opacity:.4; }
+.cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.cal-nav h3 { font-family:var(--font-display); font-size:16px; font-weight:700; }
+.cal-nav button { width:32px; height:32px; border-radius:50%; border:none; background:var(--bg2); cursor:pointer; font-size:16px; }
 
-/* ── EXPENSES TAB ── */
-.exp-body{padding:14px 18px}
-.exp-summary{background:linear-gradient(135deg,var(--teal),#00cec9);border-radius:16px;padding:18px;color:#fff;margin-bottom:16px}
-.exp-total{font-family:var(--font-h);font-size:2.2rem;font-weight:800}
-.exp-total-lbl{font-size:.8rem;opacity:.85;margin-bottom:8px}
-.exp-per-person{font-size:.9rem;opacity:.9;font-weight:500}
-.balance-cards{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
-.balance-card{background:var(--card);border-radius:12px;padding:13px 16px;border:1px solid var(--border);display:flex;align-items:center;gap:12px}
-.balance-av{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:#fff;flex-shrink:0}
-.balance-name{font-size:.875rem;font-weight:600;color:var(--text)}
-.balance-amount{margin-left:auto;font-family:var(--font-h);font-size:.95rem;font-weight:700}
-.balance-pos{color:var(--teal)}
-.balance-neg{color:var(--red)}
-.balance-zero{color:var(--muted)}
-.settlements{background:var(--yellow-light);border-radius:12px;padding:14px;border:1.5px solid rgba(245,158,11,.2);margin-bottom:16px}
-.settle-title{font-size:.8rem;font-weight:700;color:var(--yellow);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em}
-.settle-item{font-size:.85rem;color:var(--text2);margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.exp-list{display:flex;flex-direction:column;gap:8px}
-.exp-item{background:var(--card);border-radius:12px;padding:13px 16px;border:1px solid var(--border);display:flex;align-items:center;gap:12px}
-.exp-cat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
-.exp-item-title{font-size:.9rem;font-weight:600;color:var(--text)}
-.exp-item-sub{font-size:.75rem;color:var(--muted);margin-top:2px}
-.exp-item-amount{margin-left:auto;font-family:var(--font-h);font-size:1rem;font-weight:700;color:var(--text)}
-.exp-item-del{color:var(--muted);cursor:pointer;font-size:.9rem;padding:4px;margin-left:6px}
+/* ========== NOTES ========== */
+.note-card {
+  background:var(--card); border-radius:var(--radius-sm); padding:14px; margin-bottom:10px;
+  box-shadow:var(--shadow); border:1px solid var(--border); border-left:4px solid var(--secondary);
+}
+.note-card h4 { font-size:14px; font-weight:600; margin-bottom:4px; }
+.note-card p { font-size:13px; color:var(--text2); line-height:1.5; }
+.note-card .note-date { font-size:11px; color:var(--text3); margin-top:8px; }
+.note-colors { display:flex; gap:8px; margin-bottom:12px; }
+.note-color {
+  width:28px; height:28px; border-radius:50%; border:2px solid transparent; cursor:pointer; transition:.2s;
+}
+.note-color.selected { border-color:var(--text); transform:scale(1.15); }
 
-/* ── CHAT TAB ── */
-.chat-msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch}
-.chat-msgs::-webkit-scrollbar{display:none}
-.msg{display:flex;gap:8px;align-items:flex-end}
-.msg.me{flex-direction:row-reverse}
-.msg-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0}
-.msg-bubble{max-width:72%;padding:9px 13px;border-radius:16px;font-size:.875rem;line-height:1.45}
-.msg .msg-bubble{background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px;color:var(--text)}
-.msg.me .msg-bubble{background:var(--blue);color:#fff;border-bottom-right-radius:4px}
-.msg-time{font-size:.62rem;color:var(--muted);margin-top:3px}
-.msg.me .msg-time{text-align:right}
-.msg-sender{font-size:.68rem;color:var(--muted);margin-bottom:3px}
-.chat-bar{display:flex;gap:8px;padding:10px 14px;padding-bottom:calc(10px + var(--safe-b));background:var(--card);border-top:1px solid var(--border);flex-shrink:0}
-.chat-inp{flex:1;padding:10px 14px;background:var(--bg2);border:1.5px solid var(--border);border-radius:20px;color:var(--text);font-family:var(--font-b);font-size:.875rem}
-.chat-inp:focus{outline:none;border-color:var(--blue)}
-.send-btn{width:40px;height:40px;border-radius:50%;background:var(--blue);border:none;color:#fff;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s;box-shadow:0 2px 8px rgba(61,109,248,.3);flex-shrink:0}
+/* ========== MAP ========== */
+.map-container { width:100%; height:300px; border-radius:var(--radius); overflow:hidden; margin-bottom:12px; border:1px solid var(--border); }
+.map-tools { display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; }
+.map-tool-btn {
+  padding:6px 12px; border-radius:20px; border:1px solid var(--border2); background:var(--card);
+  font-size:12px; cursor:pointer; display:flex; align-items:center; gap:4px; transition:.2s;
+}
+.map-tool-btn:active { background:var(--primary-light); border-color:var(--primary); }
+.map-tool-btn.active { background:var(--primary-light); border-color:var(--primary); color:var(--primary-dark); }
+.map-markers-list { max-height:200px; overflow-y:auto; }
+.map-marker-item {
+  display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+.map-marker-item .marker-emoji { font-size:20px; }
 
-/* ── PEOPLE TAB ── */
-.people-body{padding:14px 18px}
-.invite-card{background:linear-gradient(135deg,var(--blue-light),#f0ebff);border-radius:16px;padding:18px;border:1.5px solid rgba(61,109,248,.15);margin-bottom:16px}
-.invite-card-title{font-family:var(--font-h);font-weight:700;font-size:.95rem;color:var(--text);margin-bottom:12px}
-.code-box{background:var(--card);border-radius:11px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--border);margin-bottom:12px}
-.code-text{font-family:monospace;font-size:1.2rem;letter-spacing:.12em;color:var(--blue);font-weight:700}
-.share-row{display:flex;gap:8px}
-.share-btn{flex:1;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;cursor:pointer;font-size:.75rem;color:var(--muted);font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;transition:all .2s}
-.share-btn:hover{border-color:var(--blue);color:var(--blue)}
-.share-btn-icon{font-size:1.2rem}
-.email-row{display:flex;gap:8px;margin-top:12px}
-.email-inp{flex:1;padding:11px 13px;background:var(--card);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font-b);font-size:.85rem}
-.part-item{background:var(--card);border-radius:12px;padding:13px 16px;border:1px solid var(--border);display:flex;align-items:center;gap:12px;margin-bottom:8px}
-.part-av{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:#fff;flex-shrink:0}
-.part-name{font-size:.9rem;font-weight:600;color:var(--text)}
-.part-role{font-size:.75rem;color:var(--muted);margin-top:2px}
+/* ========== SETTINGS ========== */
+.settings-item {
+  display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--border);
+  cursor:pointer;
+}
+.settings-item:active { opacity:.7; }
+.settings-icon {
+  width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+  font-size:18px;
+}
+.settings-item .settings-text { flex:1; }
+.settings-item .settings-text h4 { font-size:14px; font-weight:600; }
+.settings-item .settings-text p { font-size:12px; color:var(--text3); }
 
-/* ── NOTES & CALENDAR ── */
-.notes-body{padding:14px 18px}
-.note-card{background:var(--card);border-radius:13px;padding:15px;border:1px solid var(--border);border-left:3px solid var(--teal);cursor:pointer;margin-bottom:9px;transition:box-shadow .2s}
-.note-card:active{box-shadow:var(--shadow)}
-.note-title{font-weight:700;font-size:.9rem;color:var(--text);margin-bottom:5px}
-.note-preview{font-size:.8rem;color:var(--muted);line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.note-footer{display:flex;justify-content:space-between;align-items:center;margin-top:9px}
-.note-date{font-size:.7rem;color:var(--muted)}
-#view-note-editor{background:var(--card)}
-.note-ed-title{width:100%;padding:16px 18px;background:transparent;border:none;color:var(--text);font-family:var(--font-h);font-size:1.4rem;font-weight:700;border-bottom:1px solid var(--border)}
-.note-ed-title:focus{outline:none}
-.note-ed-body{flex:1;padding:16px 18px;background:transparent;border:none;color:var(--text);font-family:var(--font-b);font-size:.9rem;resize:none;line-height:1.7;min-height:300px}
-.note-ed-body:focus{outline:none}
-.note-toolbar{display:flex;gap:6px;padding:10px 14px;border-top:1px solid var(--border);flex-wrap:wrap;background:var(--bg)}
-.tool-btn{padding:7px 11px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:.78rem;cursor:pointer;font-family:var(--font-b);transition:background .2s}
+/* ========== CHECKLIST ========== */
+.checklist-item {
+  display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border);
+}
+.check-box {
+  width:22px; height:22px; border-radius:6px; border:2px solid var(--border2);
+  display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; transition:.2s;
+}
+.check-box.checked { background:var(--accent); border-color:var(--accent); color:white; font-size:12px; }
+.checklist-text { flex:1; font-size:14px; }
+.checklist-text.done { text-decoration:line-through; color:var(--text3); }
 
-.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--card);border-bottom:1px solid var(--border)}
-.cal-month{font-family:var(--font-h);font-size:1.1rem;font-weight:700}
-.cal-nav-btn{width:34px;height:34px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;color:var(--text)}
-.cal-grid{padding:14px 16px 0;background:var(--card)}
-.cal-wds{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
-.cal-wd{text-align:center;font-size:.68rem;color:var(--muted);font-weight:700;padding:4px}
-.cal-days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding-bottom:14px}
-.cal-day{aspect-ratio:1;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:background .15s}
-.cal-day-num{font-size:.82rem;font-weight:500;color:var(--text)}
-.cal-day.empty{pointer-events:none}
-.cal-day.today .cal-day-num{background:var(--blue);color:#fff;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.cal-day.selected{background:var(--blue-light)}
-.cal-day.selected .cal-day-num{color:var(--blue)}
-.cal-day.has-ev::after{content:'';position:absolute;bottom:3px;width:5px;height:5px;border-radius:50%;background:var(--accent)}
-.cal-events{padding:14px 18px}
-.cal-ev-title{font-family:var(--font-h);font-size:.95rem;font-weight:700;margin-bottom:10px}
-.ev-item{display:flex;gap:12px;background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--border);border-left:3px solid var(--blue)}
-.ev-time{font-size:.78rem;color:var(--muted);white-space:nowrap;font-weight:500}
-.ev-title{font-size:.875rem;font-weight:600;color:var(--text)}
-.ev-trip{font-size:.72rem;color:var(--blue);margin-top:2px}
+/* ========== EMPTY STATE ========== */
+.empty-state { text-align:center; padding:40px 20px; }
+.empty-state .empty-icon { font-size:56px; margin-bottom:12px; }
+.empty-state h3 { font-family:var(--font-display); font-size:18px; font-weight:700; margin-bottom:6px; }
+.empty-state p { color:var(--text3); font-size:13px; max-width:260px; margin:0 auto; }
 
-/* ── PROFILE & CHECKLIST & SPINNER ── */
-.profile-hero{padding:30px 20px;text-align:center;background:linear-gradient(160deg,var(--blue-light),var(--purple-light));border-bottom:1px solid var(--border)}
-.profile-av{width:72px;height:72px;border-radius:22px;background:var(--blue);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:2rem;font-weight:800;color:#fff;box-shadow:0 4px 16px rgba(61,109,248,.3)}
-.profile-name{font-family:var(--font-h);font-size:1.3rem;font-weight:700}
-.profile-email{color:var(--muted);font-size:.85rem;margin-top:3px}
-.settings-list{padding:14px 18px}
-.setting-item{display:flex;align-items:center;gap:14px;padding:15px;background:var(--card);border-radius:13px;margin-bottom:8px;cursor:pointer;border:1px solid var(--border);transition:box-shadow .2s}
+/* ========== TOAST ========== */
+.toast {
+  position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:1000;
+  background:var(--text); color:white; padding:12px 24px; border-radius:var(--radius-sm);
+  font-size:14px; font-weight:500; animation:toastIn .3s ease;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);
+}
+@keyframes toastIn { from { opacity:0; transform:translateX(-50%) translateY(-20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
 
-.checklist-body{padding:14px 18px}
-.check-item{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--card);border-radius:11px;border:1px solid var(--border);margin-bottom:7px;cursor:pointer;transition:opacity .2s}
-.check-item.done{opacity:.5}
-.check-box{width:22px;height:22px;border-radius:7px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
-.check-item.done .check-box{background:var(--teal);border-color:var(--teal);color:#fff}
-.check-text{font-size:.875rem;color:var(--text);flex:1}
-.check-item.done .check-text{text-decoration:line-through;color:var(--muted)}
+/* ========== LOADING ========== */
+.loading { display:flex; align-items:center; justify-content:center; padding:40px; }
+.spinner { width:32px; height:32px; border:3px solid var(--border); border-top-color:var(--primary); border-radius:50%; animation:spin .6s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
 
-.spinner-wrap{display:flex;align-items:center;justify-content:center;height:80px;color:var(--muted);font-size:.85rem;gap:8px}
-.spin{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-@media(max-width:360px){.type-grid{grid-template-columns:repeat(2,1fr)}.quick-actions{grid-template-columns:repeat(3,1fr)}}
+/* ========== UTILITIES ========== */
+.mt-8 { margin-top:8px; } .mt-16 { margin-top:16px; } .mt-24 { margin-top:24px; }
+.mb-8 { margin-bottom:8px; } .mb-16 { margin-bottom:16px; }
+.flex { display:flex; } .gap-8 { gap:8px; } .gap-12 { gap:12px; }
+.text-center { text-align:center; }
 </style>
 </head>
 <body>
+<div id="app">
 
-<div id="app" class="hidden">
-
-<div id="view-login" class="view">
-<div class="login-wrap">
-  <div class="login-hero">🌍</div>
-  <div class="login-logo">Travel <span>IO</span></div>
-  <div class="login-tagline">Le tue avventure, sempre con te</div>
-  <div class="login-card">
-    <div class="login-tabs">
-      <div class="ltab active" onclick="switchLoginTab('login')">Accedi</div>
-      <div class="ltab" onclick="switchLoginTab('register')">Registrati</div>
-    </div>
-    <div id="lf-login">
-      <div class="field"><label>Email</label><input class="inp" type="email" id="l-email" placeholder="tu@email.com" autocomplete="email"></div>
-      <div class="field"><label>Password</label><input class="inp" type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password"></div>
-      <button class="btn btn-primary btn-full" onclick="doLogin()">Accedi</button>
-      <div class="divider">oppure</div>
-      <button class="btn-google" onclick="doGoogle()">
-        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
-        Continua con Google
-      </button>
-      <p class="err-msg" id="l-err"></p>
-    </div>
-    <div id="lf-register" style="display:none">
-      <div class="field"><label>Nome</label><input class="inp" type="text" id="r-name" placeholder="Il tuo nome" autocomplete="name"></div>
-      <div class="field"><label>Email</label><input class="inp" type="email" id="r-email" placeholder="tu@email.com" autocomplete="email"></div>
-      <div class="field"><label>Password</label><input class="inp" type="password" id="r-pass" placeholder="Almeno 6 caratteri" autocomplete="new-password"></div>
-      <button class="btn btn-primary btn-full" onclick="doRegister()">Crea account</button>
-      <p class="err-msg" id="r-err"></p>
-    </div>
-  </div>
-</div>
-</div>
-
-<div id="view-dashboard" class="view">
-  <div class="scroll">
-    <div class="dash-hero">
-      <div class="dash-greeting">Ciao, <span id="dash-uname">Viaggiatore</span> 👋</div>
-      <div class="dash-name" id="dash-title">Dove andiamo?</div>
-      <div class="dash-stats">
-        <div class="dstat"><div class="dstat-num" id="s-tot">0</div><div class="dstat-lbl">Viaggi</div></div>
-        <div class="dstat"><div class="dstat-num" id="s-up">0</div><div class="dstat-lbl">In arrivo</div></div>
-        <div class="dstat"><div class="dstat-num" id="s-past">0</div><div class="dstat-lbl">Completati</div></div>
+  <!-- ===== AUTH SCREEN ===== -->
+  <div id="screen-auth" class="screen auth-screen active">
+    <div class="auth-logo">✈️</div>
+    <h1 class="auth-title">VoyageApp</h1>
+    <p class="auth-sub">Organizza i tuoi viaggi con amici</p>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">Accedi</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')">Registrati</button>
+      </div>
+      <div id="auth-login">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" class="form-input" id="login-email" placeholder="la-tua@email.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" class="form-input" id="login-password" placeholder="••••••••">
+        </div>
+        <button class="btn btn-primary" onclick="handleLogin()">Accedi</button>
+        <div class="divider">oppure</div>
+        <button class="btn btn-outline" onclick="handleGoogleLogin()">🔵 Accedi con Google</button>
+      </div>
+      <div id="auth-register" style="display:none">
+        <div class="form-group">
+          <label>Nome</label>
+          <input type="text" class="form-input" id="reg-name" placeholder="Il tuo nome">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" class="form-input" id="reg-email" placeholder="la-tua@email.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" class="form-input" id="reg-password" placeholder="Minimo 6 caratteri">
+        </div>
+        <button class="btn btn-primary" onclick="handleRegister()">Crea Account</button>
+      </div>
+      <div class="join-section">
+        <p style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:10px;">Hai un codice viaggio?</p>
+        <input type="text" class="form-input" id="join-code-auth" placeholder="ABC123" maxlength="6">
+        <button class="btn btn-secondary mt-8" onclick="joinTripFromAuth()" style="margin-top:10px">Unisciti al Viaggio</button>
       </div>
     </div>
+  </div>
 
-    <div class="join-dash" onclick="openModal('modal-join')">
-      <div style="font-size:1.6rem">🔗</div>
-      <div style="flex:1">
-        <div style="font-weight:700;font-size:.9rem;color:var(--blue)">Hai un codice invito?</div>
-        <div style="font-size:.78rem;color:var(--muted)">Entra in un viaggio esistente</div>
+  <!-- ===== HOME SCREEN ===== -->
+  <div id="screen-home" class="screen">
+    <div class="home-content">
+      <div class="welcome-bar">
+        <div class="welcome-text">
+          <h2>Ciao, <span id="user-name">Viaggiatore</span>! 👋</h2>
+          <p>Pronti per la prossima avventura?</p>
+        </div>
+        <div class="avatar" id="user-avatar" onclick="showScreen('settings')">?</div>
       </div>
-      <div style="color:var(--blue);font-size:1.2rem">›</div>
+
+      <!-- Countdown -->
+      <div class="countdown-section" id="countdown-section" style="display:none">
+        <div class="section-label">⏳ Prossimi Viaggi</div>
+        <div class="countdown-scroll" id="countdown-scroll"></div>
+      </div>
+
+      <!-- Trips -->
+      <div class="section-label" style="margin-top:8px;">🧳 I Miei Viaggi</div>
+      <div id="trips-list"></div>
+    </div>
+    <button class="fab" onclick="openCreateTrip()">＋</button>
+  </div>
+
+  <!-- ===== TRIP DETAIL SCREEN ===== -->
+  <div id="screen-trip" class="screen">
+    <div class="header">
+      <button class="header-back" onclick="showScreen('home')">←</button>
+      <div class="header-title" id="trip-detail-title">Viaggio</div>
+      <button class="btn-icon" onclick="openTripSettings()" style="background:var(--bg2);font-size:16px;">⚙️</button>
+    </div>
+    <div class="trip-detail-header">
+      <div class="trip-detail-hero" id="trip-hero">
+        <h1 id="trip-hero-name">Nome Viaggio</h1>
+        <div class="hero-date" id="trip-hero-date">Date</div>
+        <div class="hero-icon" id="trip-hero-icon">✈️</div>
+      </div>
+      <div class="trip-code-bar">
+        <span style="font-size:12px;color:var(--text3);">Codice:</span>
+        <span class="code" id="trip-code">ABC123</span>
+        <button onclick="copyTripCode()">📋 Copia</button>
+      </div>
+    </div>
+    <div class="detail-tabs" id="detail-tabs">
+      <button class="detail-tab active" data-tab="overview" onclick="switchDetailTab('overview')">Panoramica</button>
+      <button class="detail-tab" data-tab="stops" onclick="switchDetailTab('stops')">🗺️ Tappe</button>
+      <button class="detail-tab" data-tab="map" onclick="switchDetailTab('map')">📍 Mappa</button>
+      <button class="detail-tab" data-tab="chat" onclick="switchDetailTab('chat')">💬 Chat</button>
+      <button class="detail-tab" data-tab="expenses" onclick="switchDetailTab('expenses')">💰 Spese</button>
+      <button class="detail-tab" data-tab="calendar" onclick="switchDetailTab('calendar')">📅 Calendario</button>
+      <button class="detail-tab" data-tab="notes" onclick="switchDetailTab('notes')">📝 Note</button>
+      <button class="detail-tab" data-tab="checklist" onclick="switchDetailTab('checklist')">✅ Checklist</button>
+      <button class="detail-tab" data-tab="documents" onclick="switchDetailTab('documents')">📄 Documenti</button>
     </div>
 
-    <div class="section-hdr" id="countdown-section" style="display:none">
-      <div class="section-title">⏳ Prossimi viaggi</div>
+    <!-- Tab Contents -->
+    <div class="detail-content" id="tab-overview">
+      <div class="section-label">Partecipanti</div>
+      <div id="participants-list"></div>
+      <button class="btn btn-secondary mt-16" onclick="openInviteModal()">👥 Invita Partecipanti</button>
+      <div class="section-label mt-24">Dettagli Viaggio</div>
+      <div id="trip-details-info"></div>
     </div>
-    <div class="countdown-scroll" id="countdown-list"></div>
-
-    <div class="section-hdr">
-      <div class="section-title">I miei viaggi</div>
-      <div class="section-action" onclick="showView('create')">+ Nuovo</div>
+    <div class="detail-content" id="tab-stops" style="display:none">
+      <div class="search-box">
+        <input type="text" class="form-input" id="stop-search" placeholder="🔍 Cerca luogo o inserisci coordinate...">
+        <button class="btn btn-primary btn-sm" onclick="searchPlace()" style="width:auto;padding:10px 16px;">Cerca</button>
+      </div>
+      <div id="stops-map" class="map-container"></div>
+      <button class="btn btn-secondary mb-16" onclick="openAddStopModal()">＋ Aggiungi Tappa</button>
+      <div id="stops-list"></div>
     </div>
-    <div class="trips-grid" id="trips-grid">
-      <div class="spinner-wrap"><div class="spin"></div>Caricamento...</div>
+    <div class="detail-content" id="tab-map" style="display:none">
+      <div class="map-tools">
+        <button class="map-tool-btn" onclick="setMapTool('pin')" id="tool-pin">📌 Segnaposto</button>
+        <button class="map-tool-btn" onclick="setMapTool('note')" id="tool-note">📝 Nota</button>
+        <button class="map-tool-btn" onclick="setMapTool('bed')" id="tool-bed">🛏️ Alloggio</button>
+        <button class="map-tool-btn" onclick="setMapTool('food')" id="tool-food">🍽️ Ristorante</button>
+        <button class="map-tool-btn" onclick="setMapTool('star')" id="tool-star">⭐ Da vedere</button>
+        <button class="map-tool-btn" onclick="setMapTool('route')" id="tool-route">🛤️ Percorso</button>
+        <button class="map-tool-btn" onclick="setMapTool('photo')" id="tool-photo">📸 Foto spot</button>
+        <button class="map-tool-btn" onclick="setMapTool('warning')" id="tool-warning">⚠️ Attenzione</button>
+        <button class="map-tool-btn" onclick="setMapTool('fuel')" id="tool-fuel">⛽ Carburante</button>
+        <button class="map-tool-btn" onclick="setMapTool('parking')" id="tool-parking">🅿️ Parcheggio</button>
+      </div>
+      <div id="interactive-map" class="map-container" style="height:400px;"></div>
+      <div class="section-label mt-16">Segnalini sulla Mappa</div>
+      <div class="map-markers-list" id="map-markers-list"></div>
     </div>
-    <div style="height:10px"></div>
-  </div>
-  <button class="fab" onclick="showView('create')">＋</button>
-  <div class="bottomnav">
-    <div class="nav-item active" onclick="showView('dashboard')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
-    <div class="nav-item" onclick="showView('calendar-main')"><div class="nav-icon">📅</div><div class="nav-label">Calendario</div></div>
-    <div class="nav-item" onclick="showView('notes-main')"><div class="nav-icon">📝</div><div class="nav-label">Note</div></div>
-    <div class="nav-item" onclick="showView('profile')"><div class="nav-icon">👤</div><div class="nav-label">Profilo</div></div>
-  </div>
-</div>
-
-<div id="view-create" class="view">
-  <div class="topbar">
-    <div class="icon-btn" onclick="showView('dashboard')">←</div>
-    <div class="topbar-title">Nuovo viaggio</div>
-    <div style="width:38px"></div>
-  </div>
-  <div class="scroll">
-    <div class="create-body">
-      <div class="create-section">
-        <div class="create-lbl">Tipo di viaggio</div>
-        <div class="type-grid">
-          <div class="type-btn" data-type="walking" onclick="pickType(this)"><div class="ticon">🥾</div><div class="tname">A piedi</div></div>
-          <div class="type-btn" data-type="camper" onclick="pickType(this)"><div class="ticon">🚐</div><div class="tname">Camper</div></div>
-          <div class="type-btn" data-type="boat" onclick="pickType(this)"><div class="ticon">⛵</div><div class="tname">Barca</div></div>
-          <div class="type-btn" data-type="sup" onclick="pickType(this)"><div class="ticon">🏄</div><div class="tname">SUP</div></div>
-          <div class="type-btn" data-type="car" onclick="pickType(this)"><div class="ticon">🚗</div><div class="tname">Auto</div></div>
-          <div class="type-btn" data-type="flight" onclick="pickType(this)"><div class="ticon">✈️</div><div class="tname">Volo</div></div>
-          <div class="type-btn" data-type="bike" onclick="pickType(this)"><div class="ticon">🚲</div><div class="tname">Bici</div></div>
-          <div class="type-btn" data-type="train" onclick="pickType(this)"><div class="ticon">🚂</div><div class="tname">Treno</div></div>
-          <div class="type-btn" data-type="moto" onclick="pickType(this)"><div class="ticon">🏍️</div><div class="tname">Moto</div></div>
+    <div class="detail-content" id="tab-chat" style="display:none;padding:0;">
+      <div class="chat-container">
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-input-bar">
+          <input type="text" id="chat-input" placeholder="Scrivi un messaggio...">
+          <button onclick="sendMessage()">➤</button>
         </div>
       </div>
-      <div class="create-section">
-        <div class="create-lbl">Nome viaggio</div>
-        <input class="inp" type="text" id="c-name" placeholder="Es. Estate in Sicilia 2025">
+    </div>
+    <div class="detail-content" id="tab-expenses" style="display:none">
+      <div class="expense-summary" id="expense-summary">
+        <div class="total-label">Spesa Totale</div>
+        <div class="total">€0,00</div>
+        <div class="expense-balances" id="expense-balances"></div>
       </div>
-      <div class="create-section">
-        <div class="create-lbl">Destinazione</div>
-        <input class="inp" type="text" id="c-dest" placeholder="Es. Palermo, Sicilia">
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button class="btn btn-primary" onclick="openAddExpenseModal()" style="flex:1;">＋ Aggiungi Spesa</button>
+        <button class="btn btn-outline" onclick="showSettlements()" style="flex:1;">⚖️ Saldi</button>
       </div>
-      <div class="create-section">
-        <div class="create-lbl">Date</div>
-        <div class="date-row">
-          <div class="field" style="margin:0"><label>Partenza</label><input class="inp" type="date" id="c-start"></div>
-          <div class="field" style="margin:0"><label>Ritorno</label><input class="inp" type="date" id="c-end"></div>
-        </div>
+      <div id="expenses-list"></div>
+      <div id="settlements-list" style="display:none">
+        <div class="section-label">💸 Come Pareggiare</div>
+        <div id="settlements-content"></div>
       </div>
-      <div class="create-section">
-        <div class="create-lbl">Descrizione</div>
-        <textarea class="inp" id="c-desc" rows="3" placeholder="Racconta la tua avventura..."></textarea>
+    </div>
+    <div class="detail-content" id="tab-calendar" style="display:none">
+      <div class="cal-nav">
+        <button onclick="changeMonth(-1)">‹</button>
+        <h3 id="cal-month-year">Aprile 2026</h3>
+        <button onclick="changeMonth(1)">›</button>
       </div>
-      <div class="create-section">
-        <div class="create-lbl">Budget stimato (€)</div>
-        <input class="inp" type="number" id="c-budget" placeholder="0.00" inputmode="decimal">
+      <div class="calendar-grid" id="calendar-grid"></div>
+      <div class="section-label mt-16">Eventi del giorno</div>
+      <div id="cal-events"></div>
+      <button class="btn btn-secondary mt-8" onclick="openAddEventModal()">＋ Aggiungi Evento</button>
+    </div>
+    <div class="detail-content" id="tab-notes" style="display:none">
+      <button class="btn btn-secondary mb-16" onclick="openAddNoteModal()">＋ Nuova Nota</button>
+      <div id="notes-list"></div>
+    </div>
+    <div class="detail-content" id="tab-checklist" style="display:none">
+      <div class="search-box">
+        <input type="text" class="form-input" id="checklist-input" placeholder="Aggiungi elemento...">
+        <button class="btn btn-primary btn-sm" onclick="addChecklistItem()" style="width:auto;padding:10px 16px;">＋</button>
       </div>
-      <div class="create-section">
-        <div class="create-lbl">Colore</div>
-        <div class="color-row">
-          <div class="cdot sel" data-c="#3d6df8" style="background:#3d6df8" onclick="selColor(this)"></div>
-          <div class="cdot" data-c="#ff6b35" style="background:#ff6b35" onclick="selColor(this)"></div>
-          <div class="cdot" data-c="#00b894" style="background:#00b894" onclick="selColor(this)"></div>
-          <div class="cdot" data-c="#8b5cf6" style="background:#8b5cf6" onclick="selColor(this)"></div>
-          <div class="cdot" data-c="#f59e0b" style="background:#f59e0b" onclick="selColor(this)"></div>
-          <div class="cdot" data-c="#ef4444" style="background:#ef4444" onclick="selColor(this)"></div>
-          <div class="cdot" data-c="#ec4899" style="background:#ec4899" onclick="selColor(this)"></div>
-        </div>
+      <div id="checklist-list"></div>
+      <div class="section-label mt-24">Suggerimenti</div>
+      <div id="checklist-suggestions"></div>
+    </div>
+    <div class="detail-content" id="tab-documents" style="display:none">
+      <div class="empty-state">
+        <div class="empty-icon">📄</div>
+        <h3>Documenti di Viaggio</h3>
+        <p>Salva biglietti, prenotazioni, assicurazioni e altri documenti importanti</p>
+        <button class="btn btn-secondary mt-16" onclick="openAddDocModal()">＋ Aggiungi Documento</button>
       </div>
-      <button class="btn btn-accent btn-full" onclick="createTrip()" style="margin-top:4px">🚀 Crea viaggio</button>
-      <div style="height:20px"></div>
+      <div id="documents-list"></div>
     </div>
   </div>
+
+  <!-- ===== SETTINGS SCREEN ===== -->
+  <div id="screen-settings" class="screen">
+    <div class="header">
+      <button class="header-back" onclick="showScreen('home')">←</button>
+      <div class="header-title">Profilo</div>
+    </div>
+    <div style="padding:20px;">
+      <div style="text-align:center;margin-bottom:24px;">
+        <div class="avatar" style="width:80px;height:80px;font-size:32px;margin:0 auto 12px;" id="settings-avatar">?</div>
+        <h2 style="font-family:var(--font-display);font-size:20px;" id="settings-name">Nome</h2>
+        <p style="color:var(--text3);font-size:13px;" id="settings-email">email@email.com</p>
+      </div>
+      <div class="settings-item" onclick="editProfile()">
+        <div class="settings-icon" style="background:var(--primary-light);color:var(--primary);">✏️</div>
+        <div class="settings-text"><h4>Modifica Profilo</h4><p>Nome, foto, preferenze</p></div>
+        <span style="color:var(--text3);">›</span>
+      </div>
+      <div class="settings-item">
+        <div class="settings-icon" style="background:var(--secondary-light);color:var(--secondary);">🔔</div>
+        <div class="settings-text"><h4>Notifiche</h4><p>Gestisci le notifiche</p></div>
+        <span style="color:var(--text3);">›</span>
+      </div>
+      <div class="settings-item">
+        <div class="settings-icon" style="background:var(--purple-light);color:var(--purple);">🌍</div>
+        <div class="settings-text"><h4>Lingua</h4><p>Italiano</p></div>
+        <span style="color:var(--text3);">›</span>
+      </div>
+      <div class="settings-item">
+        <div class="settings-icon" style="background:var(--accent-light);color:var(--accent);">💱</div>
+        <div class="settings-text"><h4>Valuta Predefinita</h4><p>EUR (€)</p></div>
+        <span style="color:var(--text3);">›</span>
+      </div>
+      <div class="settings-item" onclick="handleLogout()">
+        <div class="settings-icon" style="background:var(--danger-light);color:var(--danger);">🚪</div>
+        <div class="settings-text"><h4>Esci</h4><p>Disconnetti il tuo account</p></div>
+        <span style="color:var(--text3);">›</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB BAR ===== -->
+  <div class="tab-bar" id="main-tab-bar" style="display:none;">
+    <button class="tab-item active" onclick="switchMainTab('home')">
+      <span class="tab-icon">🏠</span>Home
+    </button>
+    <button class="tab-item" onclick="switchMainTab('explore')">
+      <span class="tab-icon">🔍</span>Esplora
+    </button>
+    <button class="tab-item" onclick="switchMainTab('calendar')">
+      <span class="tab-icon">📅</span>Calendario
+    </button>
+    <button class="tab-item" onclick="switchMainTab('profile')">
+      <span class="tab-icon">👤</span>Profilo
+    </button>
+  </div>
+
 </div>
 
-<div id="view-trip" class="view">
-  <div class="trip-hero" id="trip-hero">
-    <div class="trip-hero-topbar">
-      <div class="icon-btn" onclick="showView('dashboard')" style="background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.3);color:#fff">←</div>
-      <div class="icon-btn" onclick="openModal('modal-trip-menu')" style="background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.3);color:#fff">⋯</div>
-    </div>
-    <div class="trip-hero-name" id="th-name"></div>
-    <div class="trip-hero-sub" id="th-dest"></div>
-    <div class="trip-hero-badges" id="th-badges"></div>
-    <div class="trip-hero-countdown" id="th-countdown">
-      <div><div class="hero-cd-num" id="th-cd-num">-</div></div>
-      <div><div class="hero-cd-lbl" id="th-cd-lbl">Caricamento...</div></div>
-    </div>
-  </div>
-  <div class="trip-tabs-wrap">
-    <div class="trip-tabs">
-      <div class="ttab active" onclick="switchTab('overview',this)">Panoramica</div>
-      <div class="ttab" onclick="switchTab('map',this)">🗺️ Mappa</div>
-      <div class="ttab" onclick="switchTab('itinerary',this)">Itinerario</div>
-      <div class="ttab" onclick="switchTab('expenses',this)">💰 Spese</div>
-      <div class="ttab" onclick="switchTab('chat',this)">💬 Chat</div>
-      <div class="ttab" onclick="switchTab('people',this)">👥 Persone</div>
-      <div class="ttab" onclick="switchTab('checklist',this)">✅ Lista</div>
-      <div class="ttab" onclick="switchTab('notes',this)">📝 Note</div>
-    </div>
-  </div>
-  <div class="tab-pane active" id="pane-overview">
-    <div class="scroll" style="padding-bottom:20px">
-      <div class="overview-body">
-        <div class="quick-actions">
-          <div class="qa-btn" onclick="switchTab('map',document.querySelector('.ttab:nth-child(2)'))"><div class="qa-icon">🗺️</div><div class="qa-lbl">Mappa</div></div>
-          <div class="qa-btn" onclick="switchTab('expenses',document.querySelector('.ttab:nth-child(4)'))"><div class="qa-icon">💰</div><div class="qa-lbl">Spese</div></div>
-          <div class="qa-btn" onclick="switchTab('chat',document.querySelector('.ttab:nth-child(5)'))"><div class="qa-icon">💬</div><div class="qa-lbl">Chat</div></div>
-          <div class="qa-btn" onclick="switchTab('people',document.querySelector('.ttab:nth-child(6)'))"><div class="qa-icon">🔗</div><div class="qa-lbl">Invita</div></div>
-        </div>
-        <div class="info-row" id="overview-info"></div>
-      </div>
-    </div>
-  </div>
-  <div class="tab-pane" id="pane-map" style="position:relative">
-    <div id="trip-map-container">
-      <input class="map-search-input" id="map-search" placeholder="🔍 Cerca luogo o coordinate..." autocomplete="off">
-      <div class="map-suggestions" id="map-sugg" style="display:none;position:absolute;top:50px;left:10px;right:60px;z-index:1001"></div>
-      <div class="map-controls">
-        <div class="map-ctrl-btn" onclick="addMarkerMode()" title="Aggiungi punto">📍</div>
-        <div class="map-ctrl-btn" onclick="toggleRoute()" title="Mostra percorso">🛣️</div>
-        <div class="map-ctrl-btn" onclick="centerMap()" title="Centra mappa">🎯</div>
-      </div>
-      <div id="trip-leaflet-map"></div>
-    </div>
-    <div class="map-add-panel" id="map-add-panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <strong style="font-size:.95rem">Aggiungi tappa</strong>
-        <span onclick="closeMapPanel()" style="cursor:pointer;color:var(--muted);font-size:1.2rem">✕</span>
-      </div>
-      <div class="field"><label>Nome del luogo</label><input class="inp" id="mp-name" placeholder="Es. Hotel Bella Vista"></div>
-      <div class="field"><label>Note</label><input class="inp" id="mp-note" placeholder="Orario, prenotazione..."></div>
-      <div class="field"><label>Ora arrivo</label><input class="inp" type="time" id="mp-time"></div>
-      <div class="field"><label>Data</label><input class="inp" type="date" id="mp-date"></div>
-      <div style="margin-bottom:12px">
-        <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:8px">Icona</div>
-        <div class="emoji-grid" id="emoji-grid">
-          <div class="emoji-opt sel" data-e="📍" onclick="selEmoji(this)">📍</div>
-          <div class="emoji-opt" data-e="🏨" onclick="selEmoji(this)">🏨</div>
-          <div class="emoji-opt" data-e="🍽️" onclick="selEmoji(this)">🍽️</div>
-          <div class="emoji-opt" data-e="✈️" onclick="selEmoji(this)">✈️</div>
-          <div class="emoji-opt" data-e="🎯" onclick="selEmoji(this)">🎯</div>
-          <div class="emoji-opt" data-e="🏖️" onclick="selEmoji(this)">🏖️</div>
-          <div class="emoji-opt" data-e="⛪" onclick="selEmoji(this)">⛪</div>
-          <div class="emoji-opt" data-e="🏔️" onclick="selEmoji(this)">🏔️</div>
-          <div class="emoji-opt" data-e="🛒" onclick="selEmoji(this)">🛒</div>
-          <div class="emoji-opt" data-e="⛽" onclick="selEmoji(this)">⛽</div>
-        </div>
-      </div>
-      <button class="btn btn-primary btn-full" onclick="saveMapMarker()">Salva tappa</button>
-    </div>
-  </div>
-  <div class="tab-pane" id="pane-itinerary">
-    <div class="scroll" style="padding-bottom:20px">
-      <div class="itinerary-body">
-        <div id="itin-list"></div>
-        <button class="add-stop-btn" onclick="openModal('modal-add-stop')">＋ Aggiungi tappa / evento</button>
-      </div>
-    </div>
-  </div>
-  <div class="tab-pane" id="pane-expenses">
-    <div class="scroll" style="padding-bottom:20px">
-      <div class="exp-body">
-        <div class="exp-summary" id="exp-summary">
-          <div class="exp-total-lbl">Totale speso</div>
-          <div class="exp-total" id="exp-total">€ 0.00</div>
-          <div class="exp-per-person" id="exp-per-p"></div>
-        </div>
-        <div id="exp-settlements"></div>
-        <div class="section-hdr" style="padding:0 0 10px">
-          <div class="section-title">Bilanci</div>
-        </div>
-        <div id="balance-cards" class="balance-cards"></div>
-        <div class="section-hdr" style="padding:0 0 10px">
-          <div class="section-title">Spese</div>
-          <div class="section-action" onclick="openModal('modal-add-expense')">+ Aggiungi</div>
-        </div>
-        <div id="exp-list" class="exp-list"></div>
-      </div>
-    </div>
-  </div>
-  <div class="tab-pane" id="pane-chat">
-    <div class="chat-msgs" id="chat-msgs"></div>
-    <div class="chat-bar">
-      <input class="chat-inp" id="chat-input" placeholder="Scrivi un messaggio..." autocomplete="off">
-      <button class="send-btn" onclick="sendMsg()">➤</button>
-    </div>
-  </div>
-  <div class="tab-pane" id="pane-people">
-    <div class="scroll" style="padding-bottom:20px">
-      <div class="people-body">
-        <div class="invite-card">
-          <div class="invite-card-title">🔗 Invita partecipanti</div>
-          <div class="code-box">
-            <div class="code-text" id="trip-invite-code">------</div>
-            <button class="btn btn-primary btn-sm" onclick="copyCode()">Copia</button>
-          </div>
-          <div class="share-row">
-            <div class="share-btn" onclick="shareWA()"><div class="share-btn-icon">💬</div>WhatsApp</div>
-            <div class="share-btn" onclick="shareTG()"><div class="share-btn-icon">✈️</div>Telegram</div>
-            <div class="share-btn" onclick="shareGen()"><div class="share-btn-icon">📤</div>Condividi</div>
-          </div>
-          <div class="email-row">
-            <input class="email-inp" type="email" id="inv-email" placeholder="email@esempio.com">
-            <button class="btn btn-primary btn-sm" onclick="invEmail()">Invita</button>
-          </div>
-        </div>
-        <div id="part-list"></div>
-      </div>
-    </div>
-  </div>
-  <div class="tab-pane" id="pane-checklist">
-    <div class="scroll" style="padding-bottom:20px">
-      <div class="checklist-body">
-        <div style="display:flex;gap:8px;margin-bottom:14px">
-          <input class="inp" type="text" id="cl-input" placeholder="Aggiungi cosa portare..." style="flex:1">
-          <button class="btn btn-primary btn-sm" onclick="addCheckItem()">＋</button>
-        </div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
-          <button class="btn btn-ghost btn-xs" onclick="addDefaultItems('abbigliamento')">👕 Abbigl.</button>
-          <button class="btn btn-ghost btn-xs" onclick="addDefaultItems('documenti')">📄 Doc.</button>
-          <button class="btn btn-ghost btn-xs" onclick="addDefaultItems('tecnologia')">📱 Tech</button>
-          <button class="btn btn-ghost btn-xs" onclick="addDefaultItems('salute')">💊 Salute</button>
-        </div>
-        <div id="checklist-list"></div>
-      </div>
-    </div>
-  </div>
-  <div class="tab-pane" id="pane-notes">
-    <div class="scroll" style="padding-bottom:20px">
-      <div class="notes-body">
-        <button class="add-stop-btn" onclick="openNoteEditor(null,true)" style="margin-bottom:12px">＋ Nuova nota</button>
-        <div id="trip-notes-list"></div>
-      </div>
-    </div>
-  </div>
+<!-- ===== MODALS ===== -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-content"></div>
 </div>
-
-<div id="view-calendar-main" class="view">
-  <div class="topbar">
-    <div class="icon-btn" onclick="showView('dashboard')">←</div>
-    <div class="topbar-title">Calendario</div>
-    <div class="icon-btn" onclick="openModal('modal-add-stop');currentTrip=null">＋</div>
-  </div>
-  <div class="cal-nav">
-    <div class="cal-nav-btn" onclick="changeMonth(-1)">‹</div>
-    <div class="cal-month" id="cal-month-lbl"></div>
-    <div class="cal-nav-btn" onclick="changeMonth(1)">›</div>
-  </div>
-  <div class="scroll">
-    <div class="cal-grid">
-      <div class="cal-wds"><div class="cal-wd">L</div><div class="cal-wd">M</div><div class="cal-wd">M</div><div class="cal-wd">G</div><div class="cal-wd">V</div><div class="cal-wd">S</div><div class="cal-wd">D</div></div>
-      <div class="cal-days-grid" id="cal-days"></div>
-    </div>
-    <div class="cal-events">
-      <div class="cal-ev-title" id="cal-ev-title">Tutti gli eventi</div>
-      <div id="cal-ev-list"></div>
-    </div>
-  </div>
-  <div class="bottomnav">
-    <div class="nav-item" onclick="showView('dashboard')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
-    <div class="nav-item active"><div class="nav-icon">📅</div><div class="nav-label">Calendario</div></div>
-    <div class="nav-item" onclick="showView('notes-main')"><div class="nav-icon">📝</div><div class="nav-label">Note</div></div>
-    <div class="nav-item" onclick="showView('profile')"><div class="nav-icon">👤</div><div class="nav-label">Profilo</div></div>
-  </div>
-</div>
-
-<div id="view-notes-main" class="view">
-  <div class="topbar">
-    <div class="icon-btn" onclick="showView('dashboard')">←</div>
-    <div class="topbar-title">Le mie note</div>
-    <div class="icon-btn" onclick="openNoteEditor(null,false)">＋</div>
-  </div>
-  <div class="scroll">
-    <div style="padding:14px 18px 6px">
-      <input class="inp" type="search" id="notes-search" placeholder="🔍 Cerca nota..." oninput="filterNotes(this.value)">
-    </div>
-    <div class="notes-body" id="notes-main-list"></div>
-  </div>
-  <div class="bottomnav">
-    <div class="nav-item" onclick="showView('dashboard')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
-    <div class="nav-item" onclick="showView('calendar-main')"><div class="nav-icon">📅</div><div class="nav-label">Calendario</div></div>
-    <div class="nav-item active"><div class="nav-icon">📝</div><div class="nav-label">Note</div></div>
-    <div class="nav-item" onclick="showView('profile')"><div class="nav-icon">👤</div><div class="nav-label">Profilo</div></div>
-  </div>
-</div>
-
-<div id="view-note-editor" class="view">
-  <div class="topbar">
-    <div class="icon-btn" onclick="closeNoteEditor()">←</div>
-    <div class="topbar-title">Nota</div>
-    <div class="icon-btn" onclick="saveNote()" style="background:var(--teal);color:#fff;border-color:var(--teal)">✓</div>
-  </div>
-  <input class="note-ed-title" id="note-ed-title" type="text" placeholder="Titolo nota...">
-  <div class="scroll">
-    <textarea class="note-ed-body" id="note-ed-body" placeholder="Scrivi qui..."></textarea>
-  </div>
-  <div class="note-toolbar">
-    <button class="tool-btn" onclick="ins('- ')">• Lista</button>
-    <button class="tool-btn" onclick="ins('✅ ')">✅</button>
-    <button class="tool-btn" onclick="ins('📍 ')">📍</button>
-    <button class="tool-btn" onclick="ins('💶 ')">💶</button>
-  </div>
-</div>
-
-<div id="view-profile" class="view">
-  <div class="topbar">
-    <div class="icon-btn" onclick="showView('dashboard')">←</div>
-    <div class="topbar-title">Profilo</div>
-    <div style="width:38px"></div>
-  </div>
-  <div class="scroll">
-    <div class="profile-hero">
-      <div class="profile-av" id="pav">?</div>
-      <div class="profile-name" id="p-name">Utente</div>
-      <div class="profile-email" id="p-email">email@esempio.com</div>
-    </div>
-    <div class="settings-list">
-      <div class="setting-item" onclick="openModal('modal-join')"><div class="setting-icon">🔗</div><div class="setting-label">Unisciti a un viaggio</div></div>
-      <div class="setting-item" onclick="showView('notes-main')"><div class="setting-icon">📝</div><div class="setting-label">Le mie note</div></div>
-      <div class="setting-item" onclick="showView('calendar-main')"><div class="setting-icon">📅</div><div class="setting-label">Calendario</div></div>
-      <button class="btn btn-danger btn-full" style="margin-top:20px" onclick="doLogout()">Esci dall'account</button>
-    </div>
-  </div>
-  <div class="bottomnav">
-    <div class="nav-item" onclick="showView('dashboard')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
-    <div class="nav-item" onclick="showView('calendar-main')"><div class="nav-icon">📅</div><div class="nav-label">Calendario</div></div>
-    <div class="nav-item" onclick="showView('notes-main')"><div class="nav-icon">📝</div><div class="nav-label">Note</div></div>
-    <div class="nav-item active"><div class="nav-icon">👤</div><div class="nav-label">Profilo</div></div>
-  </div>
-</div>
-</div>
-
-<div class="modal-bd" id="modal-join">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">🔗 Entra in un viaggio</div>
-    <div class="field"><label>Codice invito</label><input class="inp" type="text" id="join-code" placeholder="Es. ABC123" style="letter-spacing:.1em;font-size:1.1rem;text-transform:uppercase" oninput="this.value=this.value.toUpperCase()"></div>
-    <button class="btn btn-primary btn-full" onclick="joinTrip()">Entra nel viaggio</button>
-  </div>
-</div>
-
-<div class="modal-bd" id="modal-add-stop">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">📍 Aggiungi tappa / evento</div>
-    <div class="field"><label>Tipo</label>
-      <select class="inp" id="stop-type">
-        <option value="tappa">📍 Tappa</option>
-        <option value="volo">✈️ Volo</option>
-        <option value="hotel">🏨 Hotel</option>
-        <option value="attivita">🎯 Attività</option>
-        <option value="pasto">🍽️ Ristorante</option>
-      </select>
-    </div>
-    <div class="field"><label>Titolo</label><input class="inp" id="stop-title" placeholder="Es. Arrivo"></div>
-    <div class="date-row" style="margin-bottom:14px">
-      <div class="field" style="margin:0"><label>Data</label><input class="inp" type="date" id="stop-date"></div>
-      <div class="field" style="margin:0"><label>Ora</label><input class="inp" type="time" id="stop-time"></div>
-    </div>
-    <div class="field"><label>Note</label><textarea class="inp" id="stop-note" rows="2" placeholder="Dettagli..."></textarea></div>
-    <button class="btn btn-primary btn-full" onclick="saveStop()">Salva</button>
-  </div>
-</div>
-
-<div class="modal-bd" id="modal-add-expense">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">💰 Aggiungi spesa</div>
-    <div class="field"><label>Descrizione</label><input class="inp" id="exp-title" placeholder="Es. Cena"></div>
-    <div class="date-row" style="margin-bottom:14px">
-      <div class="field" style="margin:0"><label>Importo (€)</label><input class="inp" type="number" id="exp-amount" placeholder="0.00"></div>
-      <div class="field" style="margin:0"><label>Categoria</label>
-        <select class="inp" id="exp-cat">
-          <option value="food">🍽️ Cibo</option>
-          <option value="transport">🚌 Trasporto</option>
-          <option value="hotel">🏨 Alloggio</option>
-        </select>
-      </div>
-    </div>
-    <div class="field"><label>Pagato da</label><select class="inp" id="exp-paid-by" style="width:100%"></select></div>
-    <div class="field"><label>Diviso tra</label><div id="exp-split-list" style="display:flex;flex-direction:column;gap:6px;margin-top:4px"></div></div>
-    <button class="btn btn-primary btn-full" onclick="saveExpense()">Aggiungi spesa</button>
-  </div>
-</div>
-
-<div class="modal-bd" id="modal-marker-note">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title" id="mnote-title">Dettaglio tappa</div>
-    <div class="field"><label>Nota</label><textarea class="inp" id="mnote-text" rows="3" placeholder="Aggiungi una nota a questo punto..."></textarea></div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary" style="flex:1" onclick="saveMarkerNote()">Salva nota</button>
-      <button class="btn btn-danger btn-icon" onclick="deleteCurrentMarker()">🗑️</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal-bd" id="modal-trip-menu">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="setting-item" onclick="closeModal('modal-trip-menu');openModal('modal-add-stop')"><div class="setting-icon">📍</div><div class="setting-label">Aggiungi tappa</div></div>
-    <div class="setting-item" onclick="exportTrip()"><div class="setting-icon">📤</div><div class="setting-label">Esporta itinerario</div></div>
-    <div class="setting-item" style="border-color:rgba(239,68,68,.15)" onclick="deleteTrip()"><div class="setting-icon">🗑️</div><div class="setting-label" style="color:var(--red)">Elimina viaggio</div></div>
-  </div>
-</div>
-
-<div id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════════
-let db,auth,cu=null; 
-let ct=null; 
-let tripType=null, currentColor='#3d6df8';
-let unsubChat=null,unsubTrips=null;
-let calY=new Date().getFullYear(),calM=new Date().getMonth();
-let calSelDate=null,allCalEvs=[];
-let noteEdTrip=false,noteEdId=null;
-let allNotes=[],leafletMap=null,mapMarkers={},pendingLatLng=null;
-let selEmj='📍',tripParticipants=[];
-let editMarkerKey=null;
-let routeLayer=null,showRoute=false;
-
-const ICONS={walking:'🥾',camper:'🚐',boat:'⛵',sup:'🏄',car:'🚗',flight:'✈️',bike:'🚲',train:'🚂',moto:'🏍️'};
-const ILABELS={walking:'A piedi',camper:'Camper',boat:'Barca',sup:'SUP',car:'Auto',flight:'Volo+Itinerario',bike:'Bicicletta',train:'Treno',moto:'Moto'};
-const EICONS={tappa:'📍',volo:'✈️',hotel:'🏨',attivita:'🎯',pasto:'🍽️',trasporto:'🚌',nota:'📝'};
-const CATICONS={food:'🍽️',transport:'🚌',hotel:'🏨',activity:'🎯',shopping:'🛍️',other:'📦'};
-const CATCOLORS={food:'#ff9f43',transport:'#54a0ff',hotel:'#5f27cd',activity:'#00d2d3',shopping:'#ff6b81',other:'#a29bfe'};
-const AVCOLORS=['#3d6df8','#00b894','#8b5cf6','#f59e0b','#ef4444','#ec4899'];
-const DEFAULT_ITEMS={
-  abbigliamento:['👕 T-shirt','👖 Pantaloni','🧥 Giacca','👟 Scarpe','👙 Biancheria'],
-  documenti:['🪪 Carta d\'identità/Passaporto','✈️ Biglietti','💳 Carte di credito'],
-  tecnologia:['📱 Smartphone','🔌 Caricabatterie','🔋 Power bank'],
-  salute:['💊 Medicinali','🩹 Cerotti']
+// ==========================================
+//  FIREBASE CONFIG — INSERT YOUR OWN
+// ==========================================
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
 };
 
-// ══════════════════════════════════════════════════════
-// FIREBASE
-// ══════════════════════════════════════════════════════
-firebase.initializeApp({
-  apiKey:"AIzaSyCyDBfNwIr4ElCJlU7lwUf8KvJsphxQLI4",
-  authDomain:"app-viaggi-2a1f7.firebaseapp.com",
-  projectId:"app-viaggi-2a1f7",
-  storageBucket:"app-viaggi-2a1f7.firebasestorage.app",
-  messagingSenderId:"210290020900",
-  appId:"1:210290020900:web:2c798982b23bf7d57bbeb1"
-});
-db=firebase.firestore();
-auth=firebase.auth();
-db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+let db, auth, currentUser = null;
+let firebaseReady = false;
 
-auth.onAuthStateChanged(u=>{
-  cu=u;
-  document.getElementById('app').classList.remove('hidden');
-  if(u) onLogin(u);
-  else showView('login');
-});
-
-function switchLoginTab(t){
-  document.querySelectorAll('.ltab').forEach((el,i)=>el.classList.toggle('active',i===(t==='login'?0:1)));
-  document.getElementById('lf-login').style.display=t==='login'?'':'none';
-  document.getElementById('lf-register').style.display=t==='register'?'':'none';
-}
-async function doLogin(){
-  try{await auth.signInWithEmailAndPassword(document.getElementById('l-email').value,document.getElementById('l-pass').value);}
-  catch(e){document.getElementById('l-err').textContent=e.message;}
-}
-async function doRegister(){
-  const name=document.getElementById('r-name').value.trim();
-  const email=document.getElementById('r-email').value.trim();
-  const pass=document.getElementById('r-pass').value;
-  try{
-    const c=await auth.createUserWithEmailAndPassword(email,pass);
-    await c.user.updateProfile({displayName:name});
-    await db.collection('users').doc(c.user.uid).set({displayName:name,email,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-  }catch(e){document.getElementById('r-err').textContent=e.message;}
-}
-async function doGoogle(){
-  try{await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());}
-  catch(e){document.getElementById('l-err').textContent=e.message;}
-}
-function doLogout(){if(unsubChat)unsubChat();if(unsubTrips)unsubTrips();auth.signOut();}
-
-function onLogin(u){
-  const name=u.displayName||'Viaggiatore';
-  document.getElementById('dash-uname').textContent=name.split(' ')[0];
-  document.getElementById('pav').textContent=name[0].toUpperCase();
-  document.getElementById('p-name').textContent=name;
-  document.getElementById('p-email').textContent=u.email||'';
-  showView('dashboard');
-  loadTrips();
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  auth = firebase.auth();
+  firebaseReady = true;
+} catch(e) {
+  console.log('Firebase not configured — running in demo mode');
 }
 
-function showView(n){
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const v=document.getElementById('view-'+n);
-  if(v)v.classList.add('active');
-  if(n==='calendar-main'){renderCalendar();loadCalendarEvents();}
-  if(n==='notes-main')loadAllNotes();
-}
+// ==========================================
+//  STATE
+// ==========================================
+let state = {
+  trips: [],
+  currentTrip: null,
+  currentTripId: null,
+  calMonth: new Date().getMonth(),
+  calYear: new Date().getFullYear(),
+  mapTool: 'pin',
+  maps: {},
+  selectedCalDay: null,
+  userName: 'Viaggiatore',
+  userEmail: '',
+  userId: null
+};
 
-function loadTrips(){
-  if(!cu)return;
-  if(unsubTrips)unsubTrips();
-  unsubTrips=db.collection('trips').where('participants','array-contains',cu.uid)
-    .orderBy('createdAt','desc').onSnapshot(snap=>{
-      const trips=snap.docs.map(d=>({id:d.id,...d.data()}));
-      renderTrips(trips);
-    });
-}
-function renderTrips(trips){
-  const grid=document.getElementById('trips-grid');
-  grid.innerHTML='';
-  const now=new Date();
-  let upcoming=0,past=0;
-  if(!trips.length){grid.innerHTML=`<div class="empty"><div class="empty-text">Nessun viaggio ancora.<br>Crea il primo!</div></div>`;return;}
-  trips.forEach((t,i)=>{
-    const icon=ICONS[t.type]||'🗺️';
-    const sd=t.startDate?new Date(t.startDate+'T00:00:00'):null;
-    const ed=t.endDate?new Date(t.endDate+'T00:00:00'):null;
-    if(sd&&sd>now)upcoming++;
-    if(ed&&ed<now)past++;
-    
-    const card=document.createElement('div');
-    card.className='trip-card';
-    card.innerHTML=`<div class="trip-card-top" style="background:${t.color||'#3d6df8'}22">
-      <div class="trip-emoji-big">${icon}</div>
-      <div class="trip-card-info"><div class="trip-card-name">${t.name||'Viaggio'}</div></div>
-    </div>`;
-    card.onclick=()=>openTrip(t);
-    grid.appendChild(card);
+// Demo data for when Firebase is not connected
+const demoTrips = [
+  {
+    id: 'demo1', name: 'Sardegna in Barca', type: 'boat', code: 'SAR001',
+    startDate: '2026-06-15', endDate: '2026-06-22',
+    description: 'Una settimana in barca a vela lungo la costa est della Sardegna',
+    participants: [
+      { id:'u1', name:'Mario', email:'mario@test.com', color:'#F97316' },
+      { id:'u2', name:'Laura', email:'laura@test.com', color:'#0EA5E9' },
+      { id:'u3', name:'Luca', email:'luca@test.com', color:'#10B981' }
+    ],
+    stops: [
+      { id:'s1', name:'Porto di Olbia', lat:40.9225, lng:9.5013, order:1, note:'Partenza ore 9:00' },
+      { id:'s2', name:'Cala Goloritzé', lat:40.0997, lng:9.6672, order:2, note:'Spiaggia meravigliosa' },
+      { id:'s3', name:'Cala Luna', lat:40.2136, lng:9.6301, order:3, note:'Arco naturale iconico' }
+    ],
+    expenses: [
+      { id:'e1', title:'Noleggio barca', amount:1200, paidBy:'u1', splitWith:['u1','u2','u3'], icon:'⛵', date:'2026-06-15' },
+      { id:'e2', title:'Spesa alimentare', amount:180, paidBy:'u2', splitWith:['u1','u2','u3'], icon:'🛒', date:'2026-06-15' },
+      { id:'e3', title:'Carburante barca', amount:150, paidBy:'u1', splitWith:['u1','u2','u3'], icon:'⛽', date:'2026-06-16' },
+      { id:'e4', title:'Cena ristorante', amount:120, paidBy:'u3', splitWith:['u1','u2','u3'], icon:'🍽️', date:'2026-06-17' }
+    ],
+    messages: [
+      { id:'m1', userId:'u2', userName:'Laura', text:'Ragazzi non vedo l\'ora! 🎉', time:'2026-06-10T14:30:00' },
+      { id:'m2', userId:'u1', userName:'Mario', text:'Ho prenotato la barca, 12 metri con 3 cabine', time:'2026-06-10T14:32:00' },
+      { id:'m3', userId:'u3', userName:'Luca', text:'Perfetto! Porto le pinne e le maschere 🤿', time:'2026-06-10T14:35:00' }
+    ],
+    events: [
+      { id:'ev1', date:'2026-06-15', title:'Partenza da Olbia', time:'09:00', color:'#F97316' },
+      { id:'ev2', date:'2026-06-18', title:'Escursione Cala Goloritzé', time:'10:00', color:'#10B981' }
+    ],
+    notes: [
+      { id:'n1', title:'Cose da portare', content:'Crema solare SPF50, cappello, snorkel, macchina fotografica waterproof', color:'#FFEDD5', date:'2026-06-08' },
+      { id:'n2', title:'Ristoranti consigliati', content:'• Agriturismo Su Gologone (Oliena)\n• Ristorante Il Pescatore (Cala Gonone)\n• Bar Marianna (Baunei)', color:'#E0F2FE', date:'2026-06-09' }
+    ],
+    checklist: [
+      { id:'cl1', text:'Crema solare', done:true },
+      { id:'cl2', text:'Maschere snorkeling', done:true },
+      { id:'cl3', text:'Costume di ricambio', done:false },
+      { id:'cl4', text:'Farmaci mal di mare', done:false },
+      { id:'cl5', text:'Powerbank', done:false }
+    ],
+    mapMarkers: [
+      { id:'mk1', lat:40.9225, lng:9.5013, emoji:'⛵', note:'Partenza', type:'pin' },
+      { id:'mk2', lat:40.2136, lng:9.6301, emoji:'⭐', note:'Cala Luna - da non perdere!', type:'star' },
+      { id:'mk3', lat:40.0997, lng:9.6672, emoji:'📸', note:'Foto panoramica incredibile', type:'photo' }
+    ]
+  },
+  {
+    id: 'demo2', name: 'Trekking Dolomiti', type: 'walking', code: 'DOL002',
+    startDate: '2026-08-01', endDate: '2026-08-05',
+    description: 'Alta Via 1 nelle Dolomiti',
+    participants: [
+      { id:'u1', name:'Mario', email:'mario@test.com', color:'#F97316' },
+      { id:'u4', name:'Anna', email:'anna@test.com', color:'#EC4899' }
+    ],
+    stops: [
+      { id:'s4', name:'Lago di Braies', lat:46.6948, lng:12.0853, order:1, note:'Inizio trekking' },
+      { id:'s5', name:'Rifugio Fanes', lat:46.6386, lng:11.8893, order:2, note:'Prima notte' }
+    ],
+    expenses: [
+      { id:'e5', title:'Rifugio notte', amount:90, paidBy:'u1', splitWith:['u1','u4'], icon:'🏔️', date:'2026-08-01' }
+    ],
+    messages: [],
+    events: [
+      { id:'ev3', date:'2026-08-01', title:'Partenza dal lago', time:'07:00', color:'#10B981' }
+    ],
+    notes: [],
+    checklist: [
+      { id:'cl6', text:'Scarponi da trekking', done:false },
+      { id:'cl7', text:'Bastoncini', done:false },
+      { id:'cl8', text:'Giacca antipioggia', done:false }
+    ],
+    mapMarkers: []
+  },
+  {
+    id: 'demo3', name: 'Road Trip Costiera', type: 'car', code: 'AMA003',
+    startDate: '2026-05-10', endDate: '2026-05-14',
+    description: 'Costiera Amalfitana in auto',
+    participants: [
+      { id:'u1', name:'Mario', email:'mario@test.com', color:'#F97316' },
+      { id:'u2', name:'Laura', email:'laura@test.com', color:'#0EA5E9' }
+    ],
+    stops: [],
+    expenses: [],
+    messages: [],
+    events: [],
+    notes: [],
+    checklist: [],
+    mapMarkers: []
+  }
+];
+
+// ==========================================
+//  TRIP TYPE CONFIG
+// ==========================================
+const tripTypes = {
+  walking: { emoji:'🥾', name:'A Piedi', gradient:'linear-gradient(135deg, #10B981, #34D399)' },
+  camper: { emoji:'🚐', name:'Camper', gradient:'linear-gradient(135deg, #F97316, #FBBF24)' },
+  boat: { emoji:'⛵', name:'Barca', gradient:'linear-gradient(135deg, #0EA5E9, #38BDF8)' },
+  sup: { emoji:'🏄', name:'SUP', gradient:'linear-gradient(135deg, #06B6D4, #22D3EE)' },
+  car: { emoji:'🚗', name:'Auto', gradient:'linear-gradient(135deg, #8B5CF6, #A78BFA)' },
+  flight: { emoji:'✈️', name:'Volo + Itinerario', gradient:'linear-gradient(135deg, #EC4899, #F472B6)' }
+};
+
+const expenseIcons = ['🛒','🍽️','⛽','🏨','🎫','🚕','🍺','🎉','💊','🛍️','⛵','🚐','✈️','🎿','🤿'];
+
+// ==========================================
+//  AUTH
+// ==========================================
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => {
+    t.classList.toggle('active', (tab==='login'?i===0:i===1));
   });
-  document.getElementById('s-tot').textContent=trips.length;
-  document.getElementById('s-up').textContent=upcoming;
-  document.getElementById('s-past').textContent=past;
+  document.getElementById('auth-login').style.display = tab==='login'?'block':'none';
+  document.getElementById('auth-register').style.display = tab==='register'?'block':'none';
 }
 
-function pickType(el){document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');tripType=el.dataset.type;}
-function selColor(el){document.querySelectorAll('.cdot').forEach(d=>d.classList.remove('sel'));el.classList.add('sel');currentColor=el.dataset.c;}
-
-async function createTrip(){
-  if(!tripType) return toast('Seleziona il tipo');
-  const name=document.getElementById('c-name').value.trim();
-  if(!name) return toast('Inserisci il nome');
-  const data={
-    name,type:tripType,
-    startDate:document.getElementById('c-start').value,
-    endDate:document.getElementById('c-end').value,
-    color:currentColor,inviteCode:Math.random().toString(36).substr(2,6).toUpperCase(),
-    createdBy:cu.uid,participants:[cu.uid],
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
-  };
-  const ref=await db.collection('trips').add(data);
-  toast('Viaggio creato!');
-  setTimeout(()=>openTrip({id:ref.id,...data}),200);
-}
-
-async function openTrip(trip){
-  ct=trip;
-  document.getElementById('trip-hero').style.background=trip.color||'#3d6df8';
-  document.getElementById('th-name').textContent=trip.name;
-  switchTab('overview',document.querySelector('.ttab'));
-  showView('trip');
-  loadParticipants();
-}
-
-function switchTab(tab,el){
-  document.querySelectorAll('.ttab').forEach(t=>t.classList.remove('active'));
-  if(el)el.classList.add('active');
-  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
-  document.getElementById('pane-'+tab).classList.add('active');
-  
-  // FIX: Questo timeout permette al DOM di aggiornarsi prima di forzare le dimensioni della mappa
-  if(tab==='map') setTimeout(() => initTripMap(), 100); 
-  
-  if(tab==='itinerary')loadItinerary();
-  if(tab==='expenses')loadExpenses();
-  if(tab==='chat')loadChat();
-}
-
-// ── MAP FIXES ──
-function initTripMap(){
-  if(!ct)return;
-  if(!leafletMap){
-    leafletMap=L.map('trip-leaflet-map',{zoomControl:false,attributionControl:false}).setView([41.9,12.5],5);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(leafletMap);
-    leafletMap.on('click',onMapClick);
+function handleLogin() {
+  const email = document.getElementById('login-email').value;
+  const pw = document.getElementById('login-password').value;
+  if(!email||!pw) return showToast('Compila tutti i campi');
+  if(firebaseReady) {
+    auth.signInWithEmailAndPassword(email,pw).then(u => {
+      loginSuccess(u.user);
+    }).catch(e => showToast(e.message));
   } else {
-    leafletMap.invalidateSize(); // Adesso funzionerà correttamente grazie al setTimeout in switchTab
+    // Demo mode
+    state.userName = email.split('@')[0];
+    state.userEmail = email;
+    state.userId = 'u1';
+    loginSuccess({displayName:state.userName,email,uid:'u1'});
   }
-  loadMapMarkers();
 }
-let addingMarker=false;
-function addMarkerMode(){ addingMarker=!addingMarker; toast(addingMarker?'Tocca la mappa':''); }
-function onMapClick(e){
-  if(!addingMarker)return;
-  pendingLatLng={lat:e.latlng.lat,lng:e.latlng.lng};
-  document.getElementById('map-add-panel').classList.add('open');
-  addingMarker=false;
-}
-function closeMapPanel(){document.getElementById('map-add-panel').classList.remove('open');}
-function selEmoji(el){document.querySelectorAll('.emoji-opt').forEach(e=>e.classList.remove('sel'));el.classList.add('sel');selEmj=el.dataset.e;}
 
-async function saveMapMarker(){
-  if(!pendingLatLng||!ct)return;
-  await db.collection('trips').doc(ct.id).collection('waypoints').add({
-    name:document.getElementById('mp-name').value||'Tappa',
-    lat:pendingLatLng.lat,lng:pendingLatLng.lng,emoji:selEmj,
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+function handleRegister() {
+  const name = document.getElementById('reg-name').value;
+  const email = document.getElementById('reg-email').value;
+  const pw = document.getElementById('reg-password').value;
+  if(!name||!email||!pw) return showToast('Compila tutti i campi');
+  if(pw.length<6) return showToast('La password deve avere almeno 6 caratteri');
+  if(firebaseReady) {
+    auth.createUserWithEmailAndPassword(email,pw).then(u => {
+      u.user.updateProfile({displayName:name});
+      loginSuccess({...u.user,displayName:name});
+    }).catch(e => showToast(e.message));
+  } else {
+    state.userName = name;
+    state.userEmail = email;
+    state.userId = 'u1';
+    loginSuccess({displayName:name,email,uid:'u1'});
+  }
+}
+
+function handleGoogleLogin() {
+  if(firebaseReady) {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).then(r => loginSuccess(r.user)).catch(e => showToast(e.message));
+  } else {
+    state.userName = 'Mario';
+    state.userEmail = 'mario@demo.com';
+    state.userId = 'u1';
+    loginSuccess({displayName:'Mario',email:'mario@demo.com',uid:'u1'});
+  }
+}
+
+function loginSuccess(user) {
+  currentUser = user;
+  state.userName = user.displayName || user.email?.split('@')[0] || 'Viaggiatore';
+  state.userEmail = user.email || '';
+  state.userId = user.uid || 'u1';
+  document.getElementById('user-name').textContent = state.userName;
+  document.getElementById('user-avatar').textContent = state.userName[0].toUpperCase();
+  document.getElementById('settings-avatar').textContent = state.userName[0].toUpperCase();
+  document.getElementById('settings-name').textContent = state.userName;
+  document.getElementById('settings-email').textContent = state.userEmail;
+  loadTrips();
+  showScreen('home');
+  showToast('Benvenuto, ' + state.userName + '! 🎉');
+}
+
+function handleLogout() {
+  if(firebaseReady) auth.signOut();
+  currentUser = null;
+  state.trips = [];
+  showScreen('auth');
+  document.getElementById('main-tab-bar').style.display = 'none';
+}
+
+function joinTripFromAuth() {
+  const code = document.getElementById('join-code-auth').value.trim().toUpperCase();
+  if(!code) return showToast('Inserisci un codice viaggio');
+  if(!currentUser && !state.userId) return showToast('Devi prima creare un account');
+  joinTripByCode(code);
+}
+
+// ==========================================
+//  SCREENS
+// ==========================================
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  const tabBar = document.getElementById('main-tab-bar');
+  const fab = document.querySelector('.fab');
+  if(name==='auth') {
+    tabBar.style.display = 'none';
+    if(fab) fab.style.display = 'none';
+  } else if(name==='trip') {
+    tabBar.style.display = 'none';
+    if(fab) fab.style.display = 'none';
+  } else {
+    tabBar.style.display = 'flex';
+    if(fab) fab.style.display = name==='home'?'flex':'none';
+  }
+}
+
+function switchMainTab(tab) {
+  document.querySelectorAll('.tab-item').forEach((t,i) => {
+    const tabs = ['home','explore','calendar','profile'];
+    t.classList.toggle('active', tabs[i]===tab);
   });
-  closeMapPanel(); loadMapMarkers(); toast('Tappa salvata');
+  if(tab==='profile') showScreen('settings');
+  else if(tab==='home') showScreen('home');
+  else if(tab==='calendar') showGlobalCalendar();
+  else showToast('In arrivo! 🔜');
 }
 
-async function loadMapMarkers(){
-  if(!ct||!leafletMap)return;
-  // Svuota i vecchi marker prima di ripopolarli
-  Object.values(mapMarkers).forEach(m=>leafletMap.removeLayer(m));
-  mapMarkers={};
-  
-  const snap=await db.collection('trips').doc(ct.id).collection('waypoints').get();
-  snap.docs.forEach(doc=>{
-    const d={id:doc.id,...doc.data()};
-    const icon=L.divIcon({html:`<div style="font-size:1.4rem">${d.emoji||'📍'}</div>`,className:''});
-    const m=L.marker([d.lat,d.lng],{icon}).addTo(leafletMap);
-    mapMarkers[doc.id]=m;
-  });
+// ==========================================
+//  TRIPS
+// ==========================================
+function loadTrips() {
+  if(firebaseReady && state.userId) {
+    db.collection('trips').where('memberIds','array-contains',state.userId)
+      .onSnapshot(snap => {
+        state.trips = snap.docs.map(d => ({id:d.id,...d.data()}));
+        renderTrips();
+      });
+  } else {
+    state.trips = demoTrips;
+    renderTrips();
+  }
 }
 
-// ── CALENDAR FIX ──
-async function loadCalendarEvents(){
-  if(!cu)return;
-  allCalEvs=[];
+function renderTrips() {
+  const list = document.getElementById('trips-list');
+  const countdownScroll = document.getElementById('countdown-scroll');
+  const countdownSection = document.getElementById('countdown-section');
   
-  // 1. Carica eventi personali
-  const uSnap=await db.collection('users').doc(cu.uid).collection('events').get();
-  uSnap.docs.forEach(d=>allCalEvs.push({...d.data(),source:'Personale'}));
-  
-  // 2. Carica eventi e tappe dai viaggi (Mancava nel tuo codice originale!)
-  const tripsSnap = await db.collection('trips').where('participants','array-contains',cu.uid).get();
-  for(let doc of tripsSnap.docs) {
-    const tData = doc.data();
-    const evs = await db.collection('trips').doc(doc.id).collection('events').get();
-    evs.docs.forEach(d=>allCalEvs.push({...d.data(), source: tData.name}));
+  if(state.trips.length===0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🧳</div><h3>Nessun viaggio</h3><p>Crea il tuo primo viaggio o unisciti con un codice!</p></div>`;
+    countdownSection.style.display = 'none';
+    return;
   }
 
-  renderCalEvs(allCalEvs,'Tutti gli eventi');
+  // Countdown for future trips
+  const now = new Date();
+  const future = state.trips.filter(t => new Date(t.startDate) > now).sort((a,b) => new Date(a.startDate)-new Date(b.startDate));
   
-  const dayEls=document.querySelectorAll('.cal-day:not(.empty)');
-  allCalEvs.forEach(e=>{
-    if(e.date){
-      const d=parseInt(e.date.split('-')[2]);
-      const em=parseInt(e.date.split('-')[1])-1;
-      if(em===calM){dayEls[d-1]?.classList.add('has-ev');}
+  if(future.length > 0) {
+    countdownSection.style.display = 'block';
+    countdownScroll.innerHTML = future.map(t => {
+      const diff = new Date(t.startDate) - now;
+      const days = Math.floor(diff/(1000*60*60*24));
+      const hours = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+      const mins = Math.floor((diff%(1000*60*60))/(1000*60));
+      const type = tripTypes[t.type] || tripTypes.car;
+      return `
+        <div class="countdown-card ${t.type}" onclick="openTrip('${t.id}')">
+          <div class="trip-type-icon">${type.emoji}</div>
+          <h3>${t.name}</h3>
+          <div class="date">${formatDate(t.startDate)} — ${formatDate(t.endDate)}</div>
+          <div class="countdown-nums">
+            <div class="countdown-num"><div class="num">${days}</div><div class="lbl">Giorni</div></div>
+            <div class="countdown-num"><div class="num">${hours}</div><div class="lbl">Ore</div></div>
+            <div class="countdown-num"><div class="num">${mins}</div><div class="lbl">Min</div></div>
+          </div>
+        </div>`;
+    }).join('');
+  } else {
+    countdownSection.style.display = 'none';
+  }
+
+  // Trip cards
+  list.innerHTML = state.trips.map(t => {
+    const type = tripTypes[t.type] || tripTypes.car;
+    const pColors = ['#F97316','#0EA5E9','#10B981','#8B5CF6','#EC4899'];
+    return `
+      <div class="trip-card" onclick="openTrip('${t.id}')">
+        <div class="trip-card-header">
+          <div class="trip-type-badge ${t.type}">${type.emoji}</div>
+          <div class="trip-card-info">
+            <h3>${t.name}</h3>
+            <div class="trip-dates">${formatDate(t.startDate)} — ${formatDate(t.endDate)}</div>
+          </div>
+        </div>
+        <div class="trip-card-footer">
+          <div class="trip-participants">
+            ${(t.participants||[]).slice(0,4).map((p,i) => 
+              `<div class="trip-participant-avatar" style="background:${p.color||pColors[i%5]}">${(p.name||'?')[0]}</div>`
+            ).join('')}
+            ${(t.participants||[]).length>4?`<div class="trip-participant-avatar" style="background:var(--text3)">+${t.participants.length-4}</div>`:''}
+          </div>
+          <div class="trip-stops-count">📍 ${(t.stops||[]).length} tappe</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function openTrip(id) {
+  const trip = state.trips.find(t => t.id===id);
+  if(!trip) return;
+  state.currentTrip = trip;
+  state.currentTripId = id;
+  
+  const type = tripTypes[trip.type] || tripTypes.car;
+  document.getElementById('trip-detail-title').textContent = trip.name;
+  document.getElementById('trip-hero-name').textContent = trip.name;
+  document.getElementById('trip-hero-date').textContent = `${formatDate(trip.startDate)} — ${formatDate(trip.endDate)}`;
+  document.getElementById('trip-hero-icon').textContent = type.emoji;
+  document.getElementById('trip-hero').style.background = type.gradient;
+  document.getElementById('trip-code').textContent = trip.code;
+  
+  renderParticipants();
+  renderStops();
+  renderChat();
+  renderExpenses();
+  renderCalendar();
+  renderNotes();
+  renderChecklist();
+  renderMapMarkers();
+  
+  switchDetailTab('overview');
+  showScreen('trip');
+}
+
+// ==========================================
+//  CREATE TRIP
+// ==========================================
+function openCreateTrip() {
+  let selectedType = 'car';
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = `
+    <div class="modal-handle"></div>
+    <h3>✨ Nuovo Viaggio</h3>
+    <div class="form-group">
+      <label>Nome del Viaggio</label>
+      <input type="text" class="form-input" id="new-trip-name" placeholder="Es. Vacanza in Sardegna">
+    </div>
+    <div class="form-group">
+      <label>Tipo di Viaggio</label>
+      <div class="type-grid">
+        ${Object.entries(tripTypes).map(([k,v]) => `
+          <div class="type-option ${k==='car'?'selected':''}" onclick="selectType(this,'${k}')" data-type="${k}">
+            <span class="type-emoji">${v.emoji}</span>
+            <span class="type-name">${v.name}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Data Inizio</label>
+      <input type="date" class="form-input" id="new-trip-start">
+    </div>
+    <div class="form-group">
+      <label>Data Fine</label>
+      <input type="date" class="form-input" id="new-trip-end">
+    </div>
+    <div class="form-group">
+      <label>Descrizione (opzionale)</label>
+      <textarea class="form-input" id="new-trip-desc" rows="3" placeholder="Qualche dettaglio sul viaggio..."></textarea>
+    </div>
+    <button class="btn btn-primary mt-8" onclick="createTrip()">🚀 Crea Viaggio</button>
+  `;
+  openModal();
+  window._selectedType = 'car';
+}
+
+function selectType(el, type) {
+  document.querySelectorAll('.type-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  window._selectedType = type;
+}
+
+function createTrip() {
+  const name = document.getElementById('new-trip-name').value;
+  const start = document.getElementById('new-trip-start').value;
+  const end = document.getElementById('new-trip-end').value;
+  const desc = document.getElementById('new-trip-desc').value;
+  const type = window._selectedType || 'car';
+  
+  if(!name||!start||!end) return showToast('Compila nome e date');
+  
+  const code = generateCode();
+  const trip = {
+    id: 'trip_'+Date.now(),
+    name, type, code, startDate:start, endDate:end, description:desc,
+    participants: [{ id:state.userId, name:state.userName, email:state.userEmail, color:'#F97316' }],
+    memberIds: [state.userId],
+    createdBy: state.userId,
+    stops:[], expenses:[], messages:[], events:[], notes:[], checklist:[], mapMarkers:[]
+  };
+  
+  if(firebaseReady) {
+    db.collection('trips').add(trip).then(doc => {
+      trip.id = doc.id;
+      showToast('Viaggio creato! Codice: '+code);
+    });
+  } else {
+    state.trips.unshift(trip);
+    renderTrips();
+    showToast('Viaggio creato! Codice: '+code);
+  }
+  closeModal();
+}
+
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for(let i=0;i<6;i++) code += chars[Math.floor(Math.random()*chars.length)];
+  return code;
+}
+
+// ==========================================
+//  JOIN TRIP
+// ==========================================
+function joinTripByCode(code) {
+  if(firebaseReady) {
+    db.collection('trips').where('code','==',code).get().then(snap => {
+      if(snap.empty) return showToast('Codice non trovato');
+      const doc = snap.docs[0];
+      const trip = doc.data();
+      if(trip.memberIds?.includes(state.userId)) return showToast('Sei già in questo viaggio');
+      doc.ref.update({
+        memberIds: firebase.firestore.FieldValue.arrayUnion(state.userId),
+        participants: firebase.firestore.FieldValue.arrayUnion({
+          id:state.userId, name:state.userName, email:state.userEmail, color:getRandomColor()
+        })
+      });
+      showToast('Ti sei unito al viaggio! 🎉');
+    });
+  } else {
+    const trip = state.trips.find(t => t.code===code);
+    if(!trip) return showToast('Codice non trovato');
+    showToast('Ti sei unito a "'+trip.name+'"! 🎉');
+  }
+}
+
+// ==========================================
+//  DETAIL TABS
+// ==========================================
+function switchDetailTab(tab) {
+  document.querySelectorAll('.detail-tab').forEach(t => t.classList.toggle('active', t.dataset.tab===tab));
+  ['overview','stops','map','chat','expenses','calendar','notes','checklist','documents'].forEach(t => {
+    const el = document.getElementById('tab-'+t);
+    if(el) el.style.display = t===tab ? (t==='chat'?'flex':'block') : 'none';
+  });
+  
+  if(tab==='stops') setTimeout(() => initStopsMap(), 100);
+  if(tab==='map') setTimeout(() => initInteractiveMap(), 100);
+}
+
+// ==========================================
+//  PARTICIPANTS
+// ==========================================
+function renderParticipants() {
+  const trip = state.currentTrip;
+  if(!trip) return;
+  const list = document.getElementById('participants-list');
+  list.innerHTML = (trip.participants||[]).map((p,i) => `
+    <div class="participant-row">
+      <div class="avatar" style="width:36px;height:36px;font-size:14px;background:${p.color||'#F97316'}">${(p.name||'?')[0]}</div>
+      <div class="participant-name">${p.name||'Anonimo'}</div>
+      <span class="participant-role">${i===0?'Organizzatore':'Membro'}</span>
+    </div>
+  `).join('');
+  
+  document.getElementById('trip-details-info').innerHTML = `
+    <div style="background:var(--bg);border-radius:var(--radius-sm);padding:14px;margin-top:8px;">
+      <p style="font-size:13px;color:var(--text2);line-height:1.6;">
+        <strong>Tipo:</strong> ${(tripTypes[trip.type]||{}).emoji||''} ${(tripTypes[trip.type]||{}).name||trip.type}<br>
+        <strong>Durata:</strong> ${getDuration(trip.startDate,trip.endDate)} giorni<br>
+        <strong>Tappe:</strong> ${(trip.stops||[]).length}<br>
+        ${trip.description?`<strong>Note:</strong> ${trip.description}`:''}
+      </p>
+    </div>`;
+}
+
+function openInviteModal() {
+  const trip = state.currentTrip;
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = `
+    <div class="modal-handle"></div>
+    <h3>👥 Invita Amici</h3>
+    <div style="text-align:center;margin:20px 0;">
+      <p style="color:var(--text2);font-size:14px;margin-bottom:12px;">Condividi questo codice con i tuoi amici:</p>
+      <div style="font-family:monospace;font-size:36px;font-weight:800;color:var(--primary);letter-spacing:6px;margin-bottom:16px;">${trip.code}</div>
+      <button class="btn btn-primary" onclick="copyTripCode();showToast('Codice copiato! 📋');" style="max-width:200px;margin:0 auto;">
+        📋 Copia Codice
+      </button>
+    </div>
+    <div class="divider">oppure</div>
+    <div class="form-group">
+      <label>Invita via Email</label>
+      <div style="display:flex;gap:8px;">
+        <input type="email" class="form-input" id="invite-email" placeholder="email@amico.com">
+        <button class="btn btn-primary btn-sm" onclick="sendInvite()" style="width:auto;white-space:nowrap;">Invia</button>
+      </div>
+    </div>
+    <div class="form-group mt-8">
+      <label>Condividi Link</label>
+      <button class="btn btn-outline" onclick="shareTrip()">🔗 Condividi Link</button>
+    </div>
+  `;
+  openModal();
+}
+
+function sendInvite() {
+  const email = document.getElementById('invite-email').value;
+  if(!email) return;
+  showToast('Invito inviato a '+email+' 📧');
+  closeModal();
+}
+
+function shareTrip() {
+  const trip = state.currentTrip;
+  if(navigator.share) {
+    navigator.share({
+      title:'Unisciti al mio viaggio su VoyageApp!',
+      text:`Ciao! Ti invito al viaggio "${trip.name}". Usa il codice: ${trip.code}`,
+      url:window.location.href
+    });
+  } else {
+    copyTripCode();
+    showToast('Link copiato! 📋');
+  }
+}
+
+// ==========================================
+//  STOPS
+// ==========================================
+function renderStops() {
+  const trip = state.currentTrip;
+  if(!trip) return;
+  const list = document.getElementById('stops-list');
+  if(!trip.stops?.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📍</div><h3>Nessuna tappa</h3><p>Aggiungi le tappe del tuo itinerario</p></div>';
+    return;
+  }
+  list.innerHTML = trip.stops.sort((a,b)=>a.order-b.order).map(s => `
+    <div class="stop-card">
+      <div class="stop-num">TAPPA ${s.order}</div>
+      <h4>${s.name}</h4>
+      <div class="stop-coords">📍 ${s.lat?.toFixed(4)}, ${s.lng?.toFixed(4)}</div>
+      ${s.note?`<div class="stop-note">${s.note}</div>`:''}
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <button class="btn btn-sm btn-secondary" onclick="editStop('${s.id}')">✏️ Modifica</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteStop('${s.id}')">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function initStopsMap() {
+  const container = document.getElementById('stops-map');
+  if(!container || container._leaflet_id) return;
+  const trip = state.currentTrip;
+  const center = trip.stops?.length ? [trip.stops[0].lat, trip.stops[0].lng] : [41.9028, 12.4964];
+  const map = L.map(container).setView(center, trip.stops?.length ? 8 : 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'© OpenStreetMap'
+  }).addTo(map);
+  
+  if(trip.stops?.length) {
+    const coords = [];
+    trip.stops.forEach(s => {
+      const marker = L.marker([s.lat,s.lng]).addTo(map);
+      marker.bindPopup(`<b>Tappa ${s.order}: ${s.name}</b><br>${s.note||''}`);
+      coords.push([s.lat,s.lng]);
+    });
+    if(coords.length>1) {
+      L.polyline(coords, {color:'#F97316',weight:3,dashArray:'8,8'}).addTo(map);
+      map.fitBounds(coords, {padding:[30,30]});
     }
+  }
+  state.maps.stops = map;
+}
+
+function searchPlace() {
+  const query = document.getElementById('stop-search').value.trim();
+  if(!query) return;
+  
+  // Check for coordinates pattern
+  const coordMatch = query.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/);
+  if(coordMatch) {
+    const lat = parseFloat(coordMatch[1]);
+    const lng = parseFloat(coordMatch[2]);
+    openAddStopModal(lat, lng, `Punto (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+    return;
+  }
+  
+  // Use Nominatim for search
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`)
+    .then(r=>r.json()).then(results => {
+      if(!results.length) return showToast('Nessun risultato trovato');
+      if(results.length===1) {
+        openAddStopModal(parseFloat(results[0].lat), parseFloat(results[0].lon), results[0].display_name.split(',')[0]);
+      } else {
+        showSearchResults(results);
+      }
+    }).catch(() => showToast('Errore nella ricerca'));
+}
+
+function showSearchResults(results) {
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = `
+    <div class="modal-handle"></div>
+    <h3>📍 Risultati</h3>
+    ${results.map(r => `
+      <div class="settings-item" onclick="openAddStopModal(${r.lat},${r.lon},'${r.display_name.split(',')[0].replace(/'/g,"\\'")}');closeModal();">
+        <div class="settings-icon" style="background:var(--primary-light);font-size:20px;">📍</div>
+        <div class="settings-text">
+          <h4>${r.display_name.split(',')[0]}</h4>
+          <p>${r.display_name.split(',').slice(1,3).join(',')}</p>
+        </div>
+      </div>
+    `).join('')}
+  `;
+  openModal();
+}
+
+function openAddStopModal(lat, lng, name) {
+  const trip = state.currentTrip;
+  const nextOrder = (trip.stops?.length || 0) + 1;
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = `
+    <div class="modal-handle"></div>
+    <h3>📍 Aggiungi Tappa</h3>
+    <div class="form-group">
+      <label>Nome</label>
+      <input type="text" class="form-input" id="stop-name" value="${name||''}" placeholder="Nome della tappa">
+    </div>
+    <div class="form-group">
+      <label>Latitudine</label>
+      <input type="number" step="any" class="form-input" id="stop-lat" value="${lat||''}" placeholder="Es. 41.9028">
+    </div>
+    <div class="form-group">
+      <label>Longitudine</label>
+      <input type="number" step="any" class="form-input" id="stop-lng" value="${lng||''}" placeholder="Es. 12.4964">
+    </div>
+    <div class="form-group">
+      <label>Ordine</label>
+      <input type="number" class="form-input" id="stop-order" value="${nextOrder}">
+    </div>
+    <div class="form-group">
+      <label>Note</label>
+      <textarea class="form-input" id="stop-note" rows="2" placeholder="Note sulla tappa..."></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="addStop()">✅ Aggiungi Tappa</button>
+  `;
+  openModal();
+}
+
+function addStop() {
+  const trip = state.currentTrip;
+  const stop = {
+    id: 'stop_'+Date.now(),
+    name: document.getElementById('stop-name').value,
+    lat: parseFloat(document.getElementById('stop-lat').value),
+    lng: parseFloat(document.getElementById('stop-lng').value),
+    order: parseInt(document.getElementById('stop-order').value),
+    note: document.getElementById('stop-note').value
+  };
+  if(!stop.name||isNaN(stop.lat)||isNaN(stop.lng)) return showToast('Compila nome e coordinate');
+  trip.stops = trip.stops||[];
+  trip.stops.push(stop);
+  saveTripData();
+  renderStops();
+  closeModal();
+  showToast('Tappa aggiunta! 📍');
+}
+
+function deleteStop(id) {
+  const trip = state.currentTrip;
+  trip.stops = trip.stops.filter(s=>s.id!==id);
+  saveTripData();
+  renderStops();
+}
+
+// ==========================================
+//  INTERACTIVE MAP
+// ==========================================
+function initInteractiveMap() {
+  const container = document.getElementById('interactive-map');
+  if(!container) return;
+  if(container._leaflet_id) {
+    state.maps.interactive?.invalidateSize();
+    return;
+  }
+  const trip = state.currentTrip;
+  const center = trip.stops?.length ? [trip.stops[0].lat, trip.stops[0].lng] : [41.9028, 12.4964];
+  const map = L.map(container).setView(center, trip.stops?.length ? 8 : 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution:'© OpenStreetMap'
+  }).addTo(map);
+  
+  // Add existing markers
+  (trip.mapMarkers||[]).forEach(m => addMapMarkerToMap(map, m));
+  
+  // Add stops as path
+  if(trip.stops?.length) {
+    const coords = trip.stops.map(s => [s.lat,s.lng]);
+    L.polyline(coords, {color:'#F97316',weight:3}).addTo(map);
+    trip.stops.forEach(s => {
+      const icon = L.divIcon({html:`<div style="font-size:24px;">📍</div>`,iconSize:[24,24],className:''});
+      L.marker([s.lat,s.lng],{icon}).addTo(map).bindPopup(`<b>${s.name}</b>`);
+    });
+    map.fitBounds(coords, {padding:[40,40]});
+  }
+  
+  // Click to add marker
+  map.on('click', function(e) {
+    const tool = state.mapTool;
+    const emojis = {pin:'📌',note:'📝',bed:'🛏️',food:'🍽️',star:'⭐',route:'🛤️',photo:'📸',warning:'⚠️',fuel:'⛽',parking:'🅿️'};
+    const emoji = emojis[tool] || '📌';
+    
+    const marker = {
+      id:'mk_'+Date.now(), lat:e.latlng.lat, lng:e.latlng.lng,
+      emoji, type:tool, note:''
+    };
+    
+    // Prompt for note
+    const note = prompt('Aggiungi una nota per questo segnalino:');
+    if(note!==null) marker.note = note;
+    
+    trip.mapMarkers = trip.mapMarkers || [];
+    trip.mapMarkers.push(marker);
+    addMapMarkerToMap(map, marker);
+    renderMapMarkers();
+    saveTripData();
+  });
+  
+  state.maps.interactive = map;
+}
+
+function addMapMarkerToMap(map, m) {
+  const icon = L.divIcon({html:`<div style="font-size:28px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));">${m.emoji}</div>`,iconSize:[28,28],className:''});
+  const marker = L.marker([m.lat,m.lng],{icon}).addTo(map);
+  marker.bindPopup(`<b>${m.emoji} ${m.type}</b><br>${m.note||'Nessuna nota'}<br><small>${m.lat.toFixed(4)}, ${m.lng.toFixed(4)}</small>`);
+}
+
+function setMapTool(tool) {
+  state.mapTool = tool;
+  document.querySelectorAll('.map-tool-btn').forEach(b => {
+    b.classList.toggle('active', b.id === 'tool-'+tool);
   });
 }
 
-function renderCalendar(){
-  const months=['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
-  document.getElementById('cal-month-lbl').textContent=`${months[calM]} ${calY}`;
-  const first=(new Date(calY,calM,1).getDay()+6)%7;
-  const dInM=new Date(calY,calM+1,0).getDate();
-  const c=document.getElementById('cal-days');c.innerHTML='';
-  for(let i=0;i<first;i++) c.appendChild(Object.assign(document.createElement('div'),{className:'cal-day empty'}));
-  for(let d=1;d<=dInM;d++){
-    const el=document.createElement('div');el.className='cal-day';
-    el.innerHTML=`<span class="cal-day-num">${d}</span>`;
-    c.appendChild(el);
+function renderMapMarkers() {
+  const trip = state.currentTrip;
+  const list = document.getElementById('map-markers-list');
+  if(!trip?.mapMarkers?.length) {
+    list.innerHTML = '<p style="color:var(--text3);font-size:13px;padding:12px 0;">Clicca sulla mappa per aggiungere segnalini</p>';
+    return;
+  }
+  list.innerHTML = trip.mapMarkers.map(m => `
+    <div class="map-marker-item">
+      <span class="marker-emoji">${m.emoji}</span>
+      <div style="flex:1;">
+        <div style="font-weight:500;">${m.note||m.type}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:monospace;">${m.lat.toFixed(4)}, ${m.lng.toFixed(4)}</div>
+      </div>
+      <button class="btn-icon" style="width:28px;height:28px;font-size:12px;background:var(--danger-light);color:var(--danger);" onclick="deleteMapMarker('${m.id}')">✕</button>
+    </div>
+  `).join('');
+}
+
+function deleteMapMarker(id) {
+  const trip = state.currentTrip;
+  trip.mapMarkers = trip.mapMarkers.filter(m=>m.id!==id);
+  saveTripData();
+  renderMapMarkers();
+  // Reinitialize map
+  const container = document.getElementById('interactive-map');
+  if(container?._leaflet_id) {
+    state.maps.interactive.remove();
+    delete container._leaflet_id;
+    initInteractiveMap();
   }
 }
-function changeMonth(d){calM+=d;if(calM>11){calM=0;calY++;}if(calM<0){calM=11;calY--;}renderCalendar();loadCalendarEvents();}
-function renderCalEvs(evs,title){
-  const c=document.getElementById('cal-ev-list');c.innerHTML='';
-  evs.forEach(e=>{
-    const d=document.createElement('div');d.className='ev-item';
-    d.innerHTML=`<div class="ev-time">${e.time||''}</div><div><div class="ev-title">${e.title||e.name}</div><div class="ev-trip">${e.source||''}</div></div>`;
-    c.appendChild(d);
+
+// ==========================================
+//  CHAT
+// ==========================================
+function renderChat() {
+  const trip = state.currentTrip;
+  if(!trip) return;
+  const container = document.getElementById('chat-messages');
+  if(!trip.messages?.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">💬</div><h3>Nessun messaggio</h3><p>Inizia la conversazione!</p></div>';
+    return;
+  }
+  container.innerHTML = trip.messages.map(m => `
+    <div class="chat-bubble ${m.userId===state.userId?'mine':'other'}">
+      ${m.userId!==state.userId?`<div class="chat-sender">${m.userName}</div>`:''}
+      ${m.text}
+      <div class="chat-time">${formatTime(m.time)}</div>
+    </div>
+  `).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  
+  const trip = state.currentTrip;
+  const msg = {
+    id:'msg_'+Date.now(), userId:state.userId, userName:state.userName,
+    text, time:new Date().toISOString()
+  };
+  trip.messages = trip.messages || [];
+  trip.messages.push(msg);
+  saveTripData();
+  renderChat();
+  input.value = '';
+}
+
+// ==========================================
+//  EXPENSES (SPLITWISE-LIKE)
+// ==========================================
+function renderExpenses() {
+  const trip = state.currentTrip;
+  if(!trip) return;
+  
+  const total = (trip.expenses||[]).reduce((s,e)=>s+e.amount,0);
+  document.querySelector('#expense-summary .total').textContent = '€'+total.toFixed(2).replace('.',',');
+  
+  // Calculate balances
+  const balances = {};
+  (trip.participants||[]).forEach(p => balances[p.id] = {name:p.name, paid:0, owes:0, color:p.color});
+  (trip.expenses||[]).forEach(e => {
+    if(balances[e.paidBy]) balances[e.paidBy].paid += e.amount;
+    const split = e.amount / (e.splitWith||[]).length;
+    (e.splitWith||[]).forEach(uid => {
+      if(balances[uid]) balances[uid].owes += split;
+    });
+  });
+  
+  const balDiv = document.getElementById('expense-balances');
+  balDiv.innerHTML = Object.values(balances).map(b => {
+    const diff = b.paid - b.owes;
+    return `<div class="balance-chip ${diff>=0?'positive':'negative'}">${b.name}: ${diff>=0?'+':''}€${diff.toFixed(2).replace('.',',')}</div>`;
+  }).join('');
+  
+  // Expense list
+  const list = document.getElementById('expenses-list');
+  if(!trip.expenses?.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">💰</div><h3>Nessuna spesa</h3><p>Aggiungi le spese del viaggio per dividere i costi</p></div>';
+    return;
+  }
+  list.innerHTML = trip.expenses.map(e => {
+    const payer = (trip.participants||[]).find(p=>p.id===e.paidBy);
+    return `
+      <div class="expense-item">
+        <div class="expense-icon">${e.icon||'💰'}</div>
+        <div class="expense-info">
+          <h4>${e.title}</h4>
+          <div class="expense-meta">Pagato da ${payer?.name||'?'} • ${formatDate(e.date)} • ÷${(e.splitWith||[]).length}</div>
+        </div>
+        <div class="expense-amount">€${e.amount.toFixed(2).replace('.',',')}</div>
+      </div>`;
+  }).join('');
+  
+  // Settlements
+  calculateSettlements();
+}
+
+function openAddExpenseModal() {
+  const trip = state.currentTrip;
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = `
+    <div class="modal-handle"></div>
+    <h3>💰 Nuova Spesa</h3>
+    <div class="form-group">
+      <label>Descrizione</label>
+      <input type="text" class="form-input" id="exp-title" placeholder="Es. Cena al ristorante">
+    </div>
+    <div class="form-group">
+      <label>Importo (€)</label>
+      <input type="number" step="0.01" class="form-input" id="exp-amount" placeholder="0.00" style="font-size:24px;font-weight:700;">
+    </div>
+    <div class="form-group">
+      <label>Icona</label>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${expenseIcons.map((ic,i) => `<button class="btn-icon ${i===0?'selected':''}" style="font-size:20px;${i===0?'background:var(--primary-light);':'background:var(--bg2);'}" onclick="selectExpIcon(this,'${ic}')" data-icon="${ic}">${ic}</button>`).join('')}
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Pagato da</label>
+      <select class="form-input" id="exp-payer">
+        ${(trip.participants||[]).map(p => `<option value="${p.id}" ${p.id===state.userId?'selected':''}>${p.name}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Dividi tra</label>
+      ${(trip.participants||[]).map(p => `
+        <label style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:14px;">
+          <input type="checkbox" checked value="${p.id}" class="exp-split"> ${p.name}
+        </label>
+      `).join('')}
+    </div>
+    <div class="form-group">
+      <label>Data</label>
+      <input type="date" class="form-input" id="exp-date" value="${new Date().toISOString().split('T')[0]}">
+    </div>
+    <button class="btn btn-primary" onclick="addExpense()">✅ Aggiungi Spesa</button>
+  `;
+  window._expIcon = expenseIcons[0];
+  openModal();
+}
+
+function selectExpIcon(el, icon) {
+  document.querySelectorAll('[data-icon]').forEach(b => b.style.background='var(--bg2)');
+  el.style.background='var(--primary-light)';
+  window._expIcon = icon;
+}
+
+function addExpense() {
+  const trip = state.currentTrip;
+  const expense = {
+    id:'exp_'+Date.now(),
+    title:document.getElementById('exp-title').value,
+    amount:parseFloat(document.getElementById('exp-amount').value),
+    icon: window._expIcon || '💰',
+    paidBy:document.getElementById('exp-payer').value,
+    splitWith: Array.from(document.querySelectorAll('.exp-split:checked')).map(c=>c.value),
+    date:document.getElementById('exp-date').value
+  };
+  if(!expense.title||isNaN(expense.amount)) return showToast('Compila titolo e importo');
+  trip.expenses = trip.expenses || [];
+  trip.expenses.push(expense);
+  saveTripData();
+  renderExpenses();
+  closeModal();
+  showToast('Spesa aggiunta! 💰');
+}
+
+function calculateSettlements() {
+  const trip = state.currentTrip;
+  if(!trip?.expenses?.length) return;
+  
+  const balances = {};
+  (trip.participants||[]).forEach(p => balances[p.id] = {name:p.name, balance:0});
+  (trip.expenses||[]).forEach(e => {
+    if(balances[e.paidBy]) balances[e.paidBy].balance += e.amount;
+    const split = e.amount / (e.splitWith||[]).length;
+    (e.splitWith||[]).forEach(uid => {
+      if(balances[uid]) balances[uid].balance -= split;
+    });
+  });
+  
+  const debtors = Object.entries(balances).filter(([,v])=>v.balance<-0.01).map(([k,v])=>({id:k,...v})).sort((a,b)=>a.balance-b.balance);
+  const creditors = Object.entries(balances).filter(([,v])=>v.balance>0.01).map(([k,v])=>({id:k,...v})).sort((a,b)=>b.balance-a.balance);
+  
+  const settlements = [];
+  let di=0, ci=0;
+  while(di<debtors.length && ci<creditors.length) {
+    const amount = Math.min(-debtors[di].balance, creditors[ci].balance);
+    if(amount>0.01) {
+      settlements.push({from:debtors[di].name, to:creditors[ci].name, amount});
+    }
+    debtors[di].balance += amount;
+    creditors[ci].balance -= amount;
+    if(Math.abs(debtors[di].balance)<0.01) di++;
+    if(Math.abs(creditors[ci].balance)<0.01) ci++;
+  }
+  
+  document.getElementById('settlements-content').innerHTML = settlements.length ? settlements.map(s => `
+    <div class="settlement-card">
+      <span style="font-weight:600;">${s.from}</span>
+      <span class="settlement-arrow">→</span>
+      <span style="font-weight:600;">${s.to}</span>
+      <span style="margin-left:auto;font-weight:700;color:var(--accent);">€${s.amount.toFixed(2).replace('.',',')}</span>
+    </div>
+  `).join('') : '<p style="color:var(--text3);text-align:center;padding:12px;">Tutti i conti sono in pari! 🎉</p>';
+}
+
+function showSettlements() {
+  const el = document.getElementById('settlements-list');
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
+// ==========================================
+//  CALENDAR
+// ==========================================
+function renderCalendar() {
+  const trip = state.currentTrip;
+  if(!trip) return;
+  
+  const year = state.calYear;
+  const month = state.calMonth;
+  const months = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+  document.getElementById('cal-month-year').textContent = `${months[month]} ${year}`;
+  
+  const grid = document.getElementById('calendar-grid');
+  const days = ['L','M','M','G','V','S','D'];
+  let html = days.map(d => `<div class="cal-header">${d}</div>`).join('');
+  
+  const firstDay = new Date(year,month,1);
+  let startDay = firstDay.getDay() - 1;
+  if(startDay<0) startDay = 6;
+  const daysInMonth = new Date(year,month+1,0).getDate();
+  const daysInPrev = new Date(year,month,0).getDate();
+  const today = new Date();
+  
+  // Previous month
+  for(let i=startDay-1;i>=0;i--) {
+    html += `<div class="cal-day other-month">${daysInPrev-i}</div>`;
+  }
+  // Current month
+  for(let d=1;d<=daysInMonth;d++) {
+    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===d;
+    const hasEvent = (trip.events||[]).some(e=>e.date===dateStr);
+    // Check if date falls within trip range
+    const isTrip = dateStr>=trip.startDate && dateStr<=trip.endDate;
+    html += `<div class="cal-day ${isToday?'today':''} ${hasEvent?'has-event':''}" 
+      style="${isTrip?'background:var(--primary-light);':''}" 
+      onclick="selectCalDay('${dateStr}')">${d}</div>`;
+  }
+  // Next month
+  const totalCells = startDay + daysInMonth;
+  const remaining = 7 - (totalCells % 7);
+  if(remaining < 7) {
+    for(let d=1;d<=remaining;d++) {
+      html += `<div class="cal-day other-month">${d}</div>`;
+    }
+  }
+  
+  grid.innerHTML = html;
+  
+  // Show events for selected day or today
+  if(state.selectedCalDay) selectCalDay(state.selectedCalDay);
+}
+
+function changeMonth(dir) {
+  state.calMonth += dir;
+  if(state.calMonth>11) { state.calMonth=0; state.calYear++; }
+  if(state.calMonth<0) { state.calMonth=11; state.calYear--; }
+  renderCalendar();
+}
+
+function selectCalDay(date) {
+  state.selectedCalDay = date;
+  const trip = state.currentTrip;
+  const events = (trip.events||[]).filter(e=>e.date===date);
+  const evDiv = document.getElementById('cal-events');
+  if(!events.length) {
+    evDiv.innerHTML = `<p style="color:var(--text3);font-size:13px;padding:8px 0;">Nessun evento per il ${formatDate(date)}</p>`;
+    return;
+  }
+  evDiv.innerHTML = events.map(e => `
+    <div class="note-card" style="border-left-color:${e.color||'var(--primary)'}">
+      <h4>${e.time?'🕐 '+e.time+' — ':''}${e.title}</h4>
+      ${e.description?`<p>${e.description}</p>`:''}
+    </div>
+  `).join('');
+}
+
+function openAddEventModal() {
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = `
+    <div class="modal-handle"></div>
+    <h3>📅 Nuovo Evento</h3>
+    <div class="form-group">
+      <label>Titolo</label>
+      <input type="text" class="form-input" id="event-title" placeholder="Es. Check-in hotel">
+    </div>
+    <div class="form-group">
+      <label>Data</label>
+      <input type="date" class="form-input" id="event-date" value="${state.selectedCalDay||new Date().toISOString().split('T')[0]}">
+    </div>
+    <div class="form-group">
+      <label>Ora</label>
+      <input type="time" class="form-input" id="event-time">
+    </div>
+    <div class="form-group">
+      <label>Descrizione</label>
+      <textarea class="form-input" id="event-desc" rows="2" placeholder="Dettagli..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Colore</label>
+      <div class="note-colors">
+        <div class="note-color selected" style="background:#F97316;" onclick="selectColor(this,'#F97316')"></div>
+        <div class="note-color" style="background:#0EA5E9;" onclick="selectColor(this,'#0EA5E9')"></div>
+        <div class="note-color" style="background:#10B981;" onclick="selectColor(this,'#10B981')"></div>
+        <div class="note-color" style="background:#8B5CF6;" onclick="selectColor(this,'#8B5CF6')"></div>
+        <div class="note-color" style="background:#EC4899;" onclick="selectColor(this,'#EC4899')"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addEvent()">✅ Aggiungi Evento</button>
+  `;
+  window._eventColor = '#F97316';
+  openModal();
+}
+
+function selectColor(el, color) {
+  document.querySelectorAll('.note-color').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  window._eventColor = color;
+}
+
+function addEvent() {
+  const trip = state.currentTrip;
+  const event = {
+    id:'ev_'+Date.now(),
+    title:document.getElementById('event-title').value,
+    date:document.getElementById('event-date').value,
+    time:document.getElementById('event-time').value,
+    description:document.getElementById('event-desc').value,
+    color:window._eventColor||'#F97316'
+  };
+  if(!event.title||!event.date) return showToast('Compila titolo e data');
+  trip.events = trip.events || [];
+  trip.events.push(event);
+  saveTripData();
+  renderCalendar();
+  closeModal();
+  showToast('Evento aggiunto! 📅');
+}
+
+// ==========================================
+//  NOTES
+// ==========================================
+function renderNotes() {
+  const trip = state.currentTrip;
+  if(!trip) return;
+  const list = document.getElementById('notes-list');
+  if(!trip.notes?.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div><h3>Nessuna nota</h3><p>Aggiungi note, idee e informazioni utili</p></div>';
+    return;
+  }
+  const colors = {'#FFEDD5':'border-left-color:var(--primary)','#E0F2FE':'border-left-color:var(--secondary)','#D1FAE5':'border-left-color:var(--accent)','#EDE9FE':'border-left-color:var(--purple)','#FCE7F3':'border-left-color:var(--pink)'};
+  list.innerHTML = trip.notes.map(n => `
+    <div class="note-card" style="background:${n.color||'var(--card)'};${colors[n.color]||''}">
+      <h4>${n.title}</h4>
+      <p style="white-space:pre-wrap;">${n.content}</p>
+      <div class="note-date">${formatDate(n.date)}</div>
+      <button class="btn btn-sm btn-danger" style="margin-top:8px;" onclick="deleteNote('${n.id}')">🗑️ Elimina</button>
+    </div>
+  `).join('');
+}
+
+function openAddNoteModal() {
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = `
+    <div class="modal-handle"></div>
+    <h3>📝 Nuova Nota</h3>
+    <div class="form-group">
+      <label>Titolo</label>
+      <input type="text" class="form-input" id="note-title" placeholder="Titolo della nota">
+    </div>
+    <div class="form-group">
+      <label>Contenuto</label>
+      <textarea class="form-input" id="note-content" rows="5" placeholder="Scrivi la tua nota..."></textarea>
+    </div>
+    <div class="form-group">
+      <label>Colore</label>
+      <div class="note-colors">
+        <div class="note-color selected" style="background:#FFEDD5;" onclick="selectColor(this,'#FFEDD5')"></div>
+        <div class="note-color" style="background:#E0F2FE;" onclick="selectColor(this,'#E0F2FE')"></div>
+        <div class="note-color" style="background:#D1FAE5;" onclick="selectColor(this,'#D1FAE5')"></div>
+        <div class="note-color" style="background:#EDE9FE;" onclick="selectColor(this,'#EDE9FE')"></div>
+        <div class="note-color" style="background:#FCE7F3;" onclick="selectColor(this,'#FCE7F3')"></div>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="addNote()">✅ Salva Nota</button>
+  `;
+  window._eventColor = '#FFEDD5';
+  openModal();
+}
+
+function addNote() {
+  const trip = state.currentTrip;
+  const note = {
+    id:'note_'+Date.now(),
+    title:document.getElementById('note-title').value,
+    content:document.getElementById('note-content').value,
+    color:window._eventColor||'#FFEDD5',
+    date:new Date().toISOString().split('T')[0]
+  };
+  if(!note.title) return showToast('Inserisci un titolo');
+  trip.notes = trip.notes || [];
+  trip.notes.push(note);
+  saveTripData();
+  renderNotes();
+  closeModal();
+  showToast('Nota salvata! 📝');
+}
+
+function deleteNote(id) {
+  const trip = state.currentTrip;
+  trip.notes = trip.notes.filter(n=>n.id!==id);
+  saveTripData();
+  renderNotes();
+}
+
+// ==========================================
+//  CHECKLIST
+// ==========================================
+function renderChecklist() {
+  const trip = state.currentTrip;
+  if(!trip) return;
+  const list = document.getElementById('checklist-list');
+  if(!trip.checklist?.length) {
+    list.innerHTML = '<p style="color:var(--text3);font-size:13px;padding:8px 0;">Nessun elemento nella checklist</p>';
+  } else {
+    const done = trip.checklist.filter(c=>c.done).length;
+    const total = trip.checklist.length;
+    list.innerHTML = `
+      <div style="margin-bottom:12px;background:var(--bg2);border-radius:var(--radius-xs);overflow:hidden;">
+        <div style="height:6px;background:var(--accent);width:${(done/total*100)}%;transition:.3s;border-radius:var(--radius-xs);"></div>
+      </div>
+      <p style="font-size:12px;color:var(--text3);margin-bottom:12px;">${done}/${total} completati</p>
+      ${trip.checklist.map(c => `
+        <div class="checklist-item">
+          <div class="check-box ${c.done?'checked':''}" onclick="toggleCheckItem('${c.id}')">${c.done?'✓':''}</div>
+          <span class="checklist-text ${c.done?'done':''}">${c.text}</span>
+          <button class="btn-icon" style="width:24px;height:24px;font-size:10px;background:var(--danger-light);color:var(--danger);" onclick="deleteCheckItem('${c.id}')">✕</button>
+        </div>
+      `).join('')}
+    `;
+  }
+  
+  // Suggestions based on trip type
+  const suggestions = {
+    walking: ['Scarponi da trekking','Bastoncini','Giacca antipioggia','Borraccia','Snack energetici','Kit pronto soccorso','Crema solare','Powerbank'],
+    camper: ['Sacco a pelo','Stoviglie','Gas cucina','Cavi adattatori','Torcia','Sedie pieghevoli','Tavolo campeggio'],
+    boat: ['Crema solare waterproof','Cappello','Medicinali mal di mare','Costume','Snorkel','Sacca stagna'],
+    sup: ['Muta','Crema solare','Borraccia con laccio','Sacca stagna','Costume'],
+    car: ['Caricatore auto','Documenti auto','Cavo AUX','Snack','Cuscino viaggio','Occhiali da sole'],
+    flight: ['Passaporto','Boarding pass','Adattatore presa','Cuscino viaggio','Liquidi <100ml','Powerbank']
+  };
+  
+  const typeSuggestions = suggestions[trip.type] || suggestions.car;
+  const existingTexts = (trip.checklist||[]).map(c=>c.text.toLowerCase());
+  const filtered = typeSuggestions.filter(s => !existingTexts.includes(s.toLowerCase()));
+  
+  document.getElementById('checklist-suggestions').innerHTML = filtered.length ? 
+    `<div style="display:flex;flex-wrap:wrap;gap:6px;">${filtered.map(s => 
+      `<button class="btn btn-sm btn-outline" onclick="addSuggestedItem('${s}')" style="font-size:12px;">+ ${s}</button>`
+    ).join('')}</div>` : '<p style="color:var(--text3);font-size:12px;">Nessun suggerimento</p>';
+}
+
+function addChecklistItem() {
+  const input = document.getElementById('checklist-input');
+  const text = input.value.trim();
+  if(!text) return;
+  const trip = state.currentTrip;
+  trip.checklist = trip.checklist || [];
+  trip.checklist.push({id:'cl_'+Date.now(), text, done:false});
+  saveTripData();
+  renderChecklist();
+  input.value = '';
+}
+
+function addSuggestedItem(text) {
+  const trip = state.currentTrip;
+  trip.checklist = trip.checklist || [];
+  trip.checklist.push({id:'cl_'+Date.now(), text, done:false});
+  saveTripData();
+  renderChecklist();
+}
+
+function toggleCheckItem(id) {
+  const trip = state.currentTrip;
+  const item = trip.checklist.find(c=>c.id===id);
+  if(item) item.done = !item.done;
+  saveTripData();
+  renderChecklist();
+}
+
+function deleteCheckItem(id) {
+  const trip = state.currentTrip;
+  trip.checklist = trip.checklist.filter(c=>c.id!==id);
+  saveTripData();
+  renderChecklist();
+}
+
+// ==========================================
+//  TRIP SETTINGS
+// ==========================================
+function openTripSettings() {
+  const trip = state.currentTrip;
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = `
+    <div class="modal-handle"></div>
+    <h3>⚙️ Impostazioni Viaggio</h3>
+    <div class="form-group">
+      <label>Nome</label>
+      <input type="text" class="form-input" id="edit-trip-name" value="${trip.name}">
+    </div>
+    <div class="form-group">
+      <label>Descrizione</label>
+      <textarea class="form-input" id="edit-trip-desc" rows="3">${trip.description||''}</textarea>
+    </div>
+    <div class="form-group">
+      <label>Data Inizio</label>
+      <input type="date" class="form-input" id="edit-trip-start" value="${trip.startDate}">
+    </div>
+    <div class="form-group">
+      <label>Data Fine</label>
+      <input type="date" class="form-input" id="edit-trip-end" value="${trip.endDate}">
+    </div>
+    <button class="btn btn-primary" onclick="updateTrip()">💾 Salva Modifiche</button>
+    <button class="btn btn-danger mt-8" onclick="deleteTrip()">🗑️ Elimina Viaggio</button>
+  `;
+  openModal();
+}
+
+function updateTrip() {
+  const trip = state.currentTrip;
+  trip.name = document.getElementById('edit-trip-name').value;
+  trip.description = document.getElementById('edit-trip-desc').value;
+  trip.startDate = document.getElementById('edit-trip-start').value;
+  trip.endDate = document.getElementById('edit-trip-end').value;
+  saveTripData();
+  openTrip(trip.id);
+  closeModal();
+  showToast('Viaggio aggiornato! ✅');
+}
+
+function deleteTrip() {
+  if(!confirm('Sei sicuro di voler eliminare questo viaggio?')) return;
+  const id = state.currentTripId;
+  if(firebaseReady) {
+    db.collection('trips').doc(id).delete();
+  } else {
+    state.trips = state.trips.filter(t=>t.id!==id);
+  }
+  showScreen('home');
+  renderTrips();
+  closeModal();
+  showToast('Viaggio eliminato');
+}
+
+// ==========================================
+//  GLOBAL CALENDAR VIEW
+// ==========================================
+function showGlobalCalendar() {
+  // Simple redirect - show home with trip calendars
+  showToast('Seleziona un viaggio per il calendario 📅');
+}
+
+// ==========================================
+//  UTILITIES
+// ==========================================
+function saveTripData() {
+  if(firebaseReady && state.currentTripId) {
+    db.collection('trips').doc(state.currentTripId).update(state.currentTrip);
+  }
+}
+
+function formatDate(str) {
+  if(!str) return '';
+  const d = new Date(str+'T00:00:00');
+  return d.toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'});
+}
+
+function formatTime(str) {
+  if(!str) return '';
+  const d = new Date(str);
+  return d.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+}
+
+function getDuration(start,end) {
+  if(!start||!end) return 0;
+  return Math.ceil((new Date(end)-new Date(start))/(1000*60*60*24))+1;
+}
+
+function getRandomColor() {
+  const colors = ['#F97316','#0EA5E9','#10B981','#8B5CF6','#EC4899','#06B6D4','#FBBF24'];
+  return colors[Math.floor(Math.random()*colors.length)];
+}
+
+function copyTripCode() {
+  const code = state.currentTrip?.code || '';
+  navigator.clipboard?.writeText(code).then(()=>showToast('Codice copiato! 📋')).catch(()=>{
+    const el=document.createElement('textarea');el.value=code;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);
+    showToast('Codice copiato! 📋');
   });
 }
 
-// ALTRE FUNZIONI UTILI MANTENUTE (Partecipanti, Chat, Spese, etc...)
-async function loadParticipants(){
-  if(!ct)return;
-  tripParticipants=[];
-  for(const uid of ct.participants||[]){
-    const ud=await db.collection('users').doc(uid).get();
-    // Safety check in caso l'utente non abbia displayName impostato
-    const name = ud.data()?.displayName || 'Utente';
-    tripParticipants.push({uid,name});
-  }
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if(existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(), 2500);
 }
 
-// Utility Modals & UI
-function openModal(id){document.getElementById(id)?.classList.add('open');}
-function closeModal(id){document.getElementById(id)?.classList.remove('open');}
-document.querySelectorAll('.modal-bd').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open');}));
+function openModal() {
+  document.getElementById('modal-overlay').classList.add('active');
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('active');
+}
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if(e.target===this) closeModal();
+});
 
-let _toastT;
-function toast(msg){
-  const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');
-  clearTimeout(_toastT);_toastT=setTimeout(()=>el.classList.remove('show'),2800);
+function editProfile() {
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = `
+    <div class="modal-handle"></div>
+    <h3>✏️ Modifica Profilo</h3>
+    <div class="form-group">
+      <label>Nome</label>
+      <input type="text" class="form-input" id="edit-name" value="${state.userName}">
+    </div>
+    <button class="btn btn-primary" onclick="saveProfile()">💾 Salva</button>
+  `;
+  openModal();
+}
+
+function saveProfile() {
+  state.userName = document.getElementById('edit-name').value;
+  document.getElementById('user-name').textContent = state.userName;
+  document.getElementById('user-avatar').textContent = state.userName[0].toUpperCase();
+  document.getElementById('settings-avatar').textContent = state.userName[0].toUpperCase();
+  document.getElementById('settings-name').textContent = state.userName;
+  if(firebaseReady && currentUser) {
+    currentUser.updateProfile({displayName:state.userName});
+  }
+  closeModal();
+  showToast('Profilo aggiornato! ✅');
+}
+
+function editStop(id) {
+  const trip = state.currentTrip;
+  const stop = trip.stops.find(s=>s.id===id);
+  if(!stop) return;
+  const modal = document.getElementById('modal-content');
+  modal.innerHTML = `
+    <div class="modal-handle"></div>
+    <h3>✏️ Modifica Tappa</h3>
+    <div class="form-group"><label>Nome</label><input type="text" class="form-input" id="edit-stop-name" value="${stop.name}"></div>
+    <div class="form-group"><label>Lat</label><input type="number" step="any" class="form-input" id="edit-stop-lat" value="${stop.lat}"></div>
+    <div class="form-group"><label>Lng</label><input type="number" step="any" class="form-input" id="edit-stop-lng" value="${stop.lng}"></div>
+    <div class="form-group"><label>Ordine</label><input type="number" class="form-input" id="edit-stop-order" value="${stop.order}"></div>
+    <div class="form-group"><label>Note</label><textarea class="form-input" id="edit-stop-note" rows="2">${stop.note||''}</textarea></div>
+    <button class="btn btn-primary" onclick="saveStopEdit('${id}')">💾 Salva</button>
+  `;
+  openModal();
+}
+
+function saveStopEdit(id) {
+  const trip = state.currentTrip;
+  const stop = trip.stops.find(s=>s.id===id);
+  stop.name = document.getElementById('edit-stop-name').value;
+  stop.lat = parseFloat(document.getElementById('edit-stop-lat').value);
+  stop.lng = parseFloat(document.getElementById('edit-stop-lng').value);
+  stop.order = parseInt(document.getElementById('edit-stop-order').value);
+  stop.note = document.getElementById('edit-stop-note').value;
+  saveTripData();
+  renderStops();
+  closeModal();
+  showToast('Tappa aggiornata! ✅');
+}
+
+// Countdown timer
+setInterval(() => {
+  document.querySelectorAll('.countdown-card').forEach(card => {
+    // Just re-render to update countdown
+  });
+  if(document.getElementById('screen-home').classList.contains('active')) {
+    renderTrips();
+  }
+}, 60000);
+
+// Chat enter key
+document.getElementById('chat-input')?.addEventListener('keydown', e => {
+  if(e.key==='Enter') sendMessage();
+});
+
+// Checklist enter key
+document.getElementById('checklist-input')?.addEventListener('keydown', e => {
+  if(e.key==='Enter') addChecklistItem();
+});
+
+// Firebase auth listener
+if(firebaseReady) {
+  auth.onAuthStateChanged(user => {
+    if(user) loginSuccess(user);
+  });
 }
 </script>
 </body>
