@@ -1,1181 +1,2626 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#FFFDF8">
-<title>Travel IO</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#ffffff" />
+<title>IO Travel</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Leaflet per le mappe (alternativa libera a Google Maps) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
 <style>
-:root {
-  --bg:#FFFDF8;--bg2:#FFF9EF;--bg3:#FFF4E0;
-  --card:#FFFFFF;--card2:#FFFCF5;
-  --pri:#FF7A2F;--pri-l:#FFF0E5;--pri-d:#E55A0F;
-  --sec:#2EAAE0;--sec-l:#E5F5FC;
-  --acc:#2ECC71;--acc-l:#E0F8EA;
-  --red:#FF4757;--red-l:#FFE8EA;
-  --pur:#9B59B6;--pur-l:#F3E8F9;
-  --pnk:#E84393;--pnk-l:#FCE4F0;
-  --ylw:#F1C40F;--ylw-l:#FDF6D8;
-  --txt:#2D3436;--txt2:#636E72;--txt3:#B2BEC3;
-  --brd:#F5EFE6;--brd2:#EBE3D6;
-  --sh:0 2px 16px rgba(255,122,47,.07);
-  --sh2:0 8px 32px rgba(255,122,47,.12);
-  --r:18px;--rs:12px;--rx:8px;
-  --font:'Quicksand',sans-serif;
-  --hd:'Nunito',sans-serif;
-  --sab:env(safe-area-inset-bottom,0px);
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{font-family:var(--font);background:var(--bg);color:var(--txt);height:100%;overflow:hidden;overscroll-behavior:none;font-weight:500;}
-input,textarea,select,button{font-family:var(--font);font-weight:500;}
-::-webkit-scrollbar{width:0;height:0;}
-button{-webkit-appearance:none;appearance:none;}
+  :root {
+    --bg: #f7f9fc;
+    --bg-2: #eef2f9;
+    --surface: #ffffff;
+    --surface-2: #f2f5fb;
+    --text: #1a2233;
+    --text-muted: #5a6578;
+    --text-light: #8a94a6;
+    --primary: #4f7cff;
+    --primary-dark: #3a62e0;
+    --primary-soft: #e8efff;
+    --accent: #ff8a3d;
+    --success: #2ecc71;
+    --danger: #ff5a5f;
+    --warning: #ffb648;
+    --border: #e6ebf3;
+    --shadow: 0 6px 20px rgba(25, 40, 90, 0.06);
+    --shadow-lg: 0 12px 32px rgba(25, 40, 90, 0.10);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --radius-lg: 22px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
 
-#app{height:100%;display:flex;flex-direction:column;position:relative;}
-.scr{display:none;flex:1;overflow-y:auto;flex-direction:column;}
-.scr.on{display:flex;}
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-/* ── AUTH ── */
-.auth{
-  background:linear-gradient(170deg,#FFFDF8 0%,#FFF4E0 40%,#FFE8C8 100%);
-  justify-content:center;align-items:center;padding:28px;min-height:100%;
-  position:relative;overflow:hidden;
-}
-.auth::before{
-  content:'';position:absolute;width:300px;height:300px;border-radius:50%;
-  background:radial-gradient(circle,rgba(255,122,47,.12),transparent 70%);
-  top:-60px;right:-80px;
-}
-.auth::after{
-  content:'';position:absolute;width:200px;height:200px;border-radius:50%;
-  background:radial-gradient(circle,rgba(46,170,224,.1),transparent 70%);
-  bottom:-40px;left:-60px;
-}
-.auth-logo{
-  width:88px;height:88px;border-radius:28px;
-  background:linear-gradient(135deg,#FF7A2F,#FFB347);
-  display:flex;align-items:center;justify-content:center;
-  font-size:42px;margin-bottom:16px;position:relative;z-index:1;
-  box-shadow:0 12px 40px rgba(255,122,47,.35);
-  animation:logoFloat 3s ease-in-out infinite;
-}
-@keyframes logoFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.auth h1{font-family:var(--hd);font-size:32px;font-weight:900;letter-spacing:-.5px;position:relative;z-index:1;}
-.auth h1 span{color:var(--pri);}
-.auth-sub{color:var(--txt2);margin-bottom:28px;font-size:14px;position:relative;z-index:1;}
-.auth-box{
-  background:var(--card);border-radius:28px;padding:28px;width:100%;max-width:400px;
-  box-shadow:var(--sh2);position:relative;z-index:1;border:1px solid rgba(255,255,255,.8);
-}
-.atabs{display:flex;gap:4px;background:var(--bg2);border-radius:14px;padding:4px;margin-bottom:24px;}
-.atab{
-  flex:1;padding:11px;border:none;background:none;border-radius:12px;
-  font-weight:700;font-size:14px;color:var(--txt3);cursor:pointer;transition:.25s;
-}
-.atab.on{background:var(--card);color:var(--pri);box-shadow:0 2px 8px rgba(0,0,0,.05);}
-.fg{margin-bottom:16px;}
-.fg label{display:block;font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.8px;}
-.fi{
-  width:100%;padding:14px 16px;border:2px solid var(--brd);border-radius:var(--rs);
-  font-size:16px;transition:.25s;background:var(--bg);outline:none;
-}
-.fi:focus{border-color:var(--pri);background:var(--card);box-shadow:0 0 0 4px var(--pri-l);}
-textarea.fi{resize:vertical;min-height:60px;}
-.btn{
-  width:100%;padding:15px;border:none;border-radius:var(--rs);font-size:15px;
-  font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;
-  justify-content:center;gap:8px;letter-spacing:.2px;
-}
-.btn:active{transform:scale(.97);}
-.btn-p{background:linear-gradient(135deg,var(--pri),#FFB347);color:#fff;box-shadow:0 4px 16px rgba(255,122,47,.3);}
-.btn-s{background:var(--pri-l);color:var(--pri-d);}
-.btn-o{background:none;border:2px solid var(--brd2);color:var(--txt2);}
-.btn-d{background:var(--red-l);color:var(--red);}
-.btn-sm{padding:9px 16px;width:auto;font-size:13px;border-radius:var(--rx);}
-.btn-ic{
-  width:42px;height:42px;border-radius:50%;border:none;background:var(--pri-l);
-  color:var(--pri);display:flex;align-items:center;justify-content:center;cursor:pointer;
-  font-size:18px;transition:.2s;padding:0;flex-shrink:0;
-}
-.btn-ic:active{transform:scale(.88);}
-.dvd{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--txt3);font-size:13px;}
-.dvd::before,.dvd::after{content:'';flex:1;height:1px;background:var(--brd2);}
+  html, body {
+    margin: 0; padding: 0;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100%;
+    overscroll-behavior: none;
+    -webkit-font-smoothing: antialiased;
+  }
 
-.join-box{margin-top:16px;padding-top:16px;border-top:2px dashed var(--brd2);}
-.join-box .fi{text-align:center;font-size:22px;letter-spacing:6px;font-weight:800;text-transform:uppercase;}
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, textarea, select { font-family: inherit; font-size: 16px; }
+  a { color: var(--primary); text-decoration: none; }
 
-/* ── HEADER ── */
-.hdr{
-  background:var(--card);padding:10px 16px;display:flex;align-items:center;gap:10px;
-  border-bottom:1px solid var(--brd);position:sticky;top:0;z-index:100;min-height:52px;
-}
-.hdr-t{font-family:var(--hd);font-weight:800;font-size:17px;flex:1;}
-.hdr-b{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;}
+  /* ---------- APP SHELL ---------- */
+  #app { min-height: 100vh; display: flex; flex-direction: column; }
 
-/* ── HOME ── */
-.home-c{padding:16px;padding-bottom:calc(80px + var(--sab));}
-.wb{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.wb h2{font-family:var(--hd);font-size:21px;font-weight:800;}
-.wb p{color:var(--txt2);font-size:12px;margin-top:1px;}
-.av{
-  width:42px;height:42px;border-radius:50%;
-  background:linear-gradient(135deg,var(--pri),#FFB347);
-  display:flex;align-items:center;justify-content:center;color:#fff;
-  font-weight:800;font-size:15px;cursor:pointer;flex-shrink:0;
-}
-.sl{font-family:var(--hd);font-size:12px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+  /* ---------- AUTH SCREENS ---------- */
+  .auth-screen {
+    min-height: 100vh;
+    padding: calc(var(--safe-top) + 30px) 24px calc(var(--safe-bottom) + 30px);
+    background: linear-gradient(160deg, #eaf0ff 0%, #f7f9fc 50%, #fff4ea 100%);
+    display: flex; flex-direction: column;
+  }
+  .auth-logo {
+    font-size: 42px; font-weight: 800; letter-spacing: -1px;
+    margin-top: 40px; margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .auth-tag { color: var(--text-muted); font-size: 15px; margin-bottom: 40px; }
 
-/* Countdown */
-.cd-scroll{display:flex;gap:10px;overflow-x:auto;padding:0 16px 8px;margin:0 -16px;}
-.cd-card{
-  min-width:250px;border-radius:var(--r);padding:18px;color:#fff;position:relative;overflow:hidden;flex-shrink:0;cursor:pointer;
-}
-.cd-card:active{transform:scale(.97);transition:.15s;}
-.cd-card .cd-icon{font-size:44px;position:absolute;right:14px;top:14px;opacity:.25;}
-.cd-card h3{font-family:var(--hd);font-size:17px;font-weight:800;margin-bottom:3px;}
-.cd-card .cd-date{font-size:12px;opacity:.8;margin-bottom:10px;}
-.cd-nums{display:flex;gap:6px;}
-.cd-num{background:rgba(255,255,255,.22);backdrop-filter:blur(6px);border-radius:10px;padding:7px 9px;text-align:center;min-width:44px;}
-.cd-num b{font-family:var(--hd);font-size:20px;font-weight:900;display:block;}
-.cd-num small{font-size:8px;text-transform:uppercase;letter-spacing:.5px;opacity:.8;}
+  .auth-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 28px 22px;
+    box-shadow: var(--shadow-lg);
+    margin-bottom: 18px;
+  }
+  .auth-title { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
+  .auth-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 22px; }
 
-/* Trip Cards */
-.tc{
-  background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:10px;
-  box-shadow:var(--sh);cursor:pointer;transition:all .2s;border:1px solid var(--brd);
-}
-.tc:active{transform:scale(.98);background:var(--card2);}
-.tc-h{display:flex;align-items:center;gap:11px;margin-bottom:8px;}
-.tc-badge{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-.tc-info{flex:1;}
-.tc-info h3{font-family:var(--hd);font-size:15px;font-weight:800;}
-.tc-info .td{font-size:11px;color:var(--txt3);margin-top:1px;}
-.tc-f{display:flex;align-items:center;justify-content:space-between;}
-.tc-ps{display:flex;align-items:center;}
-.tc-pa{
-  width:26px;height:26px;border-radius:50%;border:2px solid var(--card);
-  display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;
-  color:#fff;margin-left:-7px;
-}
-.tc-pa:first-child{margin-left:0;}
-.tc-sc{font-size:11px;color:var(--txt3);display:flex;align-items:center;gap:3px;}
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--text);
+    outline: none; transition: all .2s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus {
+    border-color: var(--primary); background: #fff;
+    box-shadow: 0 0 0 4px rgba(79, 124, 255, 0.12);
+  }
 
-/* ── TAB BAR ── */
-.tbar{
-  background:var(--card);border-top:1px solid var(--brd);display:flex;
-  padding:6px 8px calc(6px + var(--sab));position:fixed;bottom:0;left:0;right:0;z-index:200;
-}
-.tbar-i{
-  flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;
-  padding:5px;border:none;background:none;cursor:pointer;color:var(--txt3);
-  font-size:9px;font-weight:600;transition:.2s;
-}
-.tbar-i.on{color:var(--pri);}
-.tbar-i span{font-size:21px;}
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 14px 20px;
+    border-radius: var(--radius-sm);
+    font-weight: 700; font-size: 15px;
+    transition: transform .1s, box-shadow .2s, background .2s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 6px 16px rgba(79, 124, 255, 0.35); }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-secondary { background: var(--surface-2); color: var(--text); border: 1.5px solid var(--border); }
+  .btn-ghost { background: transparent; color: var(--primary); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-sm { padding: 9px 14px; font-size: 13px; width: auto; }
+  .btn:disabled { opacity: .6; cursor: not-allowed; }
 
-/* ── FAB ── */
-.fab{
-  position:fixed;bottom:calc(72px + var(--sab));right:16px;z-index:150;
-  width:54px;height:54px;border-radius:50%;border:none;
-  background:linear-gradient(135deg,var(--pri),#FFB347);color:#fff;
-  font-size:28px;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 6px 24px rgba(255,122,47,.4);cursor:pointer;transition:.2s;
-}
-.fab:active{transform:scale(.88);}
+  .auth-switch { text-align: center; color: var(--text-muted); font-size: 14px; margin-top: 14px; }
+  .auth-switch button { color: var(--primary); font-weight: 700; }
 
-/* ── MODAL ── */
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;display:none;align-items:flex-end;justify-content:center;}
-.mo.on{display:flex;animation:mfin .2s;}
-.mo-c{
-  background:var(--card);border-radius:24px 24px 0 0;width:100%;max-width:500px;
-  max-height:88vh;overflow-y:auto;padding:24px;padding-bottom:calc(24px + var(--sab));
-  animation:msup .3s ease;
-}
-@keyframes msup{from{transform:translateY(100%)}to{transform:translateY(0)}}
-@keyframes mfin{from{opacity:0}to{opacity:1}}
-.mo-h{width:40px;height:4px;background:var(--brd2);border-radius:2px;margin:0 auto 18px;}
-.mo-c h3{font-family:var(--hd);font-size:19px;font-weight:800;margin-bottom:18px;}
+  .error-msg { background: #ffe9ea; color: var(--danger); padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 12px; }
+  .success-msg { background: #e6f9ee; color: var(--success); padding: 10px 14px; border-radius: 10px; font-size: 13px; margin-bottom: 12px; }
 
-/* Type grid */
-.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;}
-.to{
-  padding:12px 6px;border-radius:var(--rs);border:2px solid var(--brd);
-  text-align:center;cursor:pointer;transition:.2s;background:var(--bg);
-}
-.to:active{transform:scale(.94);}
-.to.sel{border-color:var(--pri);background:var(--pri-l);}
-.to .te{font-size:26px;display:block;margin-bottom:2px;}
-.to .tn{font-size:10px;font-weight:700;color:var(--txt2);}
+  /* ---------- MAIN APP ---------- */
+  .main-screen {
+    min-height: 100vh;
+    padding-bottom: calc(80px + var(--safe-bottom));
+    display: none;
+  }
+  .main-screen.active { display: block; }
 
-/* ── TRIP DETAIL ── */
-.td-hero{border-radius:var(--r);padding:22px;color:#fff;margin:0 16px 12px;position:relative;overflow:hidden;}
-.td-hero h1{font-family:var(--hd);font-size:22px;font-weight:900;margin-bottom:3px;}
-.td-hero .hdate{opacity:.85;font-size:12px;}
-.td-hero .hico{position:absolute;right:18px;bottom:14px;font-size:56px;opacity:.18;}
-.code-bar{
-  display:flex;align-items:center;gap:8px;background:var(--bg2);padding:10px 14px;
-  border-radius:var(--rs);margin:0 16px 12px;
-}
-.code-bar .code{font-family:monospace;font-size:18px;font-weight:800;letter-spacing:4px;color:var(--pri);flex:1;}
-.code-bar button{padding:7px 14px;border:none;border-radius:var(--rx);background:var(--pri);color:#fff;font-size:12px;font-weight:700;cursor:pointer;}
+  .header {
+    background: var(--surface);
+    padding: calc(var(--safe-top) + 16px) 20px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .header h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .header h1 .accent { color: var(--accent); }
+  .header .avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 15px;
+  }
 
-.dtabs{display:flex;gap:2px;overflow-x:auto;padding:0 16px 10px;background:var(--card);border-bottom:1px solid var(--brd);}
-.dtab{
-  padding:7px 13px;border:none;background:none;border-radius:20px;
-  font-size:12px;font-weight:600;color:var(--txt3);cursor:pointer;white-space:nowrap;transition:.2s;
-}
-.dtab.on{background:var(--pri-l);color:var(--pri-d);font-weight:700;}
+  .page-title {
+    padding: 20px 20px 10px;
+    font-size: 24px; font-weight: 800; letter-spacing: -0.5px;
+  }
+  .page-title small { font-size: 14px; color: var(--text-muted); font-weight: 500; display: block; margin-top: 4px; }
 
-.dc{padding:16px;flex:1;overflow-y:auto;padding-bottom:calc(20px + var(--sab));}
+  /* ---------- BOTTOM NAV ---------- */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-around;
+    padding: 8px 0 calc(8px + var(--safe-bottom));
+    z-index: 100;
+    box-shadow: 0 -4px 16px rgba(25, 40, 90, 0.04);
+  }
+  .nav-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 8px 4px; color: var(--text-light);
+    font-size: 11px; font-weight: 600;
+    transition: color .2s;
+  }
+  .nav-btn svg { width: 22px; height: 22px; stroke-width: 2; }
+  .nav-btn.active { color: var(--primary); }
+  .nav-btn.active svg { stroke-width: 2.5; }
 
-/* Participants */
-.pr{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--brd);}
-.pr:last-child{border:none;}
-.pr-n{flex:1;font-weight:600;font-size:14px;}
-.pr-r{font-size:10px;color:var(--txt3);background:var(--bg2);padding:3px 8px;border-radius:10px;font-weight:600;}
+  /* ---------- HOME / TRIPS LIST ---------- */
+  .home-section { padding: 0 20px 20px; }
 
-/* Stops */
-.sc{
-  background:var(--bg);border-radius:var(--rs);padding:14px;margin-bottom:8px;
-  border-left:4px solid var(--pri);
-}
-.sc .sn{font-family:var(--hd);font-size:11px;font-weight:800;color:var(--pri);margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px;}
-.sc h4{font-family:var(--hd);font-size:14px;font-weight:700;margin-bottom:3px;}
-.sc .sco{font-size:10px;color:var(--txt3);font-family:monospace;}
-.sc .sno{font-size:12px;color:var(--txt2);margin-top:5px;line-height:1.4;}
-.sbox{display:flex;gap:6px;margin-bottom:14px;}
-.sbox input{flex:1;}
+  .quick-actions {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-bottom: 20px;
+  }
+  .quick-action {
+    background: var(--surface); padding: 16px;
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    display: flex; align-items: center; gap: 12px;
+    transition: transform .1s;
+  }
+  .quick-action:active { transform: scale(0.97); }
+  .quick-action .qa-icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .qa-icon.blue { background: var(--primary-soft); color: var(--primary); }
+  .qa-icon.orange { background: #fff1e6; color: var(--accent); }
+  .quick-action .qa-label { font-size: 13px; font-weight: 700; }
 
-/* Chat */
-.chat-c{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-.chat-m{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:6px;}
-.cb{max-width:78%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.45;animation:mfin .2s;}
-.cb.me{background:var(--pri);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
-.cb.ot{background:var(--bg2);color:var(--txt);align-self:flex-start;border-bottom-left-radius:4px;}
-.cb .csn{font-size:10px;font-weight:700;margin-bottom:2px;opacity:.75;}
-.cb .ct{font-size:9px;opacity:.55;margin-top:3px;text-align:right;}
-.chat-ib{
-  display:flex;gap:8px;padding:10px 14px;background:var(--card);border-top:1px solid var(--brd);
-  padding-bottom:calc(10px + var(--sab));
-}
-.chat-ib input{flex:1;padding:10px 16px;border:2px solid var(--brd);border-radius:24px;font-size:14px;background:var(--bg);outline:none;}
-.chat-ib input:focus{border-color:var(--pri);}
-.chat-ib button{width:40px;height:40px;border-radius:50%;border:none;background:var(--pri);color:#fff;font-size:16px;cursor:pointer;}
+  .section-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin: 10px 0 14px;
+  }
+  .section-header h2 { margin: 0; font-size: 18px; font-weight: 700; }
+  .section-header .link { color: var(--primary); font-size: 13px; font-weight: 600; }
 
-/* Expenses */
-.ex-sum{
-  background:linear-gradient(135deg,var(--pri),#FFB347);border-radius:var(--r);
-  padding:20px;color:#fff;margin-bottom:14px;text-align:center;
-}
-.ex-sum .etot{font-family:var(--hd);font-size:34px;font-weight:900;}
-.ex-sum .etl{font-size:12px;opacity:.8;margin-bottom:6px;}
-.ex-bals{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
-.bal-c{background:rgba(255,255,255,.22);border-radius:16px;padding:4px 10px;font-size:11px;font-weight:600;backdrop-filter:blur(4px);}
-.bal-c.pos{color:#D1FAE5;}.bal-c.neg{color:#FFE8EA;}
-.ex-it{
-  background:var(--card);border-radius:var(--rs);padding:12px;margin-bottom:7px;
-  box-shadow:var(--sh);display:flex;align-items:center;gap:10px;border:1px solid var(--brd);
-}
-.ex-ico{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:17px;background:var(--bg2);flex-shrink:0;}
-.ex-inf{flex:1;}
-.ex-inf h4{font-size:13px;font-weight:700;}
-.ex-inf .em{font-size:11px;color:var(--txt3);}
-.ex-am{font-family:var(--hd);font-size:15px;font-weight:800;color:var(--pri);}
-.stl-card{
-  background:var(--acc-l);border-radius:var(--rs);padding:11px 14px;
-  margin-bottom:7px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;
-}
-.stl-ar{color:var(--acc);font-weight:800;font-size:15px;}
+  /* Countdown card */
+  .countdown-card {
+    background: linear-gradient(135deg, #4f7cff, #7a5cff);
+    color: #fff; border-radius: var(--radius-lg); padding: 20px;
+    margin-bottom: 20px; position: relative; overflow: hidden;
+    box-shadow: 0 12px 28px rgba(79, 124, 255, 0.35);
+  }
+  .countdown-card::before {
+    content: ''; position: absolute; right: -30px; top: -30px;
+    width: 140px; height: 140px; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .countdown-card::after {
+    content: ''; position: absolute; right: 30px; bottom: -50px;
+    width: 100px; height: 100px; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .countdown-label { font-size: 12px; opacity: .85; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+  .countdown-name { font-size: 22px; font-weight: 800; margin: 6px 0 14px; }
+  .countdown-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; position: relative; z-index: 1; }
+  .countdown-grid div {
+    background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(10px);
+    padding: 10px 4px; border-radius: 12px; text-align: center;
+  }
+  .countdown-grid .num { font-size: 22px; font-weight: 800; display: block; }
+  .countdown-grid .lbl { font-size: 10px; opacity: .85; text-transform: uppercase; }
 
-/* Calendar */
-.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:14px;}
-.cal-h{text-align:center;font-size:10px;font-weight:700;color:var(--txt3);padding:7px 0;}
-.cal-d{
-  aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  border-radius:10px;font-size:13px;cursor:pointer;transition:.15s;position:relative;font-weight:600;
-}
-.cal-d:active{background:var(--bg2);}
-.cal-d.today{background:var(--pri-l);color:var(--pri);font-weight:800;}
-.cal-d.ev::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--pri);position:absolute;bottom:3px;}
-.cal-d.om{color:var(--txt3);opacity:.35;}
-.cal-d.trip{background:var(--sec-l);}
-.cal-n{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.cal-n h3{font-family:var(--hd);font-size:15px;font-weight:800;}
-.cal-n button{width:30px;height:30px;border-radius:50%;border:none;background:var(--bg2);cursor:pointer;font-size:15px;}
+  /* Trip cards */
+  .trip-card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 16px; margin-bottom: 12px;
+    box-shadow: var(--shadow); display: flex; gap: 14px; align-items: center;
+    transition: transform .1s;
+  }
+  .trip-card:active { transform: scale(0.98); }
+  .trip-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; flex-shrink: 0;
+  }
+  .trip-icon.walk { background: #e6f9ee; color: #2ecc71; }
+  .trip-icon.camper { background: #fff1e6; color: #ff8a3d; }
+  .trip-icon.boat { background: #e6f4ff; color: #4f7cff; }
+  .trip-icon.sup { background: #e6fcfa; color: #1abc9c; }
+  .trip-icon.car { background: #f3ebff; color: #7a5cff; }
+  .trip-icon.flight { background: #ffe6f0; color: #ff5a85; }
+  .trip-icon.bike { background: #fff9e6; color: #ffb648; }
+  .trip-icon.mixed { background: #e8efff; color: #4f7cff; }
 
-/* Notes */
-.nt-card{
-  background:var(--card);border-radius:var(--rs);padding:13px;margin-bottom:8px;
-  box-shadow:var(--sh);border:1px solid var(--brd);border-left:4px solid var(--sec);
-}
-.nt-card h4{font-size:13px;font-weight:700;margin-bottom:3px;}
-.nt-card p{font-size:12px;color:var(--txt2);line-height:1.5;white-space:pre-wrap;}
-.nt-card .ndate{font-size:10px;color:var(--txt3);margin-top:6px;}
-.nc{display:flex;gap:8px;margin-bottom:10px;}
-.ncol{width:26px;height:26px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:.15s;}
-.ncol.sel{border-color:var(--txt);transform:scale(1.15);}
+  .trip-info { flex: 1; min-width: 0; }
+  .trip-name { font-size: 16px; font-weight: 700; margin: 0 0 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .trip-meta { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+  .trip-badge {
+    background: var(--primary-soft); color: var(--primary);
+    padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
+  }
 
-/* Map */
-.map-c{width:100%;height:280px;border-radius:var(--r);overflow:hidden;margin-bottom:10px;border:1px solid var(--brd);}
-.map-t{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;}
-.mt-b{
-  padding:5px 10px;border-radius:16px;border:1px solid var(--brd2);background:var(--card);
-  font-size:11px;cursor:pointer;display:flex;align-items:center;gap:3px;transition:.15s;font-weight:600;
-}
-.mt-b:active,.mt-b.on{background:var(--pri-l);border-color:var(--pri);color:var(--pri-d);}
-.mkr-list{max-height:180px;overflow-y:auto;}
-.mkr-it{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--brd);font-size:12px;}
-.mkr-it .me{font-size:18px;}
+  .empty-state {
+    text-align: center; padding: 40px 20px; color: var(--text-muted);
+  }
+  .empty-state .emoji { font-size: 48px; margin-bottom: 12px; }
+  .empty-state h3 { margin: 0 0 6px; color: var(--text); font-size: 18px; }
+  .empty-state p { margin: 0 0 18px; font-size: 14px; }
 
-/* Checklist */
-.cl-it{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid var(--brd);}
-.ck{
-  width:22px;height:22px;border-radius:7px;border:2px solid var(--brd2);
-  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:.2s;font-size:11px;
-}
-.ck.done{background:var(--acc);border-color:var(--acc);color:#fff;}
-.cl-txt{flex:1;font-size:13px;}
-.cl-txt.done{text-decoration:line-through;color:var(--txt3);}
+  /* ---------- MODAL ---------- */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(15, 20, 40, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.active { display: flex; animation: fade 0.25s; }
+  .modal {
+    background: var(--surface); width: 100%; max-width: 500px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    padding: 22px 20px calc(22px + var(--safe-bottom));
+    max-height: 92vh; overflow-y: auto;
+    animation: slideUp .3s;
+  }
+  .modal-full {
+    border-radius: 0; max-height: 100vh; height: 100vh;
+    padding-top: calc(var(--safe-top) + 16px);
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
-/* Settings */
-.st-it{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--brd);cursor:pointer;}
-.st-it:active{opacity:.7;}
-.st-ic{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;}
-.st-it .st-t{flex:1;}
-.st-it .st-t h4{font-size:13px;font-weight:700;}
-.st-it .st-t p{font-size:11px;color:var(--txt3);}
+  .modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 18px;
+  }
+  .modal-header h2 { margin: 0; font-size: 20px; font-weight: 700; }
+  .modal-close {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--surface-2); display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: var(--text-muted);
+  }
 
-/* Empty */
-.emp{text-align:center;padding:36px 16px;}
-.emp .ei{font-size:52px;margin-bottom:10px;}
-.emp h3{font-family:var(--hd);font-size:17px;font-weight:800;margin-bottom:5px;}
-.emp p{color:var(--txt3);font-size:12px;max-width:240px;margin:0 auto;}
+  /* ---------- TRIP TYPE GRID ---------- */
+  .type-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 16px;
+  }
+  .type-option {
+    background: var(--surface-2); border: 2px solid transparent;
+    border-radius: 14px; padding: 14px 6px; text-align: center;
+    transition: all .2s;
+  }
+  .type-option .emoji { font-size: 26px; display: block; margin-bottom: 4px; }
+  .type-option .label { font-size: 12px; font-weight: 600; }
+  .type-option.selected {
+    border-color: var(--primary); background: var(--primary-soft);
+    color: var(--primary);
+  }
 
-/* Toast */
-.toast{
-  position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:1000;
-  background:var(--txt);color:#fff;padding:11px 22px;border-radius:var(--rs);
-  font-size:13px;font-weight:600;animation:tin .3s ease;box-shadow:0 8px 28px rgba(0,0,0,.2);
-  max-width:calc(100% - 32px);text-align:center;
-}
-@keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(-16px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+  /* ---------- TRIP DETAIL ---------- */
+  .detail-header {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff; padding: calc(var(--safe-top) + 14px) 20px 24px;
+    position: relative;
+  }
+  .detail-back {
+    display: flex; align-items: center; gap: 6px;
+    color: #fff; font-weight: 600; font-size: 14px;
+    margin-bottom: 14px;
+  }
+  .detail-title { font-size: 26px; font-weight: 800; margin: 0 0 4px; letter-spacing: -0.5px; }
+  .detail-sub { font-size: 13px; opacity: .9; }
+  .detail-stats {
+    display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap;
+  }
+  .stat-pill {
+    background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);
+    padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  }
 
-.spn{width:28px;height:28px;border:3px solid var(--brd);border-top-color:var(--pri);border-radius:50%;animation:sp .5s linear infinite;}
-@keyframes sp{to{transform:rotate(360deg)}}
-.loading{display:flex;align-items:center;justify-content:center;padding:36px;}
+  .tab-bar {
+    display: flex; background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 40;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0; padding: 14px 18px; font-size: 13px; font-weight: 600;
+    color: var(--text-muted); position: relative;
+    white-space: nowrap;
+  }
+  .tab-btn.active { color: var(--primary); }
+  .tab-btn.active::after {
+    content: ''; position: absolute; bottom: 0; left: 12px; right: 12px;
+    height: 3px; background: var(--primary); border-radius: 3px 3px 0 0;
+  }
 
-.mt4{margin-top:4px;}.mt8{margin-top:8px;}.mt12{margin-top:12px;}.mt16{margin-top:16px;}.mt20{margin-top:20px;}.mb8{margin-bottom:8px;}.mb12{margin-bottom:12px;}.mb14{margin-bottom:14px;}
-.tac{text-align:center;}
-.progress-bar{height:5px;background:var(--brd);border-radius:3px;overflow:hidden;margin-bottom:8px;}
-.progress-fill{height:100%;background:var(--acc);border-radius:3px;transition:.3s;}
+  .tab-content { padding: 20px; display: none; }
+  .tab-content.active { display: block; }
+
+  /* ---------- CHAT ---------- */
+  .chat-container {
+    display: flex; flex-direction: column;
+    height: calc(100vh - var(--safe-top) - 160px);
+  }
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 16px 20px;
+    background: var(--bg);
+  }
+  .chat-msg { margin-bottom: 12px; display: flex; flex-direction: column; max-width: 78%; }
+  .chat-msg.me { align-self: flex-end; align-items: flex-end; }
+  .chat-msg.other { align-self: flex-start; }
+  .chat-msg .sender { font-size: 11px; color: var(--text-muted); margin-bottom: 3px; padding: 0 10px; font-weight: 600; }
+  .chat-msg .bubble {
+    padding: 9px 14px; border-radius: 18px; font-size: 14px; line-height: 1.4;
+    word-wrap: break-word; max-width: 100%;
+  }
+  .chat-msg.me .bubble { background: var(--primary); color: #fff; border-bottom-right-radius: 6px; }
+  .chat-msg.other .bubble { background: var(--surface); color: var(--text); border-bottom-left-radius: 6px; box-shadow: var(--shadow); }
+  .chat-msg .time { font-size: 10px; color: var(--text-light); margin-top: 3px; padding: 0 10px; }
+
+  .chat-input {
+    display: flex; gap: 8px; padding: 12px 16px calc(12px + var(--safe-bottom));
+    background: var(--surface); border-top: 1px solid var(--border);
+    position: sticky; bottom: 0;
+  }
+  .chat-input input {
+    flex: 1; padding: 12px 16px; border: 1.5px solid var(--border);
+    border-radius: 24px; background: var(--surface-2); outline: none;
+  }
+  .chat-input button {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 18px;
+  }
+
+  /* ---------- EXPENSES (Splitwise-like) ---------- */
+  .balance-card {
+    background: linear-gradient(135deg, #2ecc71, #1abc9c);
+    color: #fff; border-radius: var(--radius-lg); padding: 20px;
+    margin-bottom: 16px;
+  }
+  .balance-card .lbl { font-size: 12px; opacity: .9; text-transform: uppercase; letter-spacing: 1px; }
+  .balance-card .amount { font-size: 30px; font-weight: 800; margin: 6px 0; }
+
+  .expense-item {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 14px; margin-bottom: 10px; display: flex; gap: 12px; align-items: center;
+    box-shadow: var(--shadow);
+  }
+  .expense-icon {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: var(--primary-soft); color: var(--primary);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .expense-info { flex: 1; }
+  .expense-title { font-weight: 700; font-size: 15px; }
+  .expense-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .expense-amount { font-weight: 800; font-size: 16px; }
+
+  .balance-row {
+    display: flex; justify-content: space-between;
+    padding: 12px 14px; background: var(--surface); border-radius: 12px;
+    margin-bottom: 8px; font-size: 14px; box-shadow: var(--shadow);
+  }
+  .balance-row .name { font-weight: 600; }
+  .balance-row .amt.positive { color: var(--success); font-weight: 700; }
+  .balance-row .amt.negative { color: var(--danger); font-weight: 700; }
+  .balance-row .amt.zero { color: var(--text-muted); }
+
+  /* ---------- CALENDAR ---------- */
+  .cal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .cal-header h3 { margin: 0; font-size: 18px; font-weight: 700; }
+  .cal-nav { display: flex; gap: 8px; }
+  .cal-nav button { width: 34px; height: 34px; border-radius: 10px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; }
+
+  .cal-weekdays, .cal-days {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+  }
+  .cal-weekdays div { text-align: center; font-size: 11px; color: var(--text-muted); font-weight: 700; padding: 6px 0; }
+  .cal-day {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; border-radius: 10px; position: relative;
+    background: var(--surface);
+  }
+  .cal-day.other-month { color: var(--text-light); background: transparent; }
+  .cal-day.today { background: var(--primary-soft); color: var(--primary); font-weight: 800; }
+  .cal-day.selected { background: var(--primary); color: #fff; font-weight: 800; }
+  .cal-day.has-event::after {
+    content: ''; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%);
+    width: 4px; height: 4px; border-radius: 50%; background: var(--accent);
+  }
+  .cal-day.selected.has-event::after { background: #fff; }
+
+  .event-list { margin-top: 20px; }
+  .event-item {
+    background: var(--surface); padding: 12px 14px;
+    border-radius: 12px; margin-bottom: 8px;
+    border-left: 4px solid var(--primary);
+    box-shadow: var(--shadow);
+  }
+  .event-item .title { font-weight: 700; font-size: 14px; }
+  .event-item .meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+
+  /* ---------- STAGES / STOPS ---------- */
+  .stage-item {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 14px; margin-bottom: 10px;
+    display: flex; gap: 12px;
+    box-shadow: var(--shadow); position: relative;
+  }
+  .stage-num {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; flex-shrink: 0;
+  }
+  .stage-info { flex: 1; min-width: 0; }
+  .stage-title { font-weight: 700; font-size: 15px; }
+  .stage-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .stage-actions { display: flex; gap: 4px; }
+  .stage-actions button {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--surface-2); color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ---------- MAP ---------- */
+  #trip-map, #stage-search-map { height: 100%; width: 100%; border-radius: 12px; }
+  .map-container {
+    height: calc(100vh - var(--safe-top) - 170px);
+    border-radius: var(--radius); overflow: hidden;
+    position: relative;
+    background: var(--surface-2);
+  }
+  .map-fab {
+    position: absolute; bottom: 16px; right: 16px;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; box-shadow: 0 6px 16px rgba(79, 124, 255, 0.4);
+    z-index: 500;
+  }
+  .map-legend {
+    position: absolute; bottom: 16px; left: 16px;
+    background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+    padding: 8px 12px; border-radius: 12px;
+    font-size: 11px; color: var(--text-muted);
+    box-shadow: var(--shadow);
+    z-index: 500;
+  }
+  .emoji-picker {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;
+    margin: 14px 0;
+  }
+  .emoji-picker button {
+    aspect-ratio: 1; background: var(--surface-2);
+    border-radius: 10px; font-size: 24px;
+    transition: all .2s;
+  }
+  .emoji-picker button:active, .emoji-picker button.selected {
+    background: var(--primary-soft); transform: scale(1.1);
+  }
+
+  /* Map search results */
+  .search-results {
+    max-height: 260px; overflow-y: auto;
+    background: var(--surface); border-radius: 12px;
+    box-shadow: var(--shadow); margin-top: 10px;
+  }
+  .search-result {
+    padding: 12px 14px; border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .search-result:last-child { border-bottom: none; }
+  .search-result:hover, .search-result:active { background: var(--surface-2); }
+  .search-result .name { font-weight: 600; font-size: 14px; }
+  .search-result .addr { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ---------- PARTICIPANTS ---------- */
+  .participant-item {
+    background: var(--surface); padding: 12px 14px;
+    border-radius: 12px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: var(--shadow);
+  }
+  .participant-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+  }
+  .participant-info { flex: 1; }
+  .participant-name { font-weight: 600; font-size: 14px; }
+  .participant-role { font-size: 12px; color: var(--text-muted); }
+
+  .invite-code {
+    background: linear-gradient(135deg, var(--primary-soft), #fff1e6);
+    padding: 20px; border-radius: var(--radius); text-align: center;
+    margin-bottom: 16px;
+  }
+  .invite-code .lbl { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+  .invite-code .code {
+    font-size: 32px; font-weight: 800; letter-spacing: 6px;
+    color: var(--primary); margin: 10px 0; font-family: 'SF Mono', monospace;
+  }
+
+  /* ---------- NOTES ---------- */
+  .note-card {
+    background: var(--surface); padding: 14px;
+    border-radius: var(--radius); margin-bottom: 10px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--accent);
+  }
+  .note-title { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+  .note-body { font-size: 13px; color: var(--text-muted); line-height: 1.5; white-space: pre-wrap; }
+  .note-date { font-size: 11px; color: var(--text-light); margin-top: 8px; }
+
+  /* ---------- FAB ---------- */
+  .fab {
+    position: fixed; bottom: calc(80px + var(--safe-bottom) + 10px); right: 20px;
+    width: 58px; height: 58px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 300;
+    box-shadow: 0 8px 20px rgba(79, 124, 255, 0.45);
+    z-index: 90;
+  }
+
+  /* ---------- TOAST ---------- */
+  .toast {
+    position: fixed; top: calc(var(--safe-top) + 20px); left: 50%;
+    transform: translateX(-50%) translateY(-150%);
+    background: var(--text); color: #fff;
+    padding: 12px 22px; border-radius: 40px;
+    font-size: 14px; font-weight: 600;
+    box-shadow: var(--shadow-lg); z-index: 2000;
+    transition: transform .3s;
+    max-width: 90%; text-align: center;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+
+  /* ---------- LOADING ---------- */
+  .loader {
+    position: fixed; inset: 0; background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center;
+    z-index: 5000;
+  }
+  .loader.active { display: flex; }
+  .loader .spinner {
+    width: 44px; height: 44px; border: 4px solid var(--border);
+    border-top-color: var(--primary); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .tag { background: var(--surface-2); padding: 4px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; color: var(--text-muted); }
+
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  .info-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-bottom: 16px;
+  }
+  .info-box {
+    background: var(--surface); padding: 14px;
+    border-radius: var(--radius); box-shadow: var(--shadow);
+  }
+  .info-box .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+  .info-box .val { font-size: 15px; font-weight: 700; margin-top: 3px; }
+
+  .pulse { animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  /* Leaflet popup theming */
+  .leaflet-popup-content-wrapper { border-radius: 12px; }
+  .leaflet-popup-content { margin: 12px 14px; font-family: inherit; font-size: 13px; }
+
 </style>
 </head>
 <body>
+
 <div id="app">
 
-<!-- AUTH -->
-<div id="scr-auth" class="scr auth on">
-  <div class="auth-logo">🌍</div>
-  <h1>Travel <span>IO</span></h1>
-  <p class="auth-sub">I tuoi viaggi, insieme.</p>
-  <div class="auth-box">
-    <div class="atabs">
-      <button class="atab on" onclick="aTab('login')">Accedi</button>
-      <button class="atab" onclick="aTab('reg')">Registrati</button>
+  <!-- =========================================================== -->
+  <!-- AUTH SCREEN                                                -->
+  <!-- =========================================================== -->
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-logo">IO Travel</div>
+    <div class="auth-tag">Organizza. Esplora. Condividi. ✈️</div>
+
+    <!-- Login form -->
+    <div id="login-form" class="auth-card">
+      <h2 class="auth-title">Bentornato!</h2>
+      <p class="auth-sub">Accedi al tuo account per continuare</p>
+      <div id="login-error" class="error-msg" style="display:none"></div>
+      <div class="field">
+        <label>Email</label>
+        <input id="login-email" type="email" placeholder="mario.rossi@email.com" autocomplete="email" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()">Accedi</button>
+      <p class="auth-switch">Non hai un account? <button onclick="toggleAuth('register')">Registrati</button></p>
     </div>
-    <div id="a-login">
-      <div class="fg"><label>Email</label><input type="email" class="fi" id="l-email" placeholder="la-tua@email.com"></div>
-      <div class="fg"><label>Password</label><input type="password" class="fi" id="l-pw" placeholder="••••••••"></div>
-      <button class="btn btn-p" onclick="doLogin()">Accedi</button>
-      <div class="dvd">oppure</div>
-      <button class="btn btn-o" onclick="doGoogle()">🔵 Accedi con Google</button>
+
+    <!-- Register form -->
+    <div id="register-form" class="auth-card" style="display:none">
+      <h2 class="auth-title">Crea il tuo account</h2>
+      <p class="auth-sub">Inizia a pianificare i tuoi viaggi</p>
+      <div id="register-error" class="error-msg" style="display:none"></div>
+      <div class="field">
+        <label>Nome</label>
+        <input id="register-name" type="text" placeholder="Mario Rossi" />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input id="register-email" type="email" placeholder="mario.rossi@email.com" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="register-password" type="password" placeholder="Almeno 6 caratteri" />
+      </div>
+      <button class="btn btn-primary" onclick="doRegister()">Crea Account</button>
+      <p class="auth-switch">Hai già un account? <button onclick="toggleAuth('login')">Accedi</button></p>
     </div>
-    <div id="a-reg" style="display:none">
-      <div class="fg"><label>Nome</label><input type="text" class="fi" id="r-name" placeholder="Il tuo nome"></div>
-      <div class="fg"><label>Email</label><input type="email" class="fi" id="r-email" placeholder="la-tua@email.com"></div>
-      <div class="fg"><label>Password</label><input type="password" class="fi" id="r-pw" placeholder="Minimo 6 caratteri"></div>
-      <button class="btn btn-p" onclick="doReg()">Crea Account</button>
+
+    <!-- Join with code (only when logged in OR hidden until authenticated) -->
+    <div id="join-card" class="auth-card" style="display:none">
+      <h2 class="auth-title">Unisciti a un viaggio</h2>
+      <p class="auth-sub">Inserisci il codice che hai ricevuto</p>
+      <div id="join-error" class="error-msg" style="display:none"></div>
+      <div class="field">
+        <input id="join-code" type="text" placeholder="CODICE INVITO" style="text-align:center; letter-spacing:4px; text-transform:uppercase; font-weight:700; font-size:18px" maxlength="8" />
+      </div>
+      <button class="btn btn-primary" onclick="doJoinTrip()">Unisciti</button>
     </div>
-    <div class="join-box">
-      <p style="font-size:12px;color:var(--txt2);text-align:center;margin-bottom:8px;">Hai un codice viaggio?</p>
-      <input type="text" class="fi" id="join-auth" placeholder="ABC123" maxlength="6">
-      <button class="btn btn-s mt8" onclick="joinFromAuth()">Unisciti al Viaggio</button>
+  </div>
+
+  <!-- =========================================================== -->
+  <!-- MAIN APP                                                   -->
+  <!-- =========================================================== -->
+  <div id="main-screen" class="main-screen">
+
+    <!-- HOME -->
+    <div id="page-home" class="page">
+      <header class="header">
+        <h1>IO <span class="accent">Travel</span></h1>
+        <div class="avatar" id="user-avatar" onclick="showPage('profile')">?</div>
+      </header>
+
+      <div class="home-section">
+        <div id="countdown-area"></div>
+
+        <div class="quick-actions">
+          <button class="quick-action" onclick="openModal('new-trip-modal')">
+            <div class="qa-icon blue">➕</div>
+            <div class="qa-label">Nuovo<br/>viaggio</div>
+          </button>
+          <button class="quick-action" onclick="openModal('join-trip-modal')">
+            <div class="qa-icon orange">🎟️</div>
+            <div class="qa-label">Usa codice<br/>invito</div>
+          </button>
+        </div>
+
+        <div class="section-header">
+          <h2>I tuoi viaggi</h2>
+        </div>
+        <div id="trips-list"></div>
+      </div>
     </div>
+
+    <!-- CALENDAR -->
+    <div id="page-calendar" class="page" style="display:none">
+      <header class="header">
+        <h1>Calendario</h1>
+        <div class="avatar" id="user-avatar-cal" onclick="showPage('profile')">?</div>
+      </header>
+      <div class="home-section">
+        <div class="cal-header">
+          <h3 id="cal-month-label">—</h3>
+          <div class="cal-nav">
+            <button onclick="changeMonth(-1)">‹</button>
+            <button onclick="changeMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="cal-weekdays">
+          <div>Lun</div><div>Mar</div><div>Mer</div><div>Gio</div><div>Ven</div><div>Sab</div><div>Dom</div>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+
+        <div class="section-header" style="margin-top: 24px">
+          <h2 id="selected-date-label">Eventi</h2>
+          <button class="btn btn-sm btn-primary" onclick="openModal('new-event-modal')">+ Aggiungi</button>
+        </div>
+        <div id="events-list"></div>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div id="page-notes" class="page" style="display:none">
+      <header class="header">
+        <h1>Note</h1>
+        <div class="avatar" id="user-avatar-notes" onclick="showPage('profile')">?</div>
+      </header>
+      <div class="home-section">
+        <div id="notes-list"></div>
+      </div>
+      <button class="fab" onclick="openModal('new-note-modal')">+</button>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="page-profile" class="page" style="display:none">
+      <header class="header">
+        <h1>Profilo</h1>
+        <div></div>
+      </header>
+      <div class="home-section">
+        <div style="text-align:center; margin: 30px 0">
+          <div class="avatar" id="profile-avatar-big" style="width:80px; height:80px; font-size:32px; margin:0 auto 12px">?</div>
+          <h2 id="profile-name" style="margin: 0 0 4px">—</h2>
+          <p id="profile-email" style="color:var(--text-muted); margin: 0; font-size: 14px">—</p>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-box">
+            <div class="lbl">Viaggi</div>
+            <div class="val" id="stat-trips">0</div>
+          </div>
+          <div class="info-box">
+            <div class="lbl">Note</div>
+            <div class="val" id="stat-notes">0</div>
+          </div>
+        </div>
+
+        <button class="btn btn-secondary" style="margin-bottom:10px" onclick="openModal('edit-profile-modal')">✏️ Modifica profilo</button>
+        <button class="btn btn-danger" onclick="doLogout()">Esci</button>
+        <p style="text-align:center; color:var(--text-light); font-size:11px; margin-top:20px">IO Travel v1.0 • made with ✈️</p>
+      </div>
+    </div>
+
+    <!-- TRIP DETAIL -->
+    <div id="page-trip" class="page" style="display:none">
+      <div class="detail-header">
+        <button class="detail-back" onclick="showPage('home')">‹ Indietro</button>
+        <h1 class="detail-title" id="trip-detail-name">—</h1>
+        <div class="detail-sub" id="trip-detail-dates">—</div>
+        <div class="detail-stats" id="trip-detail-stats"></div>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')">📋 Panoramica</button>
+        <button class="tab-btn" data-tab="stages" onclick="switchTab('stages')">📍 Tappe</button>
+        <button class="tab-btn" data-tab="map" onclick="switchTab('map')">🗺️ Mappa</button>
+        <button class="tab-btn" data-tab="expenses" onclick="switchTab('expenses')">💰 Spese</button>
+        <button class="tab-btn" data-tab="chat" onclick="switchTab('chat')">💬 Chat</button>
+        <button class="tab-btn" data-tab="people" onclick="switchTab('people')">👥 Persone</button>
+      </div>
+
+      <!-- Tab: Overview -->
+      <div id="tab-overview" class="tab-content active">
+        <div id="trip-countdown-detail"></div>
+        <div class="info-grid">
+          <div class="info-box"><div class="lbl">Tipo</div><div class="val" id="trip-info-type">—</div></div>
+          <div class="info-box"><div class="lbl">Durata</div><div class="val" id="trip-info-duration">—</div></div>
+          <div class="info-box"><div class="lbl">Partecipanti</div><div class="val" id="trip-info-people">0</div></div>
+          <div class="info-box"><div class="lbl">Tappe</div><div class="val" id="trip-info-stages">0</div></div>
+        </div>
+
+        <div class="section-header"><h2>Descrizione</h2></div>
+        <div class="note-card" style="border-left-color: var(--primary)">
+          <div class="note-body" id="trip-description">Nessuna descrizione.</div>
+        </div>
+
+        <div class="section-header" style="margin-top:20px"><h2>Info volo/trasporto</h2></div>
+        <div class="note-card" style="border-left-color: var(--accent)">
+          <div class="note-body" id="trip-transport">—</div>
+        </div>
+
+        <button class="btn btn-secondary" style="margin-top:20px" onclick="openEditTripModal()">✏️ Modifica viaggio</button>
+        <button class="btn btn-danger" style="margin-top:10px" onclick="deleteCurrentTrip()">🗑️ Elimina viaggio</button>
+      </div>
+
+      <!-- Tab: Stages -->
+      <div id="tab-stages" class="tab-content">
+        <div class="section-header">
+          <h2>Itinerario</h2>
+          <button class="btn btn-sm btn-primary" onclick="openModal('new-stage-modal')">+ Tappa</button>
+        </div>
+        <div id="stages-list"></div>
+      </div>
+
+      <!-- Tab: Map -->
+      <div id="tab-map" class="tab-content">
+        <div class="map-container">
+          <div id="trip-map"></div>
+          <button class="map-fab" onclick="openModal('map-marker-modal')" title="Aggiungi marker">📍</button>
+          <div class="map-legend">Tocca la mappa per aggiungere un marker personalizzato</div>
+        </div>
+      </div>
+
+      <!-- Tab: Expenses -->
+      <div id="tab-expenses" class="tab-content">
+        <div class="balance-card" id="balance-card">
+          <div class="lbl">Saldo totale del viaggio</div>
+          <div class="amount" id="total-expenses">€0</div>
+          <div style="font-size: 13px; opacity:.9" id="balance-sub">Nessuna spesa registrata</div>
+        </div>
+
+        <div class="section-header">
+          <h2>Bilanci</h2>
+        </div>
+        <div id="balances-list"></div>
+
+        <div class="section-header" style="margin-top:20px">
+          <h2>Tutte le spese</h2>
+          <button class="btn btn-sm btn-primary" onclick="openModal('new-expense-modal')">+ Aggiungi</button>
+        </div>
+        <div id="expenses-list"></div>
+      </div>
+
+      <!-- Tab: Chat -->
+      <div id="tab-chat" class="tab-content" style="padding:0">
+        <div class="chat-container">
+          <div class="chat-messages" id="chat-messages"></div>
+          <div class="chat-input">
+            <input id="chat-input-field" type="text" placeholder="Scrivi un messaggio…" onkeypress="if(event.key==='Enter') sendChatMessage()" />
+            <button onclick="sendChatMessage()">➤</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: People -->
+      <div id="tab-people" class="tab-content">
+        <div class="invite-code">
+          <div class="lbl">Codice invito</div>
+          <div class="code" id="invite-code-display">————</div>
+          <button class="btn btn-sm btn-primary" style="margin: 0 auto; width:auto" onclick="shareInvite()">📤 Condividi</button>
+        </div>
+
+        <div class="section-header"><h2>Partecipanti</h2></div>
+        <div id="participants-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom nav -->
+  <nav class="bottom-nav" id="bottom-nav" style="display:none">
+    <button class="nav-btn active" data-page="home" onclick="showPage('home')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3m10-11v10a1 1 0 01-1 1h-3m-6 0h6m-6 0v-5a1 1 0 011-1h4a1 1 0 011 1v5"/></svg>
+      Home
+    </button>
+    <button class="nav-btn" data-page="calendar" onclick="showPage('calendar')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      Calendario
+    </button>
+    <button class="nav-btn" data-page="notes" onclick="showPage('notes')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      Note
+    </button>
+    <button class="nav-btn" data-page="profile" onclick="showPage('profile')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+      Profilo
+    </button>
+  </nav>
+
+</div>
+
+<!-- ================================================================= -->
+<!-- MODALS                                                            -->
+<!-- ================================================================= -->
+
+<!-- New trip -->
+<div id="new-trip-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>✨ Nuovo Viaggio</h2>
+      <button class="modal-close" onclick="closeModal('new-trip-modal')">×</button>
+    </div>
+    <div class="field">
+      <label>Nome del viaggio</label>
+      <input id="nt-name" type="text" placeholder="Es. Estate in Norvegia" />
+    </div>
+    <div class="field">
+      <label>Tipo di viaggio</label>
+      <div class="type-grid" id="nt-types">
+        <button class="type-option" data-type="walk" onclick="selectType('walk')"><span class="emoji">🚶</span><div class="label">A piedi</div></button>
+        <button class="type-option" data-type="camper" onclick="selectType('camper')"><span class="emoji">🚐</span><div class="label">Camper</div></button>
+        <button class="type-option" data-type="boat" onclick="selectType('boat')"><span class="emoji">⛵</span><div class="label">Barca</div></button>
+        <button class="type-option" data-type="sup" onclick="selectType('sup')"><span class="emoji">🏄</span><div class="label">SUP</div></button>
+        <button class="type-option" data-type="car" onclick="selectType('car')"><span class="emoji">🚗</span><div class="label">Auto</div></button>
+        <button class="type-option" data-type="flight" onclick="selectType('flight')"><span class="emoji">✈️</span><div class="label">Volo</div></button>
+        <button class="type-option" data-type="bike" onclick="selectType('bike')"><span class="emoji">🚴</span><div class="label">Bici</div></button>
+        <button class="type-option" data-type="mixed" onclick="selectType('mixed')"><span class="emoji">🌍</span><div class="label">Misto</div></button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Destinazione principale</label>
+      <input id="nt-destination" type="text" placeholder="Es. Lofoten, Norvegia" />
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+      <div class="field">
+        <label>Data inizio</label>
+        <input id="nt-start" type="date" />
+      </div>
+      <div class="field">
+        <label>Data fine</label>
+        <input id="nt-end" type="date" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Descrizione (opzionale)</label>
+      <textarea id="nt-description" rows="3" placeholder="Note o dettagli sul viaggio…"></textarea>
+    </div>
+    <div class="field">
+      <label>Info volo / trasporto (opzionale)</label>
+      <textarea id="nt-transport" rows="3" placeholder="Es. Volo AZ123 il 12/05 ore 08:30 da Malpensa"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="createTrip()">Crea viaggio</button>
   </div>
 </div>
 
-<!-- HOME -->
-<div id="scr-home" class="scr">
-  <div class="home-c">
-    <div class="wb">
-      <div><h2>Ciao, <span id="u-name">Viaggiatore</span>!</h2><p>Pronto per la prossima avventura?</p></div>
-      <div class="av" id="u-av" onclick="go('settings')">?</div>
+<!-- Join trip -->
+<div id="join-trip-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🎟️ Codice Invito</h2>
+      <button class="modal-close" onclick="closeModal('join-trip-modal')">×</button>
     </div>
-    <div id="cd-sec" style="display:none">
-      <div class="sl">⏳ Prossimi Viaggi</div>
-      <div class="cd-scroll" id="cd-scroll"></div>
+    <p style="color:var(--text-muted); font-size:14px; margin-top:0">Inserisci il codice che ti è stato condiviso per unirti al viaggio.</p>
+    <div class="field">
+      <input id="join-code-modal" type="text" placeholder="CODICE" maxlength="8" style="text-align:center; letter-spacing:4px; text-transform:uppercase; font-weight:700; font-size:20px" />
     </div>
-    <div class="sl mt12">🧳 I Miei Viaggi</div>
-    <div id="trips-l"></div>
-  </div>
-  <button class="fab" onclick="openCreate()">＋</button>
-</div>
-
-<!-- TRIP DETAIL -->
-<div id="scr-trip" class="scr">
-  <div class="hdr">
-    <button class="hdr-b" onclick="go('home')">←</button>
-    <div class="hdr-t" id="td-title">Viaggio</div>
-    <button class="btn-ic" onclick="openTripSet()" style="background:var(--bg2);font-size:14px;">⚙️</button>
-  </div>
-  <div class="td-hero" id="td-hero"><h1 id="td-hname">Nome</h1><div class="hdate" id="td-hdate">Date</div><div class="hico" id="td-hico">✈️</div></div>
-  <div class="code-bar"><span style="font-size:11px;color:var(--txt3);">Codice:</span><span class="code" id="td-code">ABC123</span><button onclick="cpCode()">📋 Copia</button></div>
-  <div class="dtabs" id="dtabs">
-    <button class="dtab on" data-t="ov" onclick="dTab('ov')">Panoramica</button>
-    <button class="dtab" data-t="st" onclick="dTab('st')">🗺️ Tappe</button>
-    <button class="dtab" data-t="mp" onclick="dTab('mp')">📍 Mappa</button>
-    <button class="dtab" data-t="ch" onclick="dTab('ch')">💬 Chat</button>
-    <button class="dtab" data-t="ex" onclick="dTab('ex')">💰 Spese</button>
-    <button class="dtab" data-t="ca" onclick="dTab('ca')">📅 Calendario</button>
-    <button class="dtab" data-t="no" onclick="dTab('no')">📝 Note</button>
-    <button class="dtab" data-t="cl" onclick="dTab('cl')">✅ Checklist</button>
-    <button class="dtab" data-t="dc" onclick="dTab('dc')">📄 Documenti</button>
-  </div>
-  <!-- OV --><div class="dc" id="t-ov"><div class="sl">Partecipanti</div><div id="part-l"></div><button class="btn btn-s mt12" onclick="openInvite()">👥 Invita Partecipanti</button><div class="sl mt20">Info Viaggio</div><div id="trip-inf"></div></div>
-  <!-- ST --><div class="dc" id="t-st" style="display:none"><div class="sbox"><input type="text" class="fi" id="st-search" placeholder="🔍 Cerca luogo o coordinate..."><button class="btn btn-p btn-sm" onclick="searchP()" style="width:auto;padding:10px 14px;">Cerca</button></div><div id="st-map" class="map-c"></div><button class="btn btn-s mb14" onclick="openAddStop()">＋ Aggiungi Tappa</button><div id="st-list"></div></div>
-  <!-- MP --><div class="dc" id="t-mp" style="display:none"><div class="map-t"><button class="mt-b on" onclick="mTool('pin')" id="mt-pin">📌 Segnaposto</button><button class="mt-b" onclick="mTool('note')" id="mt-note">📝 Nota</button><button class="mt-b" onclick="mTool('bed')" id="mt-bed">🛏️ Alloggio</button><button class="mt-b" onclick="mTool('food')" id="mt-food">🍽️ Ristorante</button><button class="mt-b" onclick="mTool('star')" id="mt-star">⭐ Da vedere</button><button class="mt-b" onclick="mTool('route')" id="mt-route">🛤️ Percorso</button><button class="mt-b" onclick="mTool('photo')" id="mt-photo">📸 Foto</button><button class="mt-b" onclick="mTool('warn')" id="mt-warn">⚠️ Attenzione</button><button class="mt-b" onclick="mTool('fuel')" id="mt-fuel">⛽ Carburante</button><button class="mt-b" onclick="mTool('park')" id="mt-park">🅿️ Parcheggio</button><button class="mt-b" onclick="mTool('swim')" id="mt-swim">🏊 Spiaggia</button><button class="mt-b" onclick="mTool('shop')" id="mt-shop">🛍️ Shopping</button></div><div id="i-map" class="map-c" style="height:380px;"></div><div class="sl mt16">Segnalini</div><div class="mkr-list" id="mkr-list"></div></div>
-  <!-- CH --><div class="dc" id="t-ch" style="display:none;padding:0;"><div class="chat-c"><div class="chat-m" id="ch-msgs"></div><div class="chat-ib"><input type="text" id="ch-in" placeholder="Scrivi un messaggio..."><button onclick="sendMsg()">➤</button></div></div></div>
-  <!-- EX --><div class="dc" id="t-ex" style="display:none"><div class="ex-sum" id="ex-sum"><div class="etl">Spesa Totale</div><div class="etot">€0,00</div><div class="ex-bals" id="ex-bals"></div></div><div style="display:flex;gap:6px;margin-bottom:14px;"><button class="btn btn-p" onclick="openAddExp()" style="flex:1;">＋ Spesa</button><button class="btn btn-o" onclick="togStl()" style="flex:1;">⚖️ Saldi</button></div><div id="ex-list"></div><div id="stl-sec" style="display:none"><div class="sl">💸 Come Pareggiare</div><div id="stl-c"></div></div></div>
-  <!-- CA --><div class="dc" id="t-ca" style="display:none"><div class="cal-n"><button onclick="chMon(-1)">‹</button><h3 id="cal-my">Aprile 2026</h3><button onclick="chMon(1)">›</button></div><div class="cal-g" id="cal-g"></div><div class="sl mt12">Eventi del giorno</div><div id="cal-ev"></div><button class="btn btn-s mt8" onclick="openAddEv()">＋ Aggiungi Evento</button></div>
-  <!-- NO --><div class="dc" id="t-no" style="display:none"><button class="btn btn-s mb14" onclick="openAddNote()">＋ Nuova Nota</button><div id="no-list"></div></div>
-  <!-- CL --><div class="dc" id="t-cl" style="display:none"><div class="sbox"><input type="text" class="fi" id="cl-in" placeholder="Aggiungi elemento..."><button class="btn btn-p btn-sm" onclick="addCl()" style="width:auto;padding:10px 14px;">＋</button></div><div id="cl-list"></div><div class="sl mt20">Suggerimenti</div><div id="cl-sug"></div></div>
-  <!-- DC --><div class="dc" id="t-dc" style="display:none"><div class="emp"><div class="ei">📄</div><h3>Documenti di Viaggio</h3><p>Biglietti, prenotazioni, assicurazioni e altri documenti</p></div><div id="doc-list"></div></div>
-</div>
-
-<!-- SETTINGS -->
-<div id="scr-settings" class="scr">
-  <div class="hdr"><button class="hdr-b" onclick="go('home')">←</button><div class="hdr-t">Profilo</div></div>
-  <div style="padding:16px;">
-    <div class="tac mb14"><div class="av" style="width:72px;height:72px;font-size:28px;margin:0 auto 10px;" id="s-av">?</div><h2 style="font-family:var(--hd);font-size:18px;font-weight:800;" id="s-name">Nome</h2><p style="color:var(--txt3);font-size:12px;" id="s-email">email</p></div>
-    <div class="st-it" onclick="editProf()"><div class="st-ic" style="background:var(--pri-l);color:var(--pri);">✏️</div><div class="st-t"><h4>Modifica Profilo</h4><p>Nome e preferenze</p></div><span style="color:var(--txt3);">›</span></div>
-    <div class="st-it"><div class="st-ic" style="background:var(--sec-l);color:var(--sec);">🔔</div><div class="st-t"><h4>Notifiche</h4><p>Gestisci le notifiche</p></div><span style="color:var(--txt3);">›</span></div>
-    <div class="st-it"><div class="st-ic" style="background:var(--pur-l);color:var(--pur);">🌍</div><div class="st-t"><h4>Lingua</h4><p>Italiano</p></div><span style="color:var(--txt3);">›</span></div>
-    <div class="st-it"><div class="st-ic" style="background:var(--acc-l);color:var(--acc);">💱</div><div class="st-t"><h4>Valuta</h4><p>EUR (€)</p></div><span style="color:var(--txt3);">›</span></div>
-    <div class="st-it" onclick="doLogout()"><div class="st-ic" style="background:var(--red-l);color:var(--red);">🚪</div><div class="st-t"><h4>Esci</h4><p>Disconnetti account</p></div><span style="color:var(--txt3);">›</span></div>
+    <button class="btn btn-primary" onclick="joinTripFromModal()">Unisciti</button>
   </div>
 </div>
 
-<div class="tbar" id="tbar" style="display:none;">
-  <button class="tbar-i on" onclick="mTab('home')"><span>🏠</span>Home</button>
-  <button class="tbar-i" onclick="mTab('explore')"><span>🔍</span>Esplora</button>
-  <button class="tbar-i" onclick="mTab('cal')"><span>📅</span>Calendario</button>
-  <button class="tbar-i" onclick="mTab('profile')"><span>👤</span>Profilo</button>
-</div>
+<!-- New event -->
+<div id="new-event-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>📅 Nuovo evento</h2>
+      <button class="modal-close" onclick="closeModal('new-event-modal')">×</button>
+    </div>
+    <div class="field"><label>Titolo</label><input id="ne-title" type="text" placeholder="Es. Visita al museo" /></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+      <div class="field"><label>Data</label><input id="ne-date" type="date" /></div>
+      <div class="field"><label>Ora</label><input id="ne-time" type="time" /></div>
+    </div>
+    <div class="field"><label>Note</label><textarea id="ne-notes" rows="3" placeholder="Dettagli…"></textarea></div>
+    <button class="btn btn-primary" onclick="createEvent()">Salva evento</button>
+  </div>
 </div>
 
-<div class="mo" id="mo"><div class="mo-c" id="mo-c"></div></div>
+<!-- New note -->
+<div id="new-note-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>📝 Nuova nota</h2>
+      <button class="modal-close" onclick="closeModal('new-note-modal')">×</button>
+    </div>
+    <div class="field"><label>Titolo</label><input id="nn-title" type="text" placeholder="Es. Cose da portare" /></div>
+    <div class="field"><label>Contenuto</label><textarea id="nn-body" rows="6" placeholder="Scrivi qui la tua nota…"></textarea></div>
+    <button class="btn btn-primary" onclick="createNote()">Salva nota</button>
+  </div>
+</div>
+
+<!-- New stage -->
+<div id="new-stage-modal" class="modal-overlay">
+  <div class="modal modal-full">
+    <div class="modal-header">
+      <h2>📍 Nuova tappa</h2>
+      <button class="modal-close" onclick="closeModal('new-stage-modal')">×</button>
+    </div>
+    <div class="field"><label>Nome tappa</label><input id="ns-title" type="text" placeholder="Es. Reine, Lofoten" /></div>
+    <div class="field">
+      <label>Cerca luogo o inserisci coordinate (lat, lng)</label>
+      <input id="ns-search" type="text" placeholder="Es. Colosseo Roma • oppure: 41.8902, 12.4924" />
+      <div style="display:flex; gap:8px; margin-top:8px">
+        <button class="btn btn-secondary btn-sm" onclick="searchLocation()" style="flex:1">🔍 Cerca</button>
+      </div>
+      <div id="stage-search-results" class="search-results" style="display:none"></div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+      <div class="field"><label>Data arrivo</label><input id="ns-date" type="date" /></div>
+      <div class="field"><label>Durata (gg)</label><input id="ns-days" type="number" min="1" value="1" /></div>
+    </div>
+    <div class="field"><label>Note (opzionale)</label><textarea id="ns-notes" rows="3" placeholder="Cose da fare, info utili…"></textarea></div>
+    <div style="background:var(--surface-2); padding:12px; border-radius:12px; font-size:13px; margin-bottom:16px">
+      <strong>Coordinate:</strong> <span id="ns-coords">Nessuna</span>
+    </div>
+    <button class="btn btn-primary" onclick="createStage()">Salva tappa</button>
+  </div>
+</div>
+
+<!-- New expense -->
+<div id="new-expense-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>💰 Nuova spesa</h2>
+      <button class="modal-close" onclick="closeModal('new-expense-modal')">×</button>
+    </div>
+    <div class="field"><label>Descrizione</label><input id="nex-desc" type="text" placeholder="Es. Cena ristorante" /></div>
+    <div class="field"><label>Importo (€)</label><input id="nex-amount" type="number" step="0.01" placeholder="0,00" /></div>
+    <div class="field">
+      <label>Pagato da</label>
+      <select id="nex-paidBy"></select>
+    </div>
+    <div class="field">
+      <label>Dividi tra</label>
+      <div id="nex-splitList" style="background:var(--surface-2); padding:12px; border-radius:12px"></div>
+    </div>
+    <div class="field">
+      <label>Categoria</label>
+      <select id="nex-category">
+        <option value="🍽️">🍽️ Cibo</option>
+        <option value="🏨">🏨 Alloggio</option>
+        <option value="🚗">🚗 Trasporti</option>
+        <option value="🎟️">🎟️ Attività</option>
+        <option value="🛒">🛒 Spesa</option>
+        <option value="💊">💊 Salute</option>
+        <option value="📦">📦 Altro</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" onclick="createExpense()">Aggiungi spesa</button>
+  </div>
+</div>
+
+<!-- Map marker -->
+<div id="map-marker-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>📌 Aggiungi marker</h2>
+      <button class="modal-close" onclick="closeModal('map-marker-modal')">×</button>
+    </div>
+    <p style="color:var(--text-muted); font-size:13px; margin-top:0">Scegli un'emoji e una nota, poi clicca sulla mappa per posizionarlo.</p>
+    <div class="field">
+      <label>Titolo</label>
+      <input id="mk-title" type="text" placeholder="Es. Bellissima baia" />
+    </div>
+    <div class="field">
+      <label>Seleziona emoji</label>
+      <div class="emoji-picker" id="emoji-picker">
+        <button onclick="selectEmoji('🛏️', this)">🛏️</button>
+        <button onclick="selectEmoji('🍽️', this)">🍽️</button>
+        <button onclick="selectEmoji('⭐', this)">⭐</button>
+        <button onclick="selectEmoji('📸', this)">📸</button>
+        <button onclick="selectEmoji('🏖️', this)">🏖️</button>
+        <button onclick="selectEmoji('🏔️', this)">🏔️</button>
+        <button onclick="selectEmoji('⛺', this)">⛺</button>
+        <button onclick="selectEmoji('🛍️', this)">🛍️</button>
+        <button onclick="selectEmoji('🚻', this)">🚻</button>
+        <button onclick="selectEmoji('⛽', this)">⛽</button>
+        <button onclick="selectEmoji('⚠️', this)">⚠️</button>
+        <button onclick="selectEmoji('❤️', this)">❤️</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Nota (opzionale)</label>
+      <textarea id="mk-note" rows="3" placeholder="Info utili, ricordi, ecc."></textarea>
+    </div>
+    <p style="text-align:center; color:var(--primary); font-weight:700; font-size:13px" class="pulse">👆 Ora tocca sulla mappa per posizionare</p>
+    <button class="btn btn-secondary" onclick="closeModal('map-marker-modal')">Annulla</button>
+  </div>
+</div>
+
+<!-- Edit profile -->
+<div id="edit-profile-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>✏️ Modifica profilo</h2>
+      <button class="modal-close" onclick="closeModal('edit-profile-modal')">×</button>
+    </div>
+    <div class="field"><label>Nome</label><input id="ep-name" type="text" /></div>
+    <button class="btn btn-primary" onclick="saveProfile()">Salva</button>
+  </div>
+</div>
+
+<!-- Edit trip -->
+<div id="edit-trip-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>✏️ Modifica viaggio</h2>
+      <button class="modal-close" onclick="closeModal('edit-trip-modal')">×</button>
+    </div>
+    <div class="field"><label>Nome</label><input id="et-name" type="text" /></div>
+    <div class="field"><label>Destinazione</label><input id="et-destination" type="text" /></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+      <div class="field"><label>Inizio</label><input id="et-start" type="date" /></div>
+      <div class="field"><label>Fine</label><input id="et-end" type="date" /></div>
+    </div>
+    <div class="field"><label>Descrizione</label><textarea id="et-description" rows="3"></textarea></div>
+    <div class="field"><label>Info volo / trasporto</label><textarea id="et-transport" rows="3"></textarea></div>
+    <button class="btn btn-primary" onclick="saveTripEdit()">Salva modifiche</button>
+  </div>
+</div>
+
+<!-- Toast & Loader -->
+<div class="toast" id="toast"></div>
+<div class="loader" id="loader"><div class="spinner"></div></div>
+
+<!-- ================================================================= -->
+<!-- FIREBASE + APP LOGIC                                              -->
+<!-- ================================================================= -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+    signOut, onAuthStateChanged, updateProfile
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import {
+    getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs,
+    updateDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp,
+    arrayUnion, arrayRemove, writeBatch, limit
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCyDBfNwIr4ElCJlU7lwUf8KvJsphxQLI4",
+    authDomain: "app-viaggi-2a1f7.firebaseapp.com",
+    projectId: "app-viaggi-2a1f7",
+    storageBucket: "app-viaggi-2a1f7.firebasestorage.app",
+    messagingSenderId: "210290020900",
+    appId: "1:210290020900:web:2c798982b23bf7d57bbeb1",
+    measurementId: "G-C4F0Y9Y197"
+  };
+
+  const fbApp = initializeApp(firebaseConfig);
+  const auth = getAuth(fbApp);
+  const db = getFirestore(fbApp);
+
+  // Expose everything needed on window so the rest of the code (inline onclick handlers) can reach them
+  window.FB = {
+    auth, db,
+    createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut,
+    onAuthStateChanged, updateProfile,
+    collection, doc, addDoc, setDoc, getDoc, getDocs,
+    updateDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp,
+    arrayUnion, arrayRemove, writeBatch, limit
+  };
+
+  // Signal ready
+  window.dispatchEvent(new Event('firebase-ready'));
+</script>
 
 <script>
-// ============================
-//  FIREBASE CONFIG
-// ============================
-const firebaseConfig={
-  apiKey:"AIzaSyCyDBfNwIr4ElCJlU7lwUf8KvJsphxQLI4",
-  authDomain:"app-viaggi-2a1f7.firebaseapp.com",
-  projectId:"app-viaggi-2a1f7",
-  storageBucket:"app-viaggi-2a1f7.firebasestorage.app",
-  messagingSenderId:"210290020900",
-  appId:"1:210290020900:web:2c798982b23bf7d57bbeb1",
-  measurementId:"G-C4F0Y9Y197"
+/* =================================================================
+   STATE
+   ================================================================= */
+const state = {
+  user: null,
+  profile: null,
+  trips: [],
+  events: [],
+  notes: [],
+  currentTripId: null,
+  currentTrip: null,
+  currentStages: [],
+  currentMarkers: [],
+  currentExpenses: [],
+  currentMessages: [],
+  currentParticipants: [],
+  selectedDate: new Date(),
+  calMonth: new Date(),
+  listeners: [], // unsubscribe callbacks
+  selectedTripType: null,
+  newMarkerData: null,
+  newStageData: null,
+  mapInstance: null,
+  mapMarkersLayer: null,
+  mapRouteLayer: null,
+  mapClickHandler: null,
+  currentPage: 'home',
+  currentTab: 'overview'
 };
-let db,auth,fbOk=false;
-try{firebase.initializeApp(firebaseConfig);db=firebase.firestore();auth=firebase.auth();fbOk=true;}catch(e){console.warn('Firebase init error',e);}
 
-// ============================
-//  STATE
-// ============================
-const S={
-  trips:[],cur:null,curId:null,
-  calM:new Date().getMonth(),calY:new Date().getFullYear(),
-  mTool:'pin',maps:{},selDay:null,
-  uName:'Viaggiatore',uEmail:'',uid:null
+const TRIP_TYPES = {
+  walk:   { label: 'A piedi', emoji: '🚶', cls: 'walk' },
+  camper: { label: 'Camper',  emoji: '🚐', cls: 'camper' },
+  boat:   { label: 'Barca',   emoji: '⛵', cls: 'boat' },
+  sup:    { label: 'SUP',     emoji: '🏄', cls: 'sup' },
+  car:    { label: 'Auto',    emoji: '🚗', cls: 'car' },
+  flight: { label: 'Volo',    emoji: '✈️', cls: 'flight' },
+  bike:   { label: 'Bici',    emoji: '🚴', cls: 'bike' },
+  mixed:  { label: 'Misto',   emoji: '🌍', cls: 'mixed' }
 };
-const TT={
-  walking:{e:'🥾',n:'A Piedi',g:'linear-gradient(135deg,#2ECC71,#55E6A5)'},
-  camper:{e:'🚐',n:'Camper',g:'linear-gradient(135deg,#FF7A2F,#FFB347)'},
-  boat:{e:'⛵',n:'Barca',g:'linear-gradient(135deg,#2EAAE0,#5CC8F5)'},
-  sup:{e:'🏄',n:'SUP',g:'linear-gradient(135deg,#00B894,#00D2D3)'},
-  car:{e:'🚗',n:'Auto',g:'linear-gradient(135deg,#9B59B6,#C39BD3)'},
-  flight:{e:'✈️',n:'Volo + Itinerario',g:'linear-gradient(135deg,#E84393,#F8A5C2)'}
-};
-const EI=['🛒','🍽️','⛽','🏨','🎫','🚕','🍺','🎉','💊','🛍️','⛵','🚐','✈️','🎿','🤿','🅿️','🎭','🚌'];
-const EM={pin:'📌',note:'📝',bed:'🛏️',food:'🍽️',star:'⭐',route:'🛤️',photo:'📸',warn:'⚠️',fuel:'⛽',park:'🅿️',swim:'🏊',shop:'🛍️'};
 
-let unsub=null; // Firestore listener cleanup
+/* =================================================================
+   UI UTILITIES
+   ================================================================= */
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.className = 'toast ' + type + ' show';
+  t.textContent = msg;
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+function showLoader(show = true) {
+  document.getElementById('loader').classList.toggle('active', show);
+}
+function openModal(id) {
+  if (id === 'new-expense-modal') prepareExpenseModal();
+  if (id === 'new-trip-modal') prepareTripModal();
+  document.getElementById(id).classList.add('active');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+window.openModal = openModal;
+window.closeModal = closeModal;
 
-// ============================
-//  AUTH
-// ============================
-function aTab(t){
-  document.querySelectorAll('.atab').forEach((b,i)=>b.classList.toggle('on',(t==='login'?i===0:i===1)));
-  $('a-login').style.display=t==='login'?'block':'none';
-  $('a-reg').style.display=t==='reg'?'block':'none';
-}
-function doLogin(){
-  const e=$('l-email').value.trim(),p=$('l-pw').value;
-  if(!e||!p)return toast('Compila tutti i campi');
-  if(!fbOk)return toast('Firebase non connesso');
-  auth.signInWithEmailAndPassword(e,p).catch(er=>toast(errMsg(er)));
-}
-function doReg(){
-  const n=$('r-name').value.trim(),e=$('r-email').value.trim(),p=$('r-pw').value;
-  if(!n||!e||!p)return toast('Compila tutti i campi');
-  if(p.length<6)return toast('Password: minimo 6 caratteri');
-  if(!fbOk)return toast('Firebase non connesso');
-  auth.createUserWithEmailAndPassword(e,p).then(cr=>{
-    return cr.user.updateProfile({displayName:n}).then(()=>{
-      db.collection('users').doc(cr.user.uid).set({name:n,email:e,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-    });
-  }).catch(er=>toast(errMsg(er)));
-}
-function doGoogle(){
-  if(!fbOk)return toast('Firebase non connesso');
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(er=>toast(errMsg(er)));
-}
-function doLogout(){
-  if(unsub)unsub();
-  auth.signOut();
-}
-function loginOk(u){
-  S.uName=u.displayName||u.email?.split('@')[0]||'Viaggiatore';
-  S.uEmail=u.email||'';S.uid=u.uid;
-  $('u-name').textContent=S.uName;
-  $('u-av').textContent=S.uName[0].toUpperCase();
-  $('s-av').textContent=S.uName[0].toUpperCase();
-  $('s-name').textContent=S.uName;
-  $('s-email').textContent=S.uEmail;
-  // Save user doc
-  if(fbOk)db.collection('users').doc(S.uid).set({name:S.uName,email:S.uEmail,lastLogin:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
-  loadTrips();
-  go('home');
-  toast('Benvenuto, '+S.uName+'! 🎉');
-}
-function joinFromAuth(){
-  const c=$('join-auth').value.trim().toUpperCase();
-  if(!c)return toast('Inserisci un codice');
-  if(!S.uid)return toast('Devi prima creare un account');
-  joinByCode(c);
-}
-function errMsg(e){
-  const m={'auth/email-already-in-use':'Email già registrata','auth/invalid-email':'Email non valida','auth/weak-password':'Password troppo debole','auth/user-not-found':'Utente non trovato','auth/wrong-password':'Password errata','auth/invalid-credential':'Credenziali non valide'};
-  return m[e.code]||e.message;
-}
-
-// Firebase auth listener
-if(fbOk)auth.onAuthStateChanged(u=>{if(u)loginOk(u);else{S.uid=null;go('auth');$('tbar').style.display='none';}});
-
-// ============================
-//  SCREENS
-// ============================
-function go(name){
-  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
-  $('scr-'+name).classList.add('on');
-  const tb=$('tbar'),fab=document.querySelector('.fab');
-  if(name==='auth'){tb.style.display='none';if(fab)fab.style.display='none';}
-  else if(name==='trip'){tb.style.display='none';if(fab)fab.style.display='none';}
-  else{tb.style.display='flex';if(fab)fab.style.display=name==='home'?'flex':'none';}
-}
-function mTab(t){
-  document.querySelectorAll('.tbar-i').forEach((b,i)=>{const ts=['home','explore','cal','profile'];b.classList.toggle('on',ts[i]===t);});
-  if(t==='profile')go('settings');
-  else if(t==='home')go('home');
-  else toast('In arrivo! 🔜');
-}
-
-// ============================
-//  TRIPS — FIRESTORE
-// ============================
-function loadTrips(){
-  if(!fbOk||!S.uid)return;
-  if(unsub)unsub();
-  unsub=db.collection('trips').where('memberIds','array-contains',S.uid)
-    .orderBy('startDate','asc')
-    .onSnapshot(snap=>{
-      S.trips=snap.docs.map(d=>({id:d.id,...d.data()}));
-      renderTrips();
-    },err=>{console.error('Trips load error',err);toast('Errore caricamento viaggi');});
-}
-function renderTrips(){
-  const list=$('trips-l'),cs=$('cd-scroll'),csec=$('cd-sec');
-  if(!S.trips.length){
-    list.innerHTML='<div class="emp"><div class="ei">🧳</div><h3>Nessun viaggio</h3><p>Crea il tuo primo viaggio o unisciti con un codice!</p></div>';
-    csec.style.display='none';return;
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-overlay')) {
+    e.target.classList.remove('active');
   }
-  const now=new Date();
-  const fut=S.trips.filter(t=>new Date(t.startDate)>now);
-  if(fut.length){
-    csec.style.display='block';
-    cs.innerHTML=fut.map(t=>{
-      const df=new Date(t.startDate)-now;
-      const d=Math.floor(df/864e5),h=Math.floor(df%864e5/36e5),m=Math.floor(df%36e5/6e4);
-      const tp=TT[t.type]||TT.car;
-      return`<div class="cd-card" style="background:${tp.g}" onclick="openTrip('${t.id}')">
-        <div class="cd-icon">${tp.e}</div><h3>${t.name}</h3>
-        <div class="cd-date">${fmtD(t.startDate)} — ${fmtD(t.endDate)}</div>
-        <div class="cd-nums">
-          <div class="cd-num"><b>${d}</b><small>Giorni</small></div>
-          <div class="cd-num"><b>${h}</b><small>Ore</small></div>
-          <div class="cd-num"><b>${m}</b><small>Min</small></div>
-        </div></div>`;
-    }).join('');
-  }else csec.style.display='none';
+});
 
-  const pCols=['#FF7A2F','#2EAAE0','#2ECC71','#9B59B6','#E84393','#F1C40F'];
-  list.innerHTML=S.trips.map(t=>{
-    const tp=TT[t.type]||TT.car;
-    const pts=t.participants||[];
-    const bgMap={walking:'#E0F8EA',camper:'#FFF0E5',boat:'#E5F5FC',sup:'#E0FCFC',car:'#F3E8F9',flight:'#FCE4F0'};
-    return`<div class="tc" onclick="openTrip('${t.id}')">
-      <div class="tc-h">
-        <div class="tc-badge" style="background:${bgMap[t.type]||'#FFF0E5'}">${tp.e}</div>
-        <div class="tc-info"><h3>${t.name}</h3><div class="td">${fmtD(t.startDate)} — ${fmtD(t.endDate)}</div></div>
-      </div>
-      <div class="tc-f">
-        <div class="tc-ps">${pts.slice(0,4).map((p,i)=>`<div class="tc-pa" style="background:${p.color||pCols[i%6]}">${(p.name||'?')[0]}</div>`).join('')}${pts.length>4?`<div class="tc-pa" style="background:var(--txt3)">+${pts.length-4}</div>`:''}</div>
-        <div class="tc-sc">📍 ${(t.stops||[]).length} tappe</div>
-      </div></div>`;
-  }).join('');
+/* =================================================================
+   AUTH
+   ================================================================= */
+function toggleAuth(which) {
+  document.getElementById('login-form').style.display = which === 'login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = which === 'register' ? 'block' : 'none';
 }
+window.toggleAuth = toggleAuth;
 
-// ============================
-//  CREATE TRIP
-// ============================
-function openCreate(){
-  window._st='car';
-  const mc=$('mo-c');
-  mc.innerHTML=`<div class="mo-h"></div><h3>✨ Nuovo Viaggio</h3>
-    <div class="fg"><label>Nome del Viaggio</label><input type="text" class="fi" id="nt-name" placeholder="Es. Vacanza in Sardegna"></div>
-    <div class="fg"><label>Tipo di Viaggio</label><div class="tg">${Object.entries(TT).map(([k,v])=>`<div class="to ${k==='car'?'sel':''}" onclick="selTy(this,'${k}')" data-ty="${k}"><span class="te">${v.e}</span><span class="tn">${v.n}</span></div>`).join('')}</div></div>
-    <div class="fg"><label>Data Inizio</label><input type="date" class="fi" id="nt-s"></div>
-    <div class="fg"><label>Data Fine</label><input type="date" class="fi" id="nt-e"></div>
-    <div class="fg"><label>Descrizione (opzionale)</label><textarea class="fi" id="nt-d" rows="2" placeholder="Dettagli..."></textarea></div>
-    <button class="btn btn-p mt4" onclick="createTrip()">🚀 Crea Viaggio</button>`;
-  openMo();
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const err = document.getElementById('login-error');
+  err.style.display = 'none';
+  if (!email || !password) {
+    err.textContent = 'Compila tutti i campi';
+    err.style.display = 'block';
+    return;
+  }
+  try {
+    showLoader(true);
+    await window.FB.signInWithEmailAndPassword(window.FB.auth, email, password);
+  } catch (e) {
+    err.textContent = mapAuthError(e.code);
+    err.style.display = 'block';
+  } finally {
+    showLoader(false);
+  }
 }
-function selTy(el,t){document.querySelectorAll('.to').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');window._st=t;}
-function createTrip(){
-  const name=$('nt-name').value.trim(),s=$('nt-s').value,e=$('nt-e').value,d=$('nt-d').value,type=window._st||'car';
-  if(!name||!s||!e)return toast('Compila nome e date');
-  const code=genCode();
-  const trip={
-    name,type,code,startDate:s,endDate:e,description:d,
-    participants:[{id:S.uid,name:S.uName,email:S.uEmail,color:'#FF7A2F'}],
-    memberIds:[S.uid],createdBy:S.uid,
-    stops:[],expenses:[],messages:[],events:[],notes:[],checklist:[],mapMarkers:[],
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+window.doLogin = doLogin;
+
+async function doRegister() {
+  const name = document.getElementById('register-name').value.trim();
+  const email = document.getElementById('register-email').value.trim();
+  const password = document.getElementById('register-password').value;
+  const err = document.getElementById('register-error');
+  err.style.display = 'none';
+  if (!name || !email || !password) {
+    err.textContent = 'Compila tutti i campi';
+    err.style.display = 'block';
+    return;
+  }
+  if (password.length < 6) {
+    err.textContent = 'La password deve essere almeno 6 caratteri';
+    err.style.display = 'block';
+    return;
+  }
+  try {
+    showLoader(true);
+    const cred = await window.FB.createUserWithEmailAndPassword(window.FB.auth, email, password);
+    await window.FB.updateProfile(cred.user, { displayName: name });
+    // Create profile doc
+    await window.FB.setDoc(window.FB.doc(window.FB.db, 'users', cred.user.uid), {
+      name, email,
+      createdAt: window.FB.serverTimestamp()
+    });
+    showToast('Account creato! 🎉', 'success');
+  } catch (e) {
+    err.textContent = mapAuthError(e.code);
+    err.style.display = 'block';
+  } finally {
+    showLoader(false);
+  }
+}
+window.doRegister = doRegister;
+
+async function doLogout() {
+  if (!confirm('Vuoi davvero uscire?')) return;
+  await cleanupListeners();
+  await window.FB.signOut(window.FB.auth);
+}
+window.doLogout = doLogout;
+
+function mapAuthError(code) {
+  const map = {
+    'auth/invalid-email': 'Email non valida',
+    'auth/user-not-found': 'Utente non trovato',
+    'auth/wrong-password': 'Password errata',
+    'auth/invalid-credential': 'Credenziali non valide',
+    'auth/email-already-in-use': 'Email già registrata',
+    'auth/weak-password': 'Password troppo debole (min. 6 caratteri)',
+    'auth/too-many-requests': 'Troppi tentativi, riprova più tardi',
+    'auth/network-request-failed': 'Problema di connessione'
   };
-  if(!fbOk)return toast('Firebase non connesso');
-  db.collection('trips').add(trip).then(ref=>{
-    // Save code mapping
-    db.collection('tripCodes').doc(code).set({tripId:ref.id,createdBy:S.uid});
-    toast('Viaggio creato! Codice: '+code+' 🎉');
-    closeMo();
-  }).catch(er=>toast('Errore: '+er.message));
+  return map[code] || 'Errore: ' + code;
 }
 
-// ============================
-//  JOIN
-// ============================
-function joinByCode(code){
-  if(!fbOk)return toast('Firebase non connesso');
-  db.collection('tripCodes').doc(code).get().then(doc=>{
-    if(!doc.exists)return toast('Codice non trovato ❌');
-    const tripId=doc.data().tripId;
-    return db.collection('trips').doc(tripId).get().then(tdoc=>{
-      if(!tdoc.exists)return toast('Viaggio non trovato');
-      const data=tdoc.data();
-      if(data.memberIds?.includes(S.uid))return toast('Sei già in questo viaggio!');
-      return tdoc.ref.update({
-        memberIds:firebase.firestore.FieldValue.arrayUnion(S.uid),
-        participants:firebase.firestore.FieldValue.arrayUnion({id:S.uid,name:S.uName,email:S.uEmail,color:rndCol()})
-      }).then(()=>toast('Ti sei unito a "'+data.name+'"! 🎉'));
+/* Auth state listener — set once Firebase is ready */
+window.addEventListener('firebase-ready', () => {
+  window.FB.onAuthStateChanged(window.FB.auth, async (user) => {
+    if (user) {
+      state.user = user;
+      await loadUserProfile();
+      enterApp();
+    } else {
+      state.user = null;
+      state.profile = null;
+      exitApp();
+    }
+  });
+});
+
+async function loadUserProfile() {
+  try {
+    const snap = await window.FB.getDoc(window.FB.doc(window.FB.db, 'users', state.user.uid));
+    if (snap.exists()) {
+      state.profile = snap.data();
+    } else {
+      // Fallback: create profile if missing
+      state.profile = { name: state.user.displayName || 'Utente', email: state.user.email };
+      await window.FB.setDoc(window.FB.doc(window.FB.db, 'users', state.user.uid), {
+        ...state.profile,
+        createdAt: window.FB.serverTimestamp()
+      });
+    }
+  } catch (e) { console.error('loadUserProfile error', e); state.profile = { name: 'Utente', email: state.user.email }; }
+}
+
+function enterApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('main-screen').classList.add('active');
+  document.getElementById('bottom-nav').style.display = 'flex';
+  updateAvatars();
+  setupRealtimeListeners();
+  showPage('home');
+}
+
+function exitApp() {
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('main-screen').classList.remove('active');
+  document.getElementById('bottom-nav').style.display = 'none';
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+  document.getElementById('register-name').value = '';
+  document.getElementById('register-email').value = '';
+  document.getElementById('register-password').value = '';
+}
+
+function updateAvatars() {
+  const name = state.profile?.name || state.user?.displayName || 'U';
+  const initials = name.split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+  document.querySelectorAll('#user-avatar, #user-avatar-cal, #user-avatar-notes, #profile-avatar-big').forEach(el => {
+    if (el) el.textContent = initials;
+  });
+  if (document.getElementById('profile-name')) document.getElementById('profile-name').textContent = name;
+  if (document.getElementById('profile-email')) document.getElementById('profile-email').textContent = state.user.email;
+  if (document.getElementById('ep-name')) document.getElementById('ep-name').value = name;
+}
+
+/* =================================================================
+   REALTIME LISTENERS
+   ================================================================= */
+async function cleanupListeners() {
+  state.listeners.forEach(u => { try { u(); } catch (_) {} });
+  state.listeners = [];
+}
+
+function setupRealtimeListeners() {
+  cleanupListeners();
+  const uid = state.user.uid;
+
+  // Trips — any trip where I'm a participant
+  const tripsQ = window.FB.query(
+    window.FB.collection(window.FB.db, 'trips'),
+    window.FB.where('participants', 'array-contains', uid)
+  );
+  const unsub1 = window.FB.onSnapshot(tripsQ, (snap) => {
+    state.trips = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    state.trips.sort((a, b) => {
+      const da = a.startDate ? new Date(a.startDate).getTime() : Infinity;
+      const dbb = b.startDate ? new Date(b.startDate).getTime() : Infinity;
+      return da - dbb;
     });
-  }).catch(er=>toast('Errore: '+er.message));
+    renderHome();
+    renderProfileStats();
+    if (state.currentTripId) {
+      const upd = state.trips.find(t => t.id === state.currentTripId);
+      if (upd) { state.currentTrip = upd; renderTripDetail(); }
+    }
+  }, (err) => console.error('trips listener error', err));
+  state.listeners.push(unsub1);
+
+  // Events (personal)
+  const evQ = window.FB.collection(window.FB.db, 'users', uid, 'events');
+  const unsub2 = window.FB.onSnapshot(evQ, (snap) => {
+    state.events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderCalendar();
+  }, (err) => console.error('events listener error', err));
+  state.listeners.push(unsub2);
+
+  // Notes (personal)
+  const notesQ = window.FB.collection(window.FB.db, 'users', uid, 'notes');
+  const unsub3 = window.FB.onSnapshot(notesQ, (snap) => {
+    state.notes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    state.notes.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    renderNotes();
+    renderProfileStats();
+  }, (err) => console.error('notes listener error', err));
+  state.listeners.push(unsub3);
 }
 
-// ============================
-//  OPEN TRIP
-// ============================
-function openTrip(id){
-  const t=S.trips.find(x=>x.id===id);
-  if(!t)return;
-  S.cur=t;S.curId=id;
-  const tp=TT[t.type]||TT.car;
-  $('td-title').textContent=t.name;
-  $('td-hname').textContent=t.name;
-  $('td-hdate').textContent=fmtD(t.startDate)+' — '+fmtD(t.endDate);
-  $('td-hico').textContent=tp.e;
-  $('td-hero').style.background=tp.g;
-  $('td-code').textContent=t.code;
-  rPart();rStops();rChat();rExp();rCal();rNotes();rCl();rMkr();
-  dTab('ov');go('trip');
+/* =================================================================
+   HOME / TRIPS LIST
+   ================================================================= */
+function renderHome() {
+  const list = document.getElementById('trips-list');
+  if (state.trips.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">✈️</div>
+        <h3>Nessun viaggio ancora</h3>
+        <p>Crea il tuo primo viaggio o unisciti con un codice!</p>
+        <button class="btn btn-primary" onclick="openModal('new-trip-modal')" style="width:auto; margin: 0 auto">Inizia ora</button>
+      </div>`;
+    renderCountdown();
+    return;
+  }
+
+  list.innerHTML = state.trips.map(t => {
+    const type = TRIP_TYPES[t.type] || TRIP_TYPES.mixed;
+    const dateRange = formatDateRange(t.startDate, t.endDate);
+    const nPpl = (t.participants || []).length;
+    return `
+      <div class="trip-card" onclick="openTrip('${t.id}')">
+        <div class="trip-icon ${type.cls}">${type.emoji}</div>
+        <div class="trip-info">
+          <div class="trip-name">${escapeHtml(t.name)}</div>
+          <div class="trip-meta">
+            ${escapeHtml(t.destination || '—')} • ${dateRange}
+          </div>
+          <div class="tag-list">
+            <span class="tag">${nPpl} 👥</span>
+            <span class="tag">${type.label}</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  renderCountdown();
 }
-function dTab(t){
-  document.querySelectorAll('.dtab').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
-  ['ov','st','mp','ch','ex','ca','no','cl','dc'].forEach(x=>{
-    const el=$('t-'+x);if(el)el.style.display=x===t?(x==='ch'?'flex':'block'):'none';
+
+function renderCountdown() {
+  const area = document.getElementById('countdown-area');
+  const now = Date.now();
+  const upcoming = state.trips
+    .filter(t => t.startDate && new Date(t.startDate).getTime() > now)
+    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0];
+  if (!upcoming) { area.innerHTML = ''; return; }
+  area.innerHTML = `
+    <div class="countdown-card" onclick="openTrip('${upcoming.id}')">
+      <div class="countdown-label">Prossimo viaggio</div>
+      <div class="countdown-name">${escapeHtml(upcoming.name)} ${TRIP_TYPES[upcoming.type]?.emoji || '✈️'}</div>
+      <div class="countdown-grid" id="countdown-grid-home" data-target="${upcoming.startDate}">
+        ${countdownHtml(upcoming.startDate)}
+      </div>
+    </div>`;
+  if (window._countdownInterval) clearInterval(window._countdownInterval);
+  window._countdownInterval = setInterval(() => {
+    const el = document.getElementById('countdown-grid-home');
+    if (el) el.innerHTML = countdownHtml(el.dataset.target);
+    const el2 = document.getElementById('countdown-grid-detail');
+    if (el2) el2.innerHTML = countdownHtml(el2.dataset.target);
+  }, 1000);
+}
+
+function countdownHtml(targetDate) {
+  const diff = new Date(targetDate).getTime() - Date.now();
+  if (diff < 0) return `<div style="grid-column:1/-1"><span class="num">🎉</span><span class="lbl">In corso!</span></div>`;
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  return `
+    <div><span class="num">${d}</span><span class="lbl">Giorni</span></div>
+    <div><span class="num">${h}</span><span class="lbl">Ore</span></div>
+    <div><span class="num">${m}</span><span class="lbl">Min</span></div>
+    <div><span class="num">${s}</span><span class="lbl">Sec</span></div>`;
+}
+
+/* =================================================================
+   PAGE NAVIGATION
+   ================================================================= */
+function showPage(page) {
+  state.currentPage = page;
+
+  ['home', 'calendar', 'notes', 'profile', 'trip'].forEach(p => {
+    const el = document.getElementById('page-' + p);
+    if (el) el.style.display = 'none';
   });
-  if(t==='st')setTimeout(()=>initStMap(),150);
-  if(t==='mp')setTimeout(()=>initIMap(),150);
+  const target = document.getElementById('page-' + page);
+  if (target) target.style.display = 'block';
+
+  // bottom nav state
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.page === page);
+  });
+
+  // When leaving trip page, detach its listeners
+  if (page !== 'trip' && state.currentTripId) {
+    detachTripListeners();
+    state.currentTripId = null;
+    state.currentTrip = null;
+    if (state.mapInstance) {
+      state.mapInstance.remove();
+      state.mapInstance = null;
+    }
+  }
+
+  if (page === 'home') renderHome();
+  if (page === 'calendar') renderCalendar();
+  if (page === 'notes') renderNotes();
+  if (page === 'profile') renderProfileStats();
+}
+window.showPage = showPage;
+
+/* =================================================================
+   TRIP CREATION
+   ================================================================= */
+function prepareTripModal() {
+  state.selectedTripType = null;
+  document.querySelectorAll('#nt-types .type-option').forEach(el => el.classList.remove('selected'));
+  document.getElementById('nt-name').value = '';
+  document.getElementById('nt-destination').value = '';
+  document.getElementById('nt-start').value = '';
+  document.getElementById('nt-end').value = '';
+  document.getElementById('nt-description').value = '';
+  document.getElementById('nt-transport').value = '';
 }
 
-// ============================
-//  PARTICIPANTS
-// ============================
-function rPart(){
-  const t=S.cur;if(!t)return;
-  $('part-l').innerHTML=(t.participants||[]).map((p,i)=>`<div class="pr">
-    <div class="av" style="width:34px;height:34px;font-size:13px;background:${p.color||'#FF7A2F'}">${(p.name||'?')[0]}</div>
-    <div class="pr-n">${p.name||'Anonimo'}</div>
-    <span class="pr-r">${p.id===t.createdBy?'Organizzatore':'Membro'}</span></div>`).join('');
-  $('trip-inf').innerHTML=`<div style="background:var(--bg);border-radius:var(--rs);padding:12px;margin-top:6px;">
-    <p style="font-size:12px;color:var(--txt2);line-height:1.7;">
-      <strong>Tipo:</strong> ${(TT[t.type]||{}).e||''} ${(TT[t.type]||{}).n||t.type}<br>
-      <strong>Durata:</strong> ${dur(t.startDate,t.endDate)} giorni<br>
-      <strong>Tappe:</strong> ${(t.stops||[]).length}<br>
-      <strong>Partecipanti:</strong> ${(t.participants||[]).length}<br>
-      ${t.description?'<strong>Note:</strong> '+t.description:''}</p></div>`;
+function selectType(type) {
+  state.selectedTripType = type;
+  document.querySelectorAll('#nt-types .type-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.type === type);
+  });
 }
-function openInvite(){
-  const t=S.cur,mc=$('mo-c');
-  mc.innerHTML=`<div class="mo-h"></div><h3>👥 Invita Amici</h3>
-    <div class="tac" style="margin:16px 0;">
-      <p style="color:var(--txt2);font-size:13px;margin-bottom:10px;">Condividi questo codice:</p>
-      <div style="font-family:monospace;font-size:34px;font-weight:900;color:var(--pri);letter-spacing:6px;margin-bottom:14px;">${t.code}</div>
-      <button class="btn btn-p" onclick="cpCode();toast('Copiato! 📋')" style="max-width:180px;margin:0 auto;">📋 Copia Codice</button>
+window.selectType = selectType;
+
+async function createTrip() {
+  const name = document.getElementById('nt-name').value.trim();
+  const destination = document.getElementById('nt-destination').value.trim();
+  const start = document.getElementById('nt-start').value;
+  const end = document.getElementById('nt-end').value;
+  const description = document.getElementById('nt-description').value.trim();
+  const transport = document.getElementById('nt-transport').value.trim();
+  const type = state.selectedTripType;
+
+  if (!name || !type || !start || !end) {
+    showToast('Nome, tipo e date sono obbligatori', 'error');
+    return;
+  }
+  if (new Date(end) < new Date(start)) {
+    showToast('La data fine deve essere dopo l\'inizio', 'error');
+    return;
+  }
+
+  try {
+    showLoader(true);
+    const code = generateInviteCode();
+    const uid = state.user.uid;
+    const tripRef = await window.FB.addDoc(window.FB.collection(window.FB.db, 'trips'), {
+      name, destination, type, startDate: start, endDate: end,
+      description, transport,
+      createdBy: uid,
+      participants: [uid],
+      participantsInfo: [{
+        uid, name: state.profile?.name || 'Utente', email: state.user.email, role: 'admin'
+      }],
+      inviteCode: code,
+      createdAt: window.FB.serverTimestamp()
+    });
+
+    // Register invite code (helps with uniqueness + lookup)
+    await window.FB.setDoc(window.FB.doc(window.FB.db, 'invites', code), {
+      tripId: tripRef.id,
+      createdBy: uid,
+      createdAt: window.FB.serverTimestamp()
+    });
+
+    closeModal('new-trip-modal');
+    showToast('Viaggio creato! ✨', 'success');
+    setTimeout(() => openTrip(tripRef.id), 300);
+  } catch (e) {
+    console.error(e);
+    showToast('Errore: ' + e.message, 'error');
+  } finally {
+    showLoader(false);
+  }
+}
+window.createTrip = createTrip;
+
+function generateInviteCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let out = '';
+  for (let i = 0; i < 6; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
+}
+
+/* =================================================================
+   JOIN TRIP
+   ================================================================= */
+async function joinTripFromModal() {
+  const code = document.getElementById('join-code-modal').value.trim().toUpperCase();
+  if (!code) return showToast('Inserisci un codice', 'error');
+  await joinByCode(code);
+  closeModal('join-trip-modal');
+  document.getElementById('join-code-modal').value = '';
+}
+window.joinTripFromModal = joinTripFromModal;
+
+async function doJoinTrip() {
+  const code = document.getElementById('join-code').value.trim().toUpperCase();
+  const err = document.getElementById('join-error');
+  err.style.display = 'none';
+  if (!state.user) {
+    err.textContent = 'Devi prima creare un account o accedere';
+    err.style.display = 'block';
+    return;
+  }
+  if (!code) {
+    err.textContent = 'Inserisci un codice';
+    err.style.display = 'block';
+    return;
+  }
+  await joinByCode(code);
+  document.getElementById('join-code').value = '';
+}
+window.doJoinTrip = doJoinTrip;
+
+async function joinByCode(code) {
+  try {
+    showLoader(true);
+    const inviteSnap = await window.FB.getDoc(window.FB.doc(window.FB.db, 'invites', code));
+    if (!inviteSnap.exists()) {
+      showToast('Codice non valido', 'error');
+      return;
+    }
+    const tripId = inviteSnap.data().tripId;
+    const tripRef = window.FB.doc(window.FB.db, 'trips', tripId);
+    const tripSnap = await window.FB.getDoc(tripRef);
+    if (!tripSnap.exists()) {
+      showToast('Viaggio non trovato', 'error');
+      return;
+    }
+    const trip = tripSnap.data();
+    const uid = state.user.uid;
+    if ((trip.participants || []).includes(uid)) {
+      showToast('Sei già nel viaggio!');
+      openTrip(tripId);
+      return;
+    }
+    await window.FB.updateDoc(tripRef, {
+      participants: window.FB.arrayUnion(uid),
+      participantsInfo: window.FB.arrayUnion({
+        uid, name: state.profile?.name || 'Utente', email: state.user.email, role: 'member'
+      })
+    });
+    showToast('Ti sei unito al viaggio! 🎉', 'success');
+    setTimeout(() => openTrip(tripId), 400);
+  } catch (e) {
+    console.error(e);
+    showToast('Errore: ' + e.message, 'error');
+  } finally {
+    showLoader(false);
+  }
+}
+
+/* =================================================================
+   TRIP DETAIL
+   ================================================================= */
+let tripListeners = [];
+function detachTripListeners() {
+  tripListeners.forEach(u => { try { u(); } catch (_) {} });
+  tripListeners = [];
+}
+
+async function openTrip(tripId) {
+  state.currentTripId = tripId;
+  const trip = state.trips.find(t => t.id === tripId);
+  if (trip) state.currentTrip = trip;
+  else {
+    try {
+      const snap = await window.FB.getDoc(window.FB.doc(window.FB.db, 'trips', tripId));
+      if (snap.exists()) state.currentTrip = { id: tripId, ...snap.data() };
+    } catch (e) { console.error(e); }
+  }
+  showPage('trip');
+  switchTab('overview');
+  renderTripDetail();
+  attachTripListeners(tripId);
+}
+window.openTrip = openTrip;
+
+function attachTripListeners(tripId) {
+  detachTripListeners();
+
+  const stagesQ = window.FB.query(
+    window.FB.collection(window.FB.db, 'trips', tripId, 'stages'),
+    window.FB.orderBy('order', 'asc')
+  );
+  const u1 = window.FB.onSnapshot(stagesQ, s => {
+    state.currentStages = s.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (state.currentTab === 'stages') renderStages();
+    if (state.currentTab === 'map') renderMap();
+    renderTripDetail();
+  }, err => console.error('stages err', err));
+  tripListeners.push(u1);
+
+  const markersQ = window.FB.collection(window.FB.db, 'trips', tripId, 'markers');
+  const u2 = window.FB.onSnapshot(markersQ, s => {
+    state.currentMarkers = s.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (state.currentTab === 'map') renderMap();
+  }, err => console.error('markers err', err));
+  tripListeners.push(u2);
+
+  const expQ = window.FB.collection(window.FB.db, 'trips', tripId, 'expenses');
+  const u3 = window.FB.onSnapshot(expQ, s => {
+    state.currentExpenses = s.docs.map(d => ({ id: d.id, ...d.data() }));
+    state.currentExpenses.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+    if (state.currentTab === 'expenses') renderExpenses();
+  }, err => console.error('exp err', err));
+  tripListeners.push(u3);
+
+  const msgsQ = window.FB.query(
+    window.FB.collection(window.FB.db, 'trips', tripId, 'messages'),
+    window.FB.orderBy('createdAt', 'asc')
+  );
+  const u4 = window.FB.onSnapshot(msgsQ, s => {
+    state.currentMessages = s.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (state.currentTab === 'chat') renderChat();
+  }, err => console.error('msgs err', err));
+  tripListeners.push(u4);
+}
+
+function renderTripDetail() {
+  const t = state.currentTrip;
+  if (!t) return;
+  document.getElementById('trip-detail-name').textContent = t.name;
+  document.getElementById('trip-detail-dates').textContent = formatDateRange(t.startDate, t.endDate);
+  const type = TRIP_TYPES[t.type] || TRIP_TYPES.mixed;
+  const stats = document.getElementById('trip-detail-stats');
+  stats.innerHTML = `
+    <div class="stat-pill">${type.emoji} ${type.label}</div>
+    <div class="stat-pill">${t.destination || '—'}</div>
+    <div class="stat-pill">👥 ${(t.participants || []).length}</div>
+  `;
+  document.getElementById('trip-info-type').textContent = type.emoji + ' ' + type.label;
+  document.getElementById('trip-info-duration').textContent = daysBetween(t.startDate, t.endDate) + ' giorni';
+  document.getElementById('trip-info-people').textContent = (t.participants || []).length;
+  document.getElementById('trip-info-stages').textContent = state.currentStages.length;
+  document.getElementById('trip-description').textContent = t.description || 'Nessuna descrizione.';
+  document.getElementById('trip-transport').textContent = t.transport || 'Nessuna info inserita.';
+
+  // countdown if future
+  const cdArea = document.getElementById('trip-countdown-detail');
+  const now = Date.now();
+  if (t.startDate && new Date(t.startDate).getTime() > now) {
+    cdArea.innerHTML = `
+      <div class="countdown-card" style="margin-top:0">
+        <div class="countdown-label">Inizia tra</div>
+        <div class="countdown-name">${escapeHtml(t.name)}</div>
+        <div class="countdown-grid" id="countdown-grid-detail" data-target="${t.startDate}">
+          ${countdownHtml(t.startDate)}
+        </div>
+      </div>`;
+  } else if (t.endDate && new Date(t.endDate).getTime() < now) {
+    cdArea.innerHTML = `<div class="note-card" style="background:#f3ebff; border-left-color:#7a5cff"><div class="note-body"><strong>✨ Viaggio concluso</strong><br/>Rivivilo con note, foto e ricordi!</div></div>`;
+  } else {
+    cdArea.innerHTML = `<div class="note-card" style="background:#e6f9ee; border-left-color:#2ecc71"><div class="note-body"><strong>🎉 Viaggio in corso!</strong><br/>Buon viaggio!</div></div>`;
+  }
+
+  // invite code
+  document.getElementById('invite-code-display').textContent = t.inviteCode || '——————';
+  // participants list
+  renderParticipants();
+}
+
+function switchTab(tab) {
+  state.currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+
+  if (tab === 'stages') renderStages();
+  if (tab === 'map') setTimeout(renderMap, 100);
+  if (tab === 'expenses') renderExpenses();
+  if (tab === 'chat') { renderChat(); setTimeout(() => { const m = document.getElementById('chat-messages'); if (m) m.scrollTop = m.scrollHeight; }, 100); }
+  if (tab === 'people') renderParticipants();
+}
+window.switchTab = switchTab;
+
+/* =================================================================
+   STAGES
+   ================================================================= */
+function renderStages() {
+  const list = document.getElementById('stages-list');
+  if (!state.currentStages.length) {
+    list.innerHTML = `<div class="empty-state"><div class="emoji">📍</div><h3>Nessuna tappa</h3><p>Aggiungi la prima tappa del tuo itinerario</p></div>`;
+    return;
+  }
+  list.innerHTML = state.currentStages.map((s, i) => `
+    <div class="stage-item">
+      <div class="stage-num">${i + 1}</div>
+      <div class="stage-info">
+        <div class="stage-title">${escapeHtml(s.title)}</div>
+        <div class="stage-meta">${s.date ? formatDate(s.date) : ''} ${s.days ? ' • ' + s.days + ' gg' : ''}</div>
+        ${s.notes ? `<div class="stage-meta" style="margin-top:4px">${escapeHtml(s.notes)}</div>` : ''}
+        ${s.lat != null ? `<div class="stage-meta" style="margin-top:4px; color:var(--primary)">📍 ${s.lat.toFixed(4)}, ${s.lng.toFixed(4)}</div>` : ''}
+      </div>
+      <div class="stage-actions">
+        <button onclick="deleteStage('${s.id}')" title="Elimina">🗑️</button>
+      </div>
     </div>
-    <div class="dvd">oppure</div>
-    <button class="btn btn-o" onclick="shareTrip()">🔗 Condividi Link</button>`;
-  openMo();
-}
-function shareTrip(){
-  const t=S.cur;
-  if(navigator.share)navigator.share({title:'Unisciti al viaggio su Travel IO!',text:'Ti invito al viaggio "'+t.name+'". Codice: '+t.code});
-  else{cpCode();toast('Codice copiato! 📋');}
+  `).join('');
 }
 
-// ============================
-//  STOPS
-// ============================
-function rStops(){
-  const t=S.cur;if(!t)return;
-  const l=$('st-list');
-  if(!t.stops?.length){l.innerHTML='<div class="emp"><div class="ei">📍</div><h3>Nessuna tappa</h3><p>Aggiungi le tappe del tuo itinerario</p></div>';return;}
-  l.innerHTML=t.stops.sort((a,b)=>a.order-b.order).map(s=>`<div class="sc">
-    <div class="sn">Tappa ${s.order}</div><h4>${s.name}</h4>
-    <div class="sco">📍 ${s.lat?.toFixed(4)}, ${s.lng?.toFixed(4)}</div>
-    ${s.note?`<div class="sno">${s.note}</div>`:''}
-    <div style="display:flex;gap:5px;margin-top:6px;">
-      <button class="btn btn-sm btn-s" onclick="editStop('${s.id}')">✏️</button>
-      <button class="btn btn-sm btn-d" onclick="delStop('${s.id}')">🗑️</button>
-    </div></div>`).join('');
+async function createStage() {
+  const title = document.getElementById('ns-title').value.trim();
+  const date = document.getElementById('ns-date').value;
+  const days = parseInt(document.getElementById('ns-days').value) || 1;
+  const notes = document.getElementById('ns-notes').value.trim();
+  if (!title) return showToast('Inserisci un nome', 'error');
+  try {
+    showLoader(true);
+    const data = {
+      title, date, days, notes,
+      order: state.currentStages.length,
+      createdAt: window.FB.serverTimestamp(),
+      createdBy: state.user.uid
+    };
+    if (state.newStageData) {
+      data.lat = state.newStageData.lat;
+      data.lng = state.newStageData.lng;
+      data.address = state.newStageData.address || '';
+    }
+    await window.FB.addDoc(window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'stages'), data);
+    closeModal('new-stage-modal');
+    document.getElementById('ns-title').value = '';
+    document.getElementById('ns-search').value = '';
+    document.getElementById('ns-date').value = '';
+    document.getElementById('ns-notes').value = '';
+    document.getElementById('ns-coords').textContent = 'Nessuna';
+    document.getElementById('stage-search-results').style.display = 'none';
+    state.newStageData = null;
+    showToast('Tappa aggiunta! 📍', 'success');
+  } catch (e) { console.error(e); showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
 }
-function initStMap(){
-  const c=$('st-map');if(!c||c._leaflet_id)return;
-  const t=S.cur,cen=t.stops?.length?[t.stops[0].lat,t.stops[0].lng]:[42,12.5];
-  const map=L.map(c).setView(cen,t.stops?.length?8:5);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'©OSM'}).addTo(map);
-  if(t.stops?.length){
-    const co=[];
-    t.stops.forEach(s=>{L.marker([s.lat,s.lng]).addTo(map).bindPopup('<b>'+s.name+'</b><br>'+(s.note||''));co.push([s.lat,s.lng]);});
-    if(co.length>1){L.polyline(co,{color:'#FF7A2F',weight:3,dashArray:'8,8'}).addTo(map);map.fitBounds(co,{padding:[30,30]});}
-  }
-  S.maps.st=map;
-}
-function searchP(){
-  const q=$('st-search').value.trim();if(!q)return;
-  const cm=q.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/);
-  if(cm)return openAddStop(+cm[1],+cm[2],'Punto ('+parseFloat(cm[1]).toFixed(4)+', '+parseFloat(cm[2]).toFixed(4)+')');
-  fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q)+'&limit=5')
-    .then(r=>r.json()).then(res=>{
-      if(!res.length)return toast('Nessun risultato');
-      if(res.length===1)return openAddStop(+res[0].lat,+res[0].lon,res[0].display_name.split(',')[0]);
-      showResults(res);
-    }).catch(()=>toast('Errore ricerca'));
-}
-function showResults(res){
-  $('mo-c').innerHTML=`<div class="mo-h"></div><h3>📍 Risultati</h3>
-    ${res.map(r=>`<div class="st-it" onclick="openAddStop(${r.lat},${r.lon},'${r.display_name.split(',')[0].replace(/'/g,"\\'")}');closeMo();">
-      <div class="st-ic" style="background:var(--pri-l);font-size:18px;">📍</div>
-      <div class="st-t"><h4>${r.display_name.split(',')[0]}</h4><p>${r.display_name.split(',').slice(1,3).join(',')}</p></div></div>`).join('')}`;
-  openMo();
-}
-function openAddStop(lat,lng,name){
-  const nx=(S.cur.stops?.length||0)+1;
-  $('mo-c').innerHTML=`<div class="mo-h"></div><h3>📍 Aggiungi Tappa</h3>
-    <div class="fg"><label>Nome</label><input type="text" class="fi" id="as-n" value="${name||''}" placeholder="Nome tappa"></div>
-    <div class="fg"><label>Latitudine</label><input type="number" step="any" class="fi" id="as-lat" value="${lat||''}" placeholder="41.9028"></div>
-    <div class="fg"><label>Longitudine</label><input type="number" step="any" class="fi" id="as-lng" value="${lng||''}" placeholder="12.4964"></div>
-    <div class="fg"><label>Ordine</label><input type="number" class="fi" id="as-o" value="${nx}"></div>
-    <div class="fg"><label>Note</label><textarea class="fi" id="as-no" rows="2" placeholder="Note tappa..."></textarea></div>
-    <button class="btn btn-p" onclick="addStop()">✅ Aggiungi</button>`;
-  openMo();
-}
-function addStop(){
-  const s={id:'s_'+Date.now(),name:$('as-n').value,lat:+$('as-lat').value,lng:+$('as-lng').value,order:+$('as-o').value,note:$('as-no').value};
-  if(!s.name||isNaN(s.lat)||isNaN(s.lng))return toast('Compila nome e coordinate');
-  S.cur.stops=S.cur.stops||[];S.cur.stops.push(s);
-  saveTrip();rStops();closeMo();toast('Tappa aggiunta! 📍');
-  // Reset map
-  const c=$('st-map');if(c?._leaflet_id){S.maps.st.remove();delete c._leaflet_id;setTimeout(initStMap,100);}
-}
-function delStop(id){S.cur.stops=S.cur.stops.filter(s=>s.id!==id);saveTrip();rStops();}
-function editStop(id){
-  const s=S.cur.stops.find(x=>x.id===id);if(!s)return;
-  $('mo-c').innerHTML=`<div class="mo-h"></div><h3>✏️ Modifica Tappa</h3>
-    <div class="fg"><label>Nome</label><input type="text" class="fi" id="es-n" value="${s.name}"></div>
-    <div class="fg"><label>Lat</label><input type="number" step="any" class="fi" id="es-lat" value="${s.lat}"></div>
-    <div class="fg"><label>Lng</label><input type="number" step="any" class="fi" id="es-lng" value="${s.lng}"></div>
-    <div class="fg"><label>Ordine</label><input type="number" class="fi" id="es-o" value="${s.order}"></div>
-    <div class="fg"><label>Note</label><textarea class="fi" id="es-no" rows="2">${s.note||''}</textarea></div>
-    <button class="btn btn-p" onclick="saveStop('${id}')">💾 Salva</button>`;
-  openMo();
-}
-function saveStop(id){
-  const s=S.cur.stops.find(x=>x.id===id);
-  s.name=$('es-n').value;s.lat=+$('es-lat').value;s.lng=+$('es-lng').value;s.order=+$('es-o').value;s.note=$('es-no').value;
-  saveTrip();rStops();closeMo();toast('Tappa aggiornata ✅');
-}
+window.createStage = createStage;
 
-// ============================
-//  INTERACTIVE MAP
-// ============================
-function initIMap(){
-  const c=$('i-map');if(!c)return;
-  if(c._leaflet_id){S.maps.im?.invalidateSize();return;}
-  const t=S.cur,cen=t.stops?.length?[t.stops[0].lat,t.stops[0].lng]:[42,12.5];
-  const map=L.map(c).setView(cen,t.stops?.length?8:5);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'©OSM'}).addTo(map);
-  (t.mapMarkers||[]).forEach(m=>addMkrMap(map,m));
-  if(t.stops?.length){
-    const co=t.stops.map(s=>[s.lat,s.lng]);
-    L.polyline(co,{color:'#FF7A2F',weight:3}).addTo(map);
-    t.stops.forEach(s=>{const ic=L.divIcon({html:'<div style="font-size:22px;">📍</div>',iconSize:[22,22],className:''});L.marker([s.lat,s.lng],{icon:ic}).addTo(map).bindPopup('<b>'+s.name+'</b>');});
-    map.fitBounds(co,{padding:[40,40]});
+async function deleteStage(id) {
+  if (!confirm('Eliminare questa tappa?')) return;
+  try {
+    await window.FB.deleteDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'stages', id));
+    showToast('Tappa eliminata');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+window.deleteStage = deleteStage;
+
+/* Location search via Nominatim (OpenStreetMap) */
+async function searchLocation() {
+  const q = document.getElementById('ns-search').value.trim();
+  const resultsEl = document.getElementById('stage-search-results');
+  if (!q) return;
+
+  // Coordinate direct input: "41.89, 12.49"
+  const coordMatch = q.match(/^(-?\d+\.?\d*)\s*,\s*(-?\d+\.?\d*)$/);
+  if (coordMatch) {
+    const lat = parseFloat(coordMatch[1]);
+    const lng = parseFloat(coordMatch[2]);
+    state.newStageData = { lat, lng, address: `${lat}, ${lng}` };
+    document.getElementById('ns-coords').textContent = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    if (!document.getElementById('ns-title').value) document.getElementById('ns-title').value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+    resultsEl.style.display = 'none';
+    showToast('Coordinate impostate ✅', 'success');
+    return;
   }
-  map.on('click',function(e){
-    const em=EM[S.mTool]||'📌';
-    const mk={id:'mk_'+Date.now(),lat:e.latlng.lat,lng:e.latlng.lng,emoji:em,type:S.mTool,note:''};
-    const n=prompt('Nota per questo segnalino:');
-    if(n===null)return;mk.note=n;
-    t.mapMarkers=t.mapMarkers||[];t.mapMarkers.push(mk);
-    addMkrMap(map,mk);rMkr();saveTrip();
+
+  try {
+    showLoader(true);
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=6`;
+    const res = await fetch(url, { headers: { 'Accept-Language': 'it' } });
+    const data = await res.json();
+    if (!data.length) {
+      resultsEl.innerHTML = '<div class="search-result">Nessun risultato</div>';
+      resultsEl.style.display = 'block';
+      return;
+    }
+    resultsEl.innerHTML = data.map((r, i) => `
+      <div class="search-result" data-idx="${i}">
+        <div class="name">${escapeHtml(r.display_name.split(',')[0])}</div>
+        <div class="addr">${escapeHtml(r.display_name)}</div>
+      </div>
+    `).join('');
+    resultsEl.style.display = 'block';
+    resultsEl.querySelectorAll('.search-result').forEach((el) => {
+      el.addEventListener('click', () => {
+        const r = data[parseInt(el.dataset.idx)];
+        state.newStageData = {
+          lat: parseFloat(r.lat),
+          lng: parseFloat(r.lon),
+          address: r.display_name
+        };
+        document.getElementById('ns-coords').textContent = `${parseFloat(r.lat).toFixed(4)}, ${parseFloat(r.lon).toFixed(4)}`;
+        if (!document.getElementById('ns-title').value) {
+          document.getElementById('ns-title').value = r.display_name.split(',')[0];
+        }
+        resultsEl.style.display = 'none';
+      });
+    });
+  } catch (e) { console.error(e); showToast('Errore ricerca'); }
+  finally { showLoader(false); }
+}
+window.searchLocation = searchLocation;
+
+/* =================================================================
+   MAP
+   ================================================================= */
+function renderMap() {
+  const container = document.getElementById('trip-map');
+  if (!container) return;
+
+  if (state.mapInstance) {
+    state.mapInstance.remove();
+    state.mapInstance = null;
+  }
+
+  // Determine initial center
+  let center = [41.9, 12.5];
+  let zoom = 5;
+  const allPoints = [
+    ...state.currentStages.filter(s => s.lat != null).map(s => [s.lat, s.lng]),
+    ...state.currentMarkers.map(m => [m.lat, m.lng])
+  ];
+  if (allPoints.length) {
+    const lats = allPoints.map(p => p[0]);
+    const lngs = allPoints.map(p => p[1]);
+    center = [(Math.min(...lats) + Math.max(...lats)) / 2, (Math.min(...lngs) + Math.max(...lngs)) / 2];
+    zoom = allPoints.length > 1 ? 6 : 11;
+  }
+
+  state.mapInstance = L.map(container, { zoomControl: true, attributionControl: true }).setView(center, zoom);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '© OSM'
+  }).addTo(state.mapInstance);
+
+  // Stages markers + route line
+  const stageCoords = [];
+  state.currentStages.forEach((s, i) => {
+    if (s.lat != null && s.lng != null) {
+      const icon = L.divIcon({
+        html: `<div style="background:#4f7cff;color:#fff;width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,.3);border:2px solid #fff"><span style="transform:rotate(45deg)">${i + 1}</span></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        className: ''
+      });
+      L.marker([s.lat, s.lng], { icon }).addTo(state.mapInstance)
+        .bindPopup(`<strong>${escapeHtml(s.title)}</strong>${s.notes ? '<br/>' + escapeHtml(s.notes) : ''}`);
+      stageCoords.push([s.lat, s.lng]);
+    }
   });
-  S.maps.im=map;
-}
-function addMkrMap(map,m){
-  const ic=L.divIcon({html:'<div style="font-size:26px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25));">'+m.emoji+'</div>',iconSize:[26,26],className:''});
-  L.marker([m.lat,m.lng],{icon:ic}).addTo(map).bindPopup('<b>'+m.emoji+' '+m.type+'</b><br>'+(m.note||'—')+'<br><small>'+m.lat.toFixed(4)+', '+m.lng.toFixed(4)+'</small>');
-}
-function mTool(t){S.mTool=t;document.querySelectorAll('.mt-b').forEach(b=>b.classList.toggle('on',b.id==='mt-'+t));}
-function rMkr(){
-  const t=S.cur,l=$('mkr-list');
-  if(!t?.mapMarkers?.length){l.innerHTML='<p style="color:var(--txt3);font-size:12px;padding:8px 0;">Tocca la mappa per aggiungere segnalini</p>';return;}
-  l.innerHTML=t.mapMarkers.map(m=>`<div class="mkr-it">
-    <span class="me">${m.emoji}</span>
-    <div style="flex:1;"><div style="font-weight:600;">${m.note||m.type}</div><div style="font-size:10px;color:var(--txt3);font-family:monospace;">${m.lat.toFixed(4)}, ${m.lng.toFixed(4)}</div></div>
-    <button class="btn-ic" style="width:26px;height:26px;font-size:10px;background:var(--red-l);color:var(--red);" onclick="delMkr('${m.id}')">✕</button></div>`).join('');
-}
-function delMkr(id){
-  S.cur.mapMarkers=S.cur.mapMarkers.filter(m=>m.id!==id);saveTrip();rMkr();
-  const c=$('i-map');if(c?._leaflet_id){S.maps.im.remove();delete c._leaflet_id;initIMap();}
-}
+  if (stageCoords.length > 1) {
+    L.polyline(stageCoords, { color: '#4f7cff', weight: 3, opacity: 0.7, dashArray: '8, 6' }).addTo(state.mapInstance);
+  }
 
-// ============================
-//  CHAT
-// ============================
-function rChat(){
-  const t=S.cur;if(!t)return;
-  const c=$('ch-msgs');
-  if(!t.messages?.length){c.innerHTML='<div class="emp"><div class="ei">💬</div><h3>Nessun messaggio</h3><p>Inizia la conversazione!</p></div>';return;}
-  c.innerHTML=t.messages.map(m=>`<div class="cb ${m.userId===S.uid?'me':'ot'}">
-    ${m.userId!==S.uid?'<div class="csn">'+m.userName+'</div>':''}${m.text}<div class="ct">${fmtT(m.time)}</div></div>`).join('');
-  c.scrollTop=c.scrollHeight;
-}
-function sendMsg(){
-  const inp=$('ch-in'),txt=inp.value.trim();if(!txt)return;
-  const msg={id:'m_'+Date.now(),userId:S.uid,userName:S.uName,text:txt,time:new Date().toISOString()};
-  S.cur.messages=S.cur.messages||[];S.cur.messages.push(msg);
-  saveTrip();rChat();inp.value='';
-}
-$('ch-in')?.addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
-
-// ============================
-//  EXPENSES
-// ============================
-function rExp(){
-  const t=S.cur;if(!t)return;
-  const tot=(t.expenses||[]).reduce((s,e)=>s+e.amount,0);
-  $('ex-sum').querySelector('.etot').textContent='€'+tot.toFixed(2).replace('.',',');
-  const bal={};
-  (t.participants||[]).forEach(p=>bal[p.id]={name:p.name,paid:0,owes:0,color:p.color});
-  (t.expenses||[]).forEach(e=>{
-    if(bal[e.paidBy])bal[e.paidBy].paid+=e.amount;
-    const sp=e.amount/((e.splitWith||[]).length||1);
-    (e.splitWith||[]).forEach(u=>{if(bal[u])bal[u].owes+=sp;});
+  // Custom user markers (emoji)
+  state.currentMarkers.forEach(m => {
+    const icon = L.divIcon({
+      html: `<div style="background:#fff;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 10px rgba(0,0,0,.25);border:2px solid #fff">${m.emoji || '📌'}</div>`,
+      iconSize: [38, 38],
+      iconAnchor: [19, 19],
+      className: ''
+    });
+    const popupHtml = `
+      <strong>${escapeHtml(m.title || 'Marker')}</strong>
+      ${m.note ? '<br/>' + escapeHtml(m.note) : ''}
+      <br/><button style="margin-top:6px; color:#ff5a5f; background:none; border:none; cursor:pointer; font-weight:600" onclick="window.deleteMarker('${m.id}')">🗑️ Elimina</button>`;
+    L.marker([m.lat, m.lng], { icon }).addTo(state.mapInstance).bindPopup(popupHtml);
   });
-  $('ex-bals').innerHTML=Object.values(bal).map(b=>{
-    const d=b.paid-b.owes;
-    return`<div class="bal-c ${d>=0?'pos':'neg'}">${b.name}: ${d>=0?'+':''}€${d.toFixed(2).replace('.',',')}</div>`;
+
+  // If user is adding a new marker, capture next click
+  state.mapClickHandler = (e) => {
+    if (state.newMarkerData) {
+      saveNewMarker(e.latlng.lat, e.latlng.lng);
+    }
+  };
+  state.mapInstance.on('click', state.mapClickHandler);
+
+  if (allPoints.length > 1) {
+    try {
+      state.mapInstance.fitBounds(allPoints, { padding: [40, 40] });
+    } catch (e) {}
+  }
+}
+
+function selectEmoji(em, btn) {
+  if (!state.newMarkerData) state.newMarkerData = {};
+  state.newMarkerData.emoji = em;
+  document.querySelectorAll('#emoji-picker button').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+window.selectEmoji = selectEmoji;
+
+// Override openModal for map marker to setup state
+const _origOpenModal = window.openModal;
+window.openModal = function(id) {
+  if (id === 'map-marker-modal') {
+    state.newMarkerData = { emoji: '⭐' };
+    document.getElementById('mk-title').value = '';
+    document.getElementById('mk-note').value = '';
+    document.querySelectorAll('#emoji-picker button').forEach(b => b.classList.remove('selected'));
+    // Pre-select the star button
+    const starBtn = [...document.querySelectorAll('#emoji-picker button')].find(b => b.textContent === '⭐');
+    if (starBtn) starBtn.classList.add('selected');
+  }
+  _origOpenModal(id);
+};
+
+async function saveNewMarker(lat, lng) {
+  const title = document.getElementById('mk-title').value.trim() || 'Marker';
+  const note = document.getElementById('mk-note').value.trim();
+  const emoji = state.newMarkerData?.emoji || '📌';
+  try {
+    showLoader(true);
+    await window.FB.addDoc(window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'markers'), {
+      lat, lng, title, note, emoji,
+      createdBy: state.user.uid,
+      createdAt: window.FB.serverTimestamp()
+    });
+    state.newMarkerData = null;
+    closeModal('map-marker-modal');
+    showToast('Marker aggiunto 📍', 'success');
+  } catch (e) { console.error(e); showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
+}
+
+window.deleteMarker = async function(id) {
+  if (!confirm('Eliminare questo marker?')) return;
+  try {
+    await window.FB.deleteDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'markers', id));
+    showToast('Marker eliminato');
+  } catch (e) { showToast('Errore', 'error'); }
+};
+
+/* =================================================================
+   EXPENSES (Splitwise-like)
+   ================================================================= */
+function prepareExpenseModal() {
+  const trip = state.currentTrip;
+  if (!trip) return;
+  const paidBySel = document.getElementById('nex-paidBy');
+  const splitList = document.getElementById('nex-splitList');
+  paidBySel.innerHTML = (trip.participantsInfo || []).map(p =>
+    `<option value="${p.uid}">${escapeHtml(p.name)}</option>`
+  ).join('');
+  paidBySel.value = state.user.uid;
+
+  splitList.innerHTML = (trip.participantsInfo || []).map(p => `
+    <label style="display:flex; align-items:center; gap:10px; padding:6px 0; font-size:14px">
+      <input type="checkbox" class="split-check" data-uid="${p.uid}" checked style="width:18px; height:18px" />
+      <span>${escapeHtml(p.name)}</span>
+    </label>
+  `).join('');
+
+  document.getElementById('nex-desc').value = '';
+  document.getElementById('nex-amount').value = '';
+}
+
+async function createExpense() {
+  const desc = document.getElementById('nex-desc').value.trim();
+  const amount = parseFloat(document.getElementById('nex-amount').value);
+  const paidBy = document.getElementById('nex-paidBy').value;
+  const category = document.getElementById('nex-category').value;
+  const splitWith = [...document.querySelectorAll('.split-check:checked')].map(e => e.dataset.uid);
+
+  if (!desc || !amount || amount <= 0) return showToast('Compila descrizione e importo', 'error');
+  if (!splitWith.length) return showToast('Seleziona almeno una persona', 'error');
+
+  try {
+    showLoader(true);
+    await window.FB.addDoc(window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'expenses'), {
+      description: desc, amount, paidBy, splitWith, category,
+      createdBy: state.user.uid,
+      createdAt: window.FB.serverTimestamp()
+    });
+    closeModal('new-expense-modal');
+    showToast('Spesa aggiunta 💰', 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
+}
+window.createExpense = createExpense;
+
+function renderExpenses() {
+  const t = state.currentTrip;
+  if (!t) return;
+  const total = state.currentExpenses.reduce((s, e) => s + (e.amount || 0), 0);
+  document.getElementById('total-expenses').textContent = '€' + total.toFixed(2);
+  document.getElementById('balance-sub').textContent = `${state.currentExpenses.length} spese • ${(t.participants || []).length} persone`;
+
+  // Compute balances: for each user, sum(paid) - sum(share)
+  const balances = {};
+  (t.participants || []).forEach(uid => balances[uid] = 0);
+  state.currentExpenses.forEach(e => {
+    if (!e.splitWith?.length) return;
+    balances[e.paidBy] = (balances[e.paidBy] || 0) + e.amount;
+    const share = e.amount / e.splitWith.length;
+    e.splitWith.forEach(uid => {
+      balances[uid] = (balances[uid] || 0) - share;
+    });
+  });
+
+  const bList = document.getElementById('balances-list');
+  const pInfo = t.participantsInfo || [];
+  bList.innerHTML = Object.entries(balances).map(([uid, bal]) => {
+    const p = pInfo.find(x => x.uid === uid);
+    const name = p ? p.name : 'Utente';
+    const cls = bal > 0.01 ? 'positive' : bal < -0.01 ? 'negative' : 'zero';
+    const sign = bal > 0 ? '+' : '';
+    const text = bal > 0.01 ? `riceve ${sign}€${bal.toFixed(2)}` :
+                 bal < -0.01 ? `deve €${Math.abs(bal).toFixed(2)}` :
+                 'in pari';
+    return `
+      <div class="balance-row">
+        <span class="name">${escapeHtml(name)}${uid === state.user.uid ? ' <span style="color:var(--text-light)">(tu)</span>' : ''}</span>
+        <span class="amt ${cls}">${text}</span>
+      </div>`;
   }).join('');
-  const el=$('ex-list');
-  if(!t.expenses?.length){el.innerHTML='<div class="emp"><div class="ei">💰</div><h3>Nessuna spesa</h3><p>Aggiungi le spese per dividere i costi</p></div>';return;}
-  el.innerHTML=t.expenses.map(e=>{
-    const py=(t.participants||[]).find(p=>p.id===e.paidBy);
-    return`<div class="ex-it"><div class="ex-ico">${e.icon||'💰'}</div>
-      <div class="ex-inf"><h4>${e.title}</h4><div class="em">${py?.name||'?'} • ${fmtD(e.date)} • ÷${(e.splitWith||[]).length}</div></div>
-      <div class="ex-am">€${e.amount.toFixed(2).replace('.',',')}</div></div>`;
+
+  const list = document.getElementById('expenses-list');
+  if (!state.currentExpenses.length) {
+    list.innerHTML = `<div class="empty-state"><div class="emoji">💸</div><h3>Nessuna spesa</h3><p>Aggiungi la prima spesa del viaggio</p></div>`;
+    return;
+  }
+  list.innerHTML = state.currentExpenses.map(e => {
+    const p = pInfo.find(x => x.uid === e.paidBy);
+    const payer = p ? p.name : 'Utente';
+    return `
+      <div class="expense-item">
+        <div class="expense-icon">${e.category || '💰'}</div>
+        <div class="expense-info">
+          <div class="expense-title">${escapeHtml(e.description)}</div>
+          <div class="expense-sub">Pagato da ${escapeHtml(payer)} • ${e.splitWith?.length || 0} persone</div>
+        </div>
+        <div style="text-align:right">
+          <div class="expense-amount">€${e.amount.toFixed(2)}</div>
+          <button class="btn btn-sm" style="font-size:11px; padding:4px 8px; color:var(--danger); width:auto" onclick="deleteExpense('${e.id}')">Elimina</button>
+        </div>
+      </div>`;
   }).join('');
-  calcStl();
 }
-function openAddExp(){
-  const t=S.cur;
-  $('mo-c').innerHTML=`<div class="mo-h"></div><h3>💰 Nuova Spesa</h3>
-    <div class="fg"><label>Descrizione</label><input type="text" class="fi" id="ae-t" placeholder="Es. Cena ristorante"></div>
-    <div class="fg"><label>Importo (€)</label><input type="number" step="0.01" class="fi" id="ae-a" placeholder="0.00" style="font-size:22px;font-weight:800;"></div>
-    <div class="fg"><label>Icona</label><div style="display:flex;flex-wrap:wrap;gap:6px;">
-      ${EI.map((ic,i)=>`<button class="btn-ic" style="font-size:18px;${i===0?'background:var(--pri-l);':'background:var(--bg2);'}" onclick="selEI(this,'${ic}')">${ic}</button>`).join('')}</div></div>
-    <div class="fg"><label>Pagato da</label><select class="fi" id="ae-p">
-      ${(t.participants||[]).map(p=>`<option value="${p.id}" ${p.id===S.uid?'selected':''}>${p.name}</option>`).join('')}</select></div>
-    <div class="fg"><label>Dividi tra</label>
-      ${(t.participants||[]).map(p=>`<label style="display:flex;align-items:center;gap:7px;padding:5px 0;font-size:13px;"><input type="checkbox" checked value="${p.id}" class="ae-sp"> ${p.name}</label>`).join('')}</div>
-    <div class="fg"><label>Data</label><input type="date" class="fi" id="ae-d" value="${new Date().toISOString().split('T')[0]}"></div>
-    <button class="btn btn-p" onclick="addExp()">✅ Aggiungi</button>`;
-  window._eic=EI[0];openMo();
+
+async function deleteExpense(id) {
+  if (!confirm('Eliminare questa spesa?')) return;
+  try {
+    await window.FB.deleteDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'expenses', id));
+    showToast('Spesa eliminata');
+  } catch (e) { showToast('Errore', 'error'); }
 }
-function selEI(el,ic){document.querySelectorAll('[class="btn-ic"]').forEach(b=>b.style.background='var(--bg2)');el.style.background='var(--pri-l)';window._eic=ic;}
-function addExp(){
-  const e={id:'e_'+Date.now(),title:$('ae-t').value,amount:+$('ae-a').value,icon:window._eic||'💰',
-    paidBy:$('ae-p').value,splitWith:Array.from(document.querySelectorAll('.ae-sp:checked')).map(c=>c.value),date:$('ae-d').value};
-  if(!e.title||isNaN(e.amount)||e.amount<=0)return toast('Compila titolo e importo');
-  S.cur.expenses=S.cur.expenses||[];S.cur.expenses.push(e);
-  saveTrip();rExp();closeMo();toast('Spesa aggiunta! 💰');
+window.deleteExpense = deleteExpense;
+
+/* =================================================================
+   CHAT
+   ================================================================= */
+async function sendChatMessage() {
+  const input = document.getElementById('chat-input-field');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  try {
+    await window.FB.addDoc(window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'messages'), {
+      text,
+      senderUid: state.user.uid,
+      senderName: state.profile?.name || 'Utente',
+      createdAt: window.FB.serverTimestamp()
+    });
+  } catch (e) { showToast('Errore invio', 'error'); }
 }
-function calcStl(){
-  const t=S.cur;if(!t?.expenses?.length)return;
-  const bal={};
-  (t.participants||[]).forEach(p=>bal[p.id]={name:p.name,b:0});
-  (t.expenses||[]).forEach(e=>{if(bal[e.paidBy])bal[e.paidBy].b+=e.amount;const sp=e.amount/((e.splitWith||[]).length||1);(e.splitWith||[]).forEach(u=>{if(bal[u])bal[u].b-=sp;});});
-  const dbt=Object.entries(bal).filter(([,v])=>v.b<-.01).map(([k,v])=>({id:k,...v})).sort((a,b)=>a.b-b.b);
-  const crd=Object.entries(bal).filter(([,v])=>v.b>.01).map(([k,v])=>({id:k,...v})).sort((a,b)=>b.b-a.b);
-  const stl=[];let di=0,ci=0;
-  while(di<dbt.length&&ci<crd.length){
-    const a=Math.min(-dbt[di].b,crd[ci].b);
-    if(a>.01)stl.push({from:dbt[di].name,to:crd[ci].name,amount:a});
-    dbt[di].b+=a;crd[ci].b-=a;
-    if(Math.abs(dbt[di].b)<.01)di++;if(Math.abs(crd[ci].b)<.01)ci++;
+window.sendChatMessage = sendChatMessage;
+
+function renderChat() {
+  const box = document.getElementById('chat-messages');
+  if (!state.currentMessages.length) {
+    box.innerHTML = `<div class="empty-state"><div class="emoji">💬</div><h3>Nessun messaggio</h3><p>Rompi il ghiaccio!</p></div>`;
+    return;
   }
-  $('stl-c').innerHTML=stl.length?stl.map(s=>`<div class="stl-card"><span style="font-weight:700;">${s.from}</span><span class="stl-ar">→</span><span style="font-weight:700;">${s.to}</span><span style="margin-left:auto;font-weight:800;color:var(--acc);">€${s.amount.toFixed(2).replace('.',',')}</span></div>`).join(''):'<p style="color:var(--txt3);text-align:center;padding:10px;">Tutti in pari! 🎉</p>';
+  box.innerHTML = state.currentMessages.map(m => {
+    const mine = m.senderUid === state.user.uid;
+    const time = m.createdAt ? formatTime(new Date(m.createdAt.seconds * 1000)) : '';
+    return `
+      <div class="chat-msg ${mine ? 'me' : 'other'}">
+        ${!mine ? `<div class="sender">${escapeHtml(m.senderName)}</div>` : ''}
+        <div class="bubble">${escapeHtml(m.text)}</div>
+        <div class="time">${time}</div>
+      </div>`;
+  }).join('');
+  box.scrollTop = box.scrollHeight;
 }
-function togStl(){const e=$('stl-sec');e.style.display=e.style.display==='none'?'block':'none';}
 
-// ============================
-//  CALENDAR
-// ============================
-function rCal(){
-  const t=S.cur;if(!t)return;
-  const y=S.calY,m=S.calM;
-  const mn=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
-  $('cal-my').textContent=mn[m]+' '+y;
-  const g=$('cal-g');let h=['L','M','M','G','V','S','D'].map(d=>'<div class="cal-h">'+d+'</div>').join('');
-  let sd=new Date(y,m,1).getDay()-1;if(sd<0)sd=6;
-  const dim=new Date(y,m+1,0).getDate(),dip=new Date(y,m,0).getDate();
-  const td=new Date();
-  for(let i=sd-1;i>=0;i--)h+='<div class="cal-d om">'+(dip-i)+'</div>';
-  for(let d=1;d<=dim;d++){
-    const ds=y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const it=td.getFullYear()===y&&td.getMonth()===m&&td.getDate()===d;
-    const he=(t.events||[]).some(e=>e.date===ds);
-    const itr=ds>=t.startDate&&ds<=t.endDate;
-    h+='<div class="cal-d'+(it?' today':'')+(he?' ev':'')+(itr&&!it?' trip':'')+'" onclick="selDay(\''+ds+'\')">'+d+'</div>';
+/* =================================================================
+   PARTICIPANTS & INVITE
+   ================================================================= */
+function renderParticipants() {
+  const t = state.currentTrip;
+  if (!t) return;
+  const list = document.getElementById('participants-list');
+  list.innerHTML = (t.participantsInfo || []).map(p => {
+    const initials = (p.name || 'U').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+    return `
+      <div class="participant-item">
+        <div class="participant-avatar">${initials}</div>
+        <div class="participant-info">
+          <div class="participant-name">${escapeHtml(p.name)}${p.uid === state.user.uid ? ' <span style="color:var(--text-light); font-size:12px">(tu)</span>' : ''}</div>
+          <div class="participant-role">${p.role === 'admin' ? '👑 Organizzatore' : '👤 Membro'}</div>
+        </div>
+        ${p.uid === t.createdBy && p.uid === state.user.uid ? '' : ''}
+      </div>`;
+  }).join('');
+}
+
+async function shareInvite() {
+  const t = state.currentTrip;
+  if (!t) return;
+  const code = t.inviteCode;
+  const text = `🌍 Ti invito al mio viaggio "${t.name}" su IO Travel!\n\nApri l'app e inserisci questo codice: ${code}`;
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Invito IO Travel', text }); return; } catch (_) {}
   }
-  const tc=sd+dim,rm=7-(tc%7);if(rm<7)for(let d=1;d<=rm;d++)h+='<div class="cal-d om">'+d+'</div>';
-  g.innerHTML=h;
-  if(S.selDay)selDay(S.selDay);
-}
-function chMon(d){S.calM+=d;if(S.calM>11){S.calM=0;S.calY++;}if(S.calM<0){S.calM=11;S.calY--;}rCal();}
-function selDay(d){
-  S.selDay=d;
-  const evs=(S.cur.events||[]).filter(e=>e.date===d);
-  $('cal-ev').innerHTML=evs.length?evs.map(e=>'<div class="nt-card" style="border-left-color:'+(e.color||'var(--pri)')+'"><h4>'+(e.time?'🕐 '+e.time+' — ':'')+e.title+'</h4>'+(e.description?'<p>'+e.description+'</p>':'')+'</div>').join(''):'<p style="color:var(--txt3);font-size:12px;padding:6px 0;">Nessun evento per il '+fmtD(d)+'</p>';
-}
-function openAddEv(){
-  $('mo-c').innerHTML=`<div class="mo-h"></div><h3>📅 Nuovo Evento</h3>
-    <div class="fg"><label>Titolo</label><input type="text" class="fi" id="ev-t" placeholder="Es. Check-in hotel"></div>
-    <div class="fg"><label>Data</label><input type="date" class="fi" id="ev-d" value="${S.selDay||new Date().toISOString().split('T')[0]}"></div>
-    <div class="fg"><label>Ora</label><input type="time" class="fi" id="ev-tm"></div>
-    <div class="fg"><label>Descrizione</label><textarea class="fi" id="ev-ds" rows="2" placeholder="Dettagli..."></textarea></div>
-    <div class="fg"><label>Colore</label><div class="nc">
-      <div class="ncol sel" style="background:#FF7A2F;" onclick="selCol(this,'#FF7A2F')"></div>
-      <div class="ncol" style="background:#2EAAE0;" onclick="selCol(this,'#2EAAE0')"></div>
-      <div class="ncol" style="background:#2ECC71;" onclick="selCol(this,'#2ECC71')"></div>
-      <div class="ncol" style="background:#9B59B6;" onclick="selCol(this,'#9B59B6')"></div>
-      <div class="ncol" style="background:#E84393;" onclick="selCol(this,'#E84393')"></div></div></div>
-    <button class="btn btn-p" onclick="addEv()">✅ Aggiungi</button>`;
-  window._col='#FF7A2F';openMo();
-}
-function selCol(el,c){document.querySelectorAll('.ncol').forEach(x=>x.classList.remove('sel'));el.classList.add('sel');window._col=c;}
-function addEv(){
-  const ev={id:'ev_'+Date.now(),title:$('ev-t').value,date:$('ev-d').value,time:$('ev-tm').value,description:$('ev-ds').value,color:window._col||'#FF7A2F'};
-  if(!ev.title||!ev.date)return toast('Compila titolo e data');
-  S.cur.events=S.cur.events||[];S.cur.events.push(ev);
-  saveTrip();rCal();closeMo();toast('Evento aggiunto! 📅');
-}
-
-// ============================
-//  NOTES
-// ============================
-function rNotes(){
-  const t=S.cur;if(!t)return;
-  const l=$('no-list');
-  if(!t.notes?.length){l.innerHTML='<div class="emp"><div class="ei">📝</div><h3>Nessuna nota</h3><p>Aggiungi note e info utili</p></div>';return;}
-  const bMap={'#FFF0E5':'var(--pri)','#E5F5FC':'var(--sec)','#E0F8EA':'var(--acc)','#F3E8F9':'var(--pur)','#FCE4F0':'var(--pnk)'};
-  l.innerHTML=t.notes.map(n=>`<div class="nt-card" style="background:${n.color||'var(--card)'};border-left-color:${bMap[n.color]||'var(--sec)'}">
-    <h4>${n.title}</h4><p>${n.content}</p><div class="ndate">${fmtD(n.date)}</div>
-    <button class="btn btn-sm btn-d mt8" onclick="delNote('${n.id}')">🗑️</button></div>`).join('');
-}
-function openAddNote(){
-  $('mo-c').innerHTML=`<div class="mo-h"></div><h3>📝 Nuova Nota</h3>
-    <div class="fg"><label>Titolo</label><input type="text" class="fi" id="no-t" placeholder="Titolo"></div>
-    <div class="fg"><label>Contenuto</label><textarea class="fi" id="no-c" rows="4" placeholder="Scrivi..."></textarea></div>
-    <div class="fg"><label>Colore</label><div class="nc">
-      <div class="ncol sel" style="background:#FFF0E5;" onclick="selCol(this,'#FFF0E5')"></div>
-      <div class="ncol" style="background:#E5F5FC;" onclick="selCol(this,'#E5F5FC')"></div>
-      <div class="ncol" style="background:#E0F8EA;" onclick="selCol(this,'#E0F8EA')"></div>
-      <div class="ncol" style="background:#F3E8F9;" onclick="selCol(this,'#F3E8F9')"></div>
-      <div class="ncol" style="background:#FCE4F0;" onclick="selCol(this,'#FCE4F0')"></div></div></div>
-    <button class="btn btn-p" onclick="addNote()">✅ Salva</button>`;
-  window._col='#FFF0E5';openMo();
-}
-function addNote(){
-  const n={id:'n_'+Date.now(),title:$('no-t').value,content:$('no-c').value,color:window._col||'#FFF0E5',date:new Date().toISOString().split('T')[0]};
-  if(!n.title)return toast('Inserisci un titolo');
-  S.cur.notes=S.cur.notes||[];S.cur.notes.push(n);
-  saveTrip();rNotes();closeMo();toast('Nota salvata! 📝');
-}
-function delNote(id){S.cur.notes=S.cur.notes.filter(n=>n.id!==id);saveTrip();rNotes();}
-
-// ============================
-//  CHECKLIST
-// ============================
-function rCl(){
-  const t=S.cur;if(!t)return;
-  const l=$('cl-list');
-  if(!t.checklist?.length){l.innerHTML='<p style="color:var(--txt3);font-size:12px;padding:6px 0;">Nessun elemento</p>';}
-  else{
-    const dn=t.checklist.filter(c=>c.done).length,tot=t.checklist.length;
-    l.innerHTML=`<div class="progress-bar"><div class="progress-fill" style="width:${dn/tot*100}%"></div></div>
-      <p style="font-size:11px;color:var(--txt3);margin-bottom:10px;">${dn}/${tot} completati</p>
-      ${t.checklist.map(c=>`<div class="cl-it">
-        <div class="ck ${c.done?'done':''}" onclick="togCl('${c.id}')">${c.done?'✓':''}</div>
-        <span class="cl-txt ${c.done?'done':''}">${c.text}</span>
-        <button class="btn-ic" style="width:24px;height:24px;font-size:9px;background:var(--red-l);color:var(--red);" onclick="delCl('${c.id}')">✕</button></div>`).join('')}`;
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('Invito copiato! 📋', 'success');
+  } catch (e) {
+    prompt('Copia il codice:', code);
   }
-  const sug={walking:['Scarponi','Bastoncini','Giacca antipioggia','Borraccia','Snack','Kit pronto soccorso','Crema solare','Powerbank','Mappa sentieri'],
-    camper:['Sacco a pelo','Stoviglie','Gas cucina','Torcia','Sedie pieghevoli','Cavi elettrici','Tavolo campeggio','Zanzariera'],
-    boat:['Crema solare waterproof','Cappello','Anti mal di mare','Costume','Snorkel','Sacca stagna','Cima extra'],
-    sup:['Muta','Crema solare','Borraccia','Sacca stagna','Costume','Leash di sicurezza'],
-    car:['Caricatore auto','Documenti auto','Snack','Cuscino viaggio','Occhiali da sole','Triangolo','Giubbotto catarifrangente'],
-    flight:['Passaporto','Boarding pass','Adattatore presa','Cuscino viaggio','Liquidi <100ml','Powerbank','Assicurazione viaggio']};
-  const ts=sug[S.cur.type]||sug.car;
-  const ex=(S.cur.checklist||[]).map(c=>c.text.toLowerCase());
-  const flt=ts.filter(s=>!ex.includes(s.toLowerCase()));
-  $('cl-sug').innerHTML=flt.length?'<div style="display:flex;flex-wrap:wrap;gap:5px;">'+flt.map(s=>`<button class="btn btn-sm btn-o" onclick="addSug('${s}')" style="font-size:11px;">+ ${s}</button>`).join('')+'</div>':'<p style="color:var(--txt3);font-size:11px;">Tutto aggiunto!</p>';
 }
-function addCl(){const inp=$('cl-in'),t=inp.value.trim();if(!t)return;S.cur.checklist=S.cur.checklist||[];S.cur.checklist.push({id:'c_'+Date.now(),text:t,done:false});saveTrip();rCl();inp.value='';}
-function addSug(t){S.cur.checklist=S.cur.checklist||[];S.cur.checklist.push({id:'c_'+Date.now(),text:t,done:false});saveTrip();rCl();}
-function togCl(id){const it=S.cur.checklist.find(c=>c.id===id);if(it)it.done=!it.done;saveTrip();rCl();}
-function delCl(id){S.cur.checklist=S.cur.checklist.filter(c=>c.id!==id);saveTrip();rCl();}
-$('cl-in')?.addEventListener('keydown',e=>{if(e.key==='Enter')addCl();});
+window.shareInvite = shareInvite;
 
-// ============================
-//  TRIP SETTINGS
-// ============================
-function openTripSet(){
-  const t=S.cur;
-  $('mo-c').innerHTML=`<div class="mo-h"></div><h3>⚙️ Impostazioni</h3>
-    <div class="fg"><label>Nome</label><input type="text" class="fi" id="et-n" value="${t.name}"></div>
-    <div class="fg"><label>Descrizione</label><textarea class="fi" id="et-d" rows="2">${t.description||''}</textarea></div>
-    <div class="fg"><label>Data Inizio</label><input type="date" class="fi" id="et-s" value="${t.startDate}"></div>
-    <div class="fg"><label>Data Fine</label><input type="date" class="fi" id="et-e" value="${t.endDate}"></div>
-    <button class="btn btn-p" onclick="updTrip()">💾 Salva</button>
-    ${t.createdBy===S.uid?'<button class="btn btn-d mt8" onclick="delTrip()">🗑️ Elimina Viaggio</button>':''}`;
-  openMo();
+/* =================================================================
+   EDIT & DELETE TRIP
+   ================================================================= */
+function openEditTripModal() {
+  const t = state.currentTrip;
+  if (!t) return;
+  document.getElementById('et-name').value = t.name || '';
+  document.getElementById('et-destination').value = t.destination || '';
+  document.getElementById('et-start').value = t.startDate || '';
+  document.getElementById('et-end').value = t.endDate || '';
+  document.getElementById('et-description').value = t.description || '';
+  document.getElementById('et-transport').value = t.transport || '';
+  openModal('edit-trip-modal');
 }
-function updTrip(){
-  S.cur.name=$('et-n').value;S.cur.description=$('et-d').value;
-  S.cur.startDate=$('et-s').value;S.cur.endDate=$('et-e').value;
-  saveTrip();openTrip(S.curId);closeMo();toast('Aggiornato! ✅');
+window.openEditTripModal = openEditTripModal;
+
+async function saveTripEdit() {
+  try {
+    showLoader(true);
+    await window.FB.updateDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId), {
+      name: document.getElementById('et-name').value.trim(),
+      destination: document.getElementById('et-destination').value.trim(),
+      startDate: document.getElementById('et-start').value,
+      endDate: document.getElementById('et-end').value,
+      description: document.getElementById('et-description').value.trim(),
+      transport: document.getElementById('et-transport').value.trim()
+    });
+    closeModal('edit-trip-modal');
+    showToast('Viaggio aggiornato ✨', 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
 }
-function delTrip(){
-  if(!confirm('Eliminare questo viaggio?'))return;
-  if(fbOk)db.collection('trips').doc(S.curId).delete();
-  go('home');closeMo();toast('Viaggio eliminato');
+window.saveTripEdit = saveTripEdit;
+
+async function deleteCurrentTrip() {
+  const t = state.currentTrip;
+  if (!t) return;
+  if (t.createdBy !== state.user.uid) return showToast('Solo il creatore può eliminare', 'error');
+  if (!confirm(`Eliminare definitivamente "${t.name}"? Verranno rimosse tutte le tappe, spese, chat e marker.`)) return;
+  try {
+    showLoader(true);
+    // Delete subcollections
+    const subcols = ['stages', 'markers', 'expenses', 'messages'];
+    for (const sub of subcols) {
+      const snap = await window.FB.getDocs(window.FB.collection(window.FB.db, 'trips', t.id, sub));
+      const batch = window.FB.writeBatch(window.FB.db);
+      snap.docs.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+    }
+    // Delete invite
+    if (t.inviteCode) {
+      try { await window.FB.deleteDoc(window.FB.doc(window.FB.db, 'invites', t.inviteCode)); } catch (_) {}
+    }
+    // Delete trip
+    await window.FB.deleteDoc(window.FB.doc(window.FB.db, 'trips', t.id));
+    detachTripListeners();
+    showToast('Viaggio eliminato', 'success');
+    showPage('home');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
+}
+window.deleteCurrentTrip = deleteCurrentTrip;
+
+/* =================================================================
+   CALENDAR + EVENTS
+   ================================================================= */
+function renderCalendar() {
+  const cal = state.calMonth;
+  const monthNames = ['Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno', 'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'];
+  document.getElementById('cal-month-label').textContent = `${monthNames[cal.getMonth()]} ${cal.getFullYear()}`;
+  const firstDay = new Date(cal.getFullYear(), cal.getMonth(), 1);
+  const lastDay = new Date(cal.getFullYear(), cal.getMonth() + 1, 0);
+  // Monday-start offset: getDay returns 0=Sun. We want 0=Mon.
+  let startOffset = (firstDay.getDay() + 6) % 7;
+  const totalDays = lastDay.getDate();
+
+  // Previous month tail
+  const prevLastDay = new Date(cal.getFullYear(), cal.getMonth(), 0).getDate();
+  let html = '';
+  for (let i = startOffset - 1; i >= 0; i--) {
+    html += `<div class="cal-day other-month">${prevLastDay - i}</div>`;
+  }
+  const today = new Date();
+  const todayKey = formatYMD(today);
+  const selKey = formatYMD(state.selectedDate);
+  for (let d = 1; d <= totalDays; d++) {
+    const dt = new Date(cal.getFullYear(), cal.getMonth(), d);
+    const key = formatYMD(dt);
+    const hasEvent = state.events.some(e => e.date === key) || state.trips.some(t => dateInRange(key, t.startDate, t.endDate));
+    let cls = 'cal-day';
+    if (key === todayKey) cls += ' today';
+    if (key === selKey) cls += ' selected';
+    if (hasEvent) cls += ' has-event';
+    html += `<div class="${cls}" onclick="selectCalDate('${key}')">${d}</div>`;
+  }
+  // Trailing days
+  const cellsUsed = startOffset + totalDays;
+  const trail = (7 - cellsUsed % 7) % 7;
+  for (let i = 1; i <= trail; i++) html += `<div class="cal-day other-month">${i}</div>`;
+
+  document.getElementById('cal-days').innerHTML = html;
+  renderEventsForDate();
+}
+window.renderCalendar = renderCalendar;
+
+function changeMonth(delta) {
+  state.calMonth = new Date(state.calMonth.getFullYear(), state.calMonth.getMonth() + delta, 1);
+  renderCalendar();
+}
+window.changeMonth = changeMonth;
+
+function selectCalDate(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  state.selectedDate = new Date(y, m - 1, d);
+  renderCalendar();
+}
+window.selectCalDate = selectCalDate;
+
+function renderEventsForDate() {
+  const key = formatYMD(state.selectedDate);
+  document.getElementById('selected-date-label').textContent =
+    `Eventi del ${state.selectedDate.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' })}`;
+
+  const dayEvents = state.events.filter(e => e.date === key);
+  const tripsOnDay = state.trips.filter(t => dateInRange(key, t.startDate, t.endDate));
+
+  const list = document.getElementById('events-list');
+  if (!dayEvents.length && !tripsOnDay.length) {
+    list.innerHTML = `<div class="empty-state" style="padding:20px"><p>Nessun evento per questa data</p></div>`;
+    return;
+  }
+
+  let html = '';
+  tripsOnDay.forEach(t => {
+    const type = TRIP_TYPES[t.type] || TRIP_TYPES.mixed;
+    html += `
+      <div class="event-item" style="border-left-color: var(--accent); cursor:pointer" onclick="openTrip('${t.id}')">
+        <div class="title">${type.emoji} ${escapeHtml(t.name)}</div>
+        <div class="meta">Viaggio • ${formatDateRange(t.startDate, t.endDate)}</div>
+      </div>`;
+  });
+  dayEvents.forEach(e => {
+    html += `
+      <div class="event-item">
+        <div class="title">${escapeHtml(e.title)}</div>
+        <div class="meta">${e.time || '—'} ${e.notes ? ' • ' + escapeHtml(e.notes) : ''}</div>
+        <button class="btn btn-sm" style="margin-top:6px; color:var(--danger); padding:4px 10px; width:auto" onclick="deleteEvent('${e.id}')">Elimina</button>
+      </div>`;
+  });
+  list.innerHTML = html;
 }
 
-// ============================
-//  SAVE TO FIRESTORE
-// ============================
-function saveTrip(){
-  if(!fbOk||!S.curId)return;
-  const data={...S.cur};delete data.id;
-  db.collection('trips').doc(S.curId).update(data).catch(e=>console.error('Save error',e));
+async function createEvent() {
+  const title = document.getElementById('ne-title').value.trim();
+  const date = document.getElementById('ne-date').value || formatYMD(state.selectedDate);
+  const time = document.getElementById('ne-time').value;
+  const notes = document.getElementById('ne-notes').value.trim();
+  if (!title) return showToast('Inserisci un titolo', 'error');
+  try {
+    showLoader(true);
+    await window.FB.addDoc(window.FB.collection(window.FB.db, 'users', state.user.uid, 'events'), {
+      title, date, time, notes,
+      createdAt: window.FB.serverTimestamp()
+    });
+    closeModal('new-event-modal');
+    document.getElementById('ne-title').value = '';
+    document.getElementById('ne-date').value = '';
+    document.getElementById('ne-time').value = '';
+    document.getElementById('ne-notes').value = '';
+    showToast('Evento creato 📅', 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
+}
+window.createEvent = createEvent;
+
+async function deleteEvent(id) {
+  if (!confirm('Eliminare evento?')) return;
+  try {
+    await window.FB.deleteDoc(window.FB.doc(window.FB.db, 'users', state.user.uid, 'events', id));
+    showToast('Evento eliminato');
+  } catch (e) { showToast('Errore', 'error'); }
+}
+window.deleteEvent = deleteEvent;
+
+/* =================================================================
+   NOTES
+   ================================================================= */
+function renderNotes() {
+  const list = document.getElementById('notes-list');
+  if (!state.notes.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">📝</div>
+        <h3>Nessuna nota</h3>
+        <p>Annota idee, liste, promemoria…</p>
+        <button class="btn btn-primary" onclick="openModal('new-note-modal')" style="width:auto; margin: 0 auto">Crea nota</button>
+      </div>`;
+    return;
+  }
+  list.innerHTML = state.notes.map(n => `
+    <div class="note-card">
+      <div class="note-title">${escapeHtml(n.title)}</div>
+      <div class="note-body">${escapeHtml(n.body || '')}</div>
+      <div class="note-date">${n.createdAt ? new Date(n.createdAt.seconds * 1000).toLocaleDateString('it-IT') : ''}</div>
+      <button class="btn btn-sm" style="margin-top:8px; color:var(--danger); padding:4px 10px; width:auto" onclick="deleteNote('${n.id}')">Elimina</button>
+    </div>
+  `).join('');
 }
 
-// ============================
-//  PROFILE
-// ============================
-function editProf(){
-  $('mo-c').innerHTML=`<div class="mo-h"></div><h3>✏️ Modifica Profilo</h3>
-    <div class="fg"><label>Nome</label><input type="text" class="fi" id="ep-n" value="${S.uName}"></div>
-    <button class="btn btn-p" onclick="saveProf()">💾 Salva</button>`;
-  openMo();
+async function createNote() {
+  const title = document.getElementById('nn-title').value.trim();
+  const body = document.getElementById('nn-body').value.trim();
+  if (!title) return showToast('Inserisci un titolo', 'error');
+  try {
+    showLoader(true);
+    await window.FB.addDoc(window.FB.collection(window.FB.db, 'users', state.user.uid, 'notes'), {
+      title, body,
+      createdAt: window.FB.serverTimestamp()
+    });
+    closeModal('new-note-modal');
+    document.getElementById('nn-title').value = '';
+    document.getElementById('nn-body').value = '';
+    showToast('Nota salvata 📝', 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
 }
-function saveProf(){
-  S.uName=$('ep-n').value;
-  $('u-name').textContent=S.uName;$('u-av').textContent=S.uName[0].toUpperCase();
-  $('s-av').textContent=S.uName[0].toUpperCase();$('s-name').textContent=S.uName;
-  if(fbOk&&auth.currentUser)auth.currentUser.updateProfile({displayName:S.uName});
-  if(fbOk)db.collection('users').doc(S.uid).update({name:S.uName});
-  closeMo();toast('Profilo aggiornato! ✅');
+window.createNote = createNote;
+
+async function deleteNote(id) {
+  if (!confirm('Eliminare nota?')) return;
+  try {
+    await window.FB.deleteDoc(window.FB.doc(window.FB.db, 'users', state.user.uid, 'notes', id));
+    showToast('Nota eliminata');
+  } catch (e) { showToast('Errore', 'error'); }
+}
+window.deleteNote = deleteNote;
+
+/* =================================================================
+   PROFILE
+   ================================================================= */
+function renderProfileStats() {
+  document.getElementById('stat-trips').textContent = state.trips.length;
+  document.getElementById('stat-notes').textContent = state.notes.length;
 }
 
-// ============================
-//  UTILS
-// ============================
-function $(id){return document.getElementById(id);}
-function fmtD(s){if(!s)return'';const d=new Date(s+'T00:00:00');return d.toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'});}
-function fmtT(s){if(!s)return'';return new Date(s).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});}
-function dur(s,e){if(!s||!e)return 0;return Math.ceil((new Date(e)-new Date(s))/864e5)+1;}
-function genCode(){const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let r='';for(let i=0;i<6;i++)r+=c[Math.floor(Math.random()*c.length)];return r;}
-function rndCol(){return['#FF7A2F','#2EAAE0','#2ECC71','#9B59B6','#E84393','#00B894','#F1C40F'][Math.floor(Math.random()*7)];}
-function cpCode(){const c=S.cur?.code||'';navigator.clipboard?.writeText(c).then(()=>toast('Codice copiato! 📋')).catch(()=>{const e=document.createElement('textarea');e.value=c;document.body.appendChild(e);e.select();document.execCommand('copy');document.body.removeChild(e);toast('Copiato! 📋');});}
-function toast(m){const ex=document.querySelector('.toast');if(ex)ex.remove();const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2800);}
-function openMo(){$('mo').classList.add('on');}
-function closeMo(){$('mo').classList.remove('on');}
-$('mo').addEventListener('click',function(e){if(e.target===this)closeMo();});
+async function saveProfile() {
+  const name = document.getElementById('ep-name').value.trim();
+  if (!name) return showToast('Inserisci un nome', 'error');
+  try {
+    showLoader(true);
+    await window.FB.updateProfile(state.user, { displayName: name });
+    await window.FB.updateDoc(window.FB.doc(window.FB.db, 'users', state.user.uid), { name });
+    state.profile.name = name;
+    updateAvatars();
+    closeModal('edit-profile-modal');
+    showToast('Profilo aggiornato ✨', 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
+}
+window.saveProfile = saveProfile;
 
-// Countdown refresh
-setInterval(()=>{if($('scr-home').classList.contains('on'))renderTrips();},60000);
+/* =================================================================
+   HELPERS
+   ================================================================= */
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+function formatYMD(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+function formatDate(ymd) {
+  if (!ymd) return '—';
+  const [y, m, d] = ymd.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function formatDateRange(s, e) {
+  if (!s || !e) return '—';
+  return `${formatDate(s)} → ${formatDate(e)}`;
+}
+function formatTime(d) {
+  return d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+}
+function daysBetween(s, e) {
+  if (!s || !e) return 0;
+  return Math.round((new Date(e) - new Date(s)) / 86400000) + 1;
+}
+function dateInRange(key, s, e) {
+  if (!s || !e) return false;
+  return key >= s && key <= e;
+}
+
+// Show join card on auth screen only once an account is present? Per user request:
+// Join option should be visible ONLY after account creation/login. So we keep it hidden on the auth screen;
+// users join via the "Usa codice invito" quick action from the Home once logged in.
 </script>
+
 </body>
 </html>
