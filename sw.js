@@ -1,5 +1,5 @@
-// IO Travel Service Worker v5
-const CACHE_NAME = 'io-travel-v5-2';
+// IO Travel Service Worker v6.1
+const CACHE_NAME = 'io-travel-v6-1';
 
 const PRECACHE = [
   './index.html',

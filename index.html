@@ -43,45 +43,69 @@
 
 <style>
   :root {
-    --bg: #f7f9fc;
-    --bg-2: #eef2f9;
+    /* Palette viaggio organico — terra, mare, tramonti */
+    --bg: #faf6ef;          /* sabbia chiarissima */
+    --bg-2: #f2ebe0;        /* sabbia leggermente più scura */
     --surface: #ffffff;
-    --surface-2: #f2f5fb;
-    --text: #1a2233;
-    --text-muted: #5a6578;
-    --text-light: #8a94a6;
-    --primary: #4f7cff;
-    --primary-dark: #3a62e0;
-    --primary-soft: #e8efff;
-    --accent: #ff8a3d;
-    --success: #2ecc71;
-    --danger: #ff5a5f;
-    --warning: #ffb648;
-    --border: #e6ebf3;
-    --shadow: 0 6px 20px rgba(25, 40, 90, 0.06);
-    --shadow-lg: 0 12px 32px rgba(25, 40, 90, 0.10);
-    --radius: 16px;
-    --radius-sm: 10px;
-    --radius-lg: 22px;
+    --surface-2: #f7f1e8;   /* pergamena */
+    --text: #2d2416;        /* terra scura */
+    --text-muted: #7a6f5e;  /* terra mediata */
+    --text-light: #a89d89;  /* sabbia scura */
+
+    --primary: #d97757;          /* arancio tramonto */
+    --primary-dark: #b85c3f;
+    --primary-soft: #fdebe1;
+    --accent: #2a9d8f;           /* turchese mare */
+    --accent-soft: #d4f1ed;
+    --sunset: #f4a261;           /* arancio dorato */
+    --ocean: #264653;            /* blu profondo oceano */
+    --forest: #588157;           /* verde bosco */
+    --sand: #e9c46a;             /* giallo sabbia calda */
+
+    --success: #588157;
+    --danger: #c1504a;
+    --warning: #e9b53f;
+
+    --border: #e7ddc8;
+    --shadow: 0 4px 20px rgba(89, 64, 33, 0.08);
+    --shadow-lg: 0 12px 32px rgba(89, 64, 33, 0.14);
+    --shadow-warm: 0 8px 24px rgba(217, 119, 87, 0.18);
+    --radius: 20px;
+    --radius-sm: 12px;
+    --radius-lg: 26px;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+    /* Gradient fondamentali */
+    --grad-sunset: linear-gradient(135deg, #d97757 0%, #f4a261 50%, #e9c46a 100%);
+    --grad-ocean: linear-gradient(135deg, #264653 0%, #2a9d8f 100%);
+    --grad-forest: linear-gradient(135deg, #588157 0%, #a3b18a 100%);
+    --grad-twilight: linear-gradient(180deg, #264653 0%, #d97757 70%, #e9c46a 100%);
   }
 
   [data-theme="dark"] {
-    --bg: #0f1420;
-    --bg-2: #161b28;
-    --surface: #1a2030;
-    --surface-2: #232a3d;
-    --text: #e8ecf4;
-    --text-muted: #9aa5ba;
-    --text-light: #6b7489;
-    --primary: #6b8dff;
-    --primary-dark: #4f7cff;
-    --primary-soft: #1f2a4a;
-    --accent: #ff9d58;
-    --border: #2a334a;
-    --shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.40);
+    --bg: #14110c;
+    --bg-2: #1d1a13;
+    --surface: #24201a;
+    --surface-2: #2d2922;
+    --text: #f0e8d8;
+    --text-muted: #b5a890;
+    --text-light: #8a7f6a;
+
+    --primary: #e8916f;
+    --primary-dark: #d97757;
+    --primary-soft: #3a2a1f;
+    --accent: #4db6a8;
+    --accent-soft: #1e3832;
+    --sunset: #f4a261;
+    --ocean: #4db6a8;
+    --forest: #7fa67d;
+    --sand: #e9c46a;
+
+    --border: #3a342a;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.50);
+    --shadow-warm: 0 8px 24px rgba(217, 119, 87, 0.25);
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -203,17 +227,27 @@
     display: flex; justify-content: space-around;
     padding: 8px 0 calc(8px + var(--safe-bottom));
     z-index: 100;
-    box-shadow: 0 -4px 16px rgba(25, 40, 90, 0.04);
+    box-shadow: 0 -6px 20px rgba(89, 64, 33, 0.06);
+    backdrop-filter: blur(8px);
   }
   .nav-btn {
     flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
     padding: 8px 4px; color: var(--text-light);
     font-size: 11px; font-weight: 600;
-    transition: color .2s;
+    transition: all .2s;
+    position: relative;
   }
-  .nav-btn svg { width: 22px; height: 22px; stroke-width: 2; }
+  .nav-btn svg { width: 22px; height: 22px; stroke-width: 2; transition: transform .2s; }
   .nav-btn.active { color: var(--primary); }
-  .nav-btn.active svg { stroke-width: 2.5; }
+  .nav-btn.active svg { stroke-width: 2.5; transform: scale(1.1); }
+  .nav-btn.active::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    width: 28px; height: 3px;
+    background: var(--primary);
+    border-radius: 2px;
+  }
 
   /* ---------- HOME / TRIPS LIST ---------- */
   .home-section { padding: 0 20px 20px; }
@@ -285,14 +319,14 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 24px; flex-shrink: 0;
   }
-  .trip-icon.walk { background: #e6f9ee; color: #2ecc71; }
-  .trip-icon.camper { background: #fff1e6; color: #ff8a3d; }
-  .trip-icon.boat { background: #e6f4ff; color: #4f7cff; }
-  .trip-icon.sup { background: #e6fcfa; color: #1abc9c; }
-  .trip-icon.car { background: #f3ebff; color: #7a5cff; }
-  .trip-icon.flight { background: #ffe6f0; color: #ff5a85; }
-  .trip-icon.bike { background: #fff9e6; color: #ffb648; }
-  .trip-icon.mixed { background: #e8efff; color: #4f7cff; }
+  .trip-icon.walk { background: #dae8d1; color: #588157; }
+  .trip-icon.camper { background: #fdebe1; color: #d97757; }
+  .trip-icon.boat { background: #d4f1ed; color: #264653; }
+  .trip-icon.sup { background: #d4f1ed; color: #2a9d8f; }
+  .trip-icon.car { background: #f3e3d0; color: #8a5a2e; }
+  .trip-icon.flight { background: #fdebe1; color: #d97757; }
+  .trip-icon.bike { background: #faeec9; color: #b08830; }
+  .trip-icon.mixed { background: #e7ddc8; color: #7a6f5e; }
 
   .trip-info { flex: 1; min-width: 0; }
   .trip-name { font-size: 16px; font-weight: 700; margin: 0 0 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -974,8 +1008,448 @@
     color: white;
   }
 
-  /* ---------- BACK BUTTON VISIBILITY ---------- */
-  .detail-back { background: transparent; }
+  /* ---------- SEARCH BOX ---------- */
+  .home-search {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .home-search input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+    color: var(--text);
+    padding: 4px 0;
+  }
+  .home-search input::placeholder { color: var(--text-light); }
+
+  /* ---------- TRAVEL MAP (globale) ---------- */
+  .travel-map-container {
+    height: 55vh;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+  .travel-stats-mini {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .travel-stat-box {
+    background: var(--surface);
+    padding: 14px 10px;
+    border-radius: 14px;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .travel-stat-box strong {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 2px;
+  }
+  .travel-stat-box span {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  /* ---------- WRAPPED / YEARLY STATS ---------- */
+  .wrapped-card {
+    background: var(--grad-twilight);
+    color: white;
+    border-radius: var(--radius-lg);
+    padding: 28px 22px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 16px;
+    cursor: pointer;
+  }
+  .wrapped-card::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(233,196,106,0.4), transparent);
+    pointer-events: none;
+  }
+  .wrapped-year {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    opacity: 0.9;
+    margin-bottom: 4px;
+  }
+  .wrapped-title {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 16px;
+  }
+  .wrapped-stat {
+    font-size: 14px;
+    margin: 8px 0;
+    opacity: 0.95;
+  }
+  .wrapped-stat strong {
+    font-size: 22px;
+    font-weight: 800;
+    color: #ffe082;
+  }
+
+  /* ---------- QR CODE invito ---------- */
+  .qr-invite-box {
+    background: white;
+    padding: 20px;
+    border-radius: 16px;
+    display: inline-block;
+    margin: 10px auto;
+  }
+  .qr-invite-wrap {
+    text-align: center;
+    padding: 12px 0;
+  }
+
+  /* ---------- OFFLINE BANNER ---------- */
+  .offline-banner {
+    position: fixed;
+    top: calc(var(--safe-top) + 8px);
+    left: 12px; right: 12px;
+    background: #c1504a;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    z-index: 9999;
+    box-shadow: 0 4px 16px rgba(193, 80, 74, 0.4);
+    transform: translateY(-120%);
+    transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .offline-banner.show {
+    transform: translateY(0);
+  }
+  .offline-banner.back {
+    background: #588157;
+    box-shadow: 0 4px 16px rgba(88, 129, 87, 0.4);
+  }
+
+  /* ---------- ONBOARDING ---------- */
+  .onboarding-modal {
+    max-width: 380px;
+    border-radius: var(--radius-lg) !important;
+    padding: 32px 24px 20px !important;
+    text-align: center;
+  }
+  .onb-emoji {
+    font-size: 72px;
+    margin-bottom: 18px;
+    animation: onbPop 0.6s ease-out;
+  }
+  @keyframes onbPop {
+    from { transform: scale(0.3); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .onb-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0 0 12px;
+    line-height: 1.2;
+    color: var(--text);
+  }
+  .onb-text {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-muted);
+    margin: 0 0 28px;
+  }
+  .onb-text strong {
+    color: var(--primary);
+    font-weight: 700;
+  }
+  .onb-progress {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 0 20px;
+  }
+  .onb-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all .3s;
+  }
+  .onb-dot.active {
+    background: var(--primary);
+    width: 24px;
+    border-radius: 4px;
+  }
+  .onb-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .onb-actions .btn {
+    flex: 1;
+    margin: 0;
+  }
+
+  /* ---------- HEADER GRADIENT ---------- */
+  .header-gradient {
+    background: var(--grad-sunset);
+    color: white;
+    padding: calc(var(--safe-top) + 18px) 20px 22px;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    box-shadow: var(--shadow-warm);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .header-gradient h1 { color: white; }
+  .header-gradient .avatar {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+  }
+
+  /* ---------- STORIES BAR (tipo IG) ---------- */
+  .stories-bar {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 16px 20px 10px;
+    margin: -14px -20px 8px;
+    scrollbar-width: none;
+  }
+  .stories-bar::-webkit-scrollbar { display: none; }
+  .story-item {
+    flex-shrink: 0;
+    width: 72px;
+    text-align: center;
+    cursor: pointer;
+  }
+  .story-avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    margin: 0 auto 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-muted);
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+    overflow: hidden;
+  }
+  .story-avatar img {
+    width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+  }
+  .story-item.has-story .story-avatar {
+    border: 3px solid transparent;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      var(--grad-sunset) border-box;
+    padding: 2px;
+  }
+  .story-item.add .story-avatar {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+  .story-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ---------- ACTIVE TRIP CARD ---------- */
+  .active-trip-card {
+    background: var(--grad-ocean);
+    color: white;
+    padding: 20px;
+    border-radius: var(--radius);
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .active-trip-card::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(233, 196, 106, 0.3), transparent);
+    pointer-events: none;
+  }
+  .active-trip-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.22);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    backdrop-filter: blur(4px);
+  }
+  .active-trip-name {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    line-height: 1.2;
+  }
+  .active-trip-meta {
+    font-size: 13px;
+    opacity: 0.88;
+    margin-bottom: 14px;
+  }
+  .active-trip-stats {
+    display: flex;
+    gap: 20px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.2);
+  }
+  .active-trip-stat {
+    display: flex;
+    flex-direction: column;
+    font-size: 11px;
+    opacity: 0.85;
+  }
+  .active-trip-stat strong {
+    display: block;
+    font-size: 18px;
+    font-weight: 800;
+    opacity: 1;
+    margin-bottom: 2px;
+  }
+
+  /* ---------- QUICK ACTIONS CHIPS ---------- */
+  .quick-actions-compact {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .quick-actions-compact::-webkit-scrollbar { display: none; }
+  .qa-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
+    white-space: nowrap;
+    border: 1px solid var(--border);
+    transition: transform .15s;
+  }
+  .qa-chip:active { transform: scale(0.96); }
+  .qa-chip-icon { font-size: 15px; }
+
+  /* ---------- COFFEE CARD INLINE ---------- */
+  .coffee-card-inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: linear-gradient(135deg, #fdf6e8 0%, #faeec9 100%);
+    border: 1.5px solid #e9c46a;
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 18px;
+  }
+  [data-theme="dark"] .coffee-card-inline {
+    background: linear-gradient(135deg, #3a2f1a 0%, #4a3a1f 100%);
+    border-color: #8a6f2c;
+  }
+  .coffee-card-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+  .coffee-icon-wrap {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .coffee-inline-title {
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .coffee-inline-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.3;
+  }
+  .coffee-inline-btn {
+    background: #2d2416;
+    color: #faeec9;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(45, 36, 22, 0.3);
+    transition: transform .15s;
+  }
+  .coffee-inline-btn:active { transform: scale(0.96); }
+  [data-theme="dark"] .coffee-inline-btn {
+    background: #faeec9;
+    color: #2d2416;
+  }
+
+  /* ---------- TRIP FILTER CHIPS ---------- */
+  .trip-filter-chips {
+    display: flex;
+    gap: 4px;
+  }
+  .trip-filter {
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: transparent;
+    border-radius: 12px;
+    transition: all .15s;
+  }
+  .trip-filter.active {
+    background: var(--primary);
+    color: white;
+  }
 
   /* ---------- AFFILIAZIONI ---------- */
   .affiliate-section {
@@ -1132,10 +1606,141 @@
   .ios-step .desc { font-size: 14px; line-height: 1.5; }
   .ios-step .desc strong { font-weight: 700; }
   .ios-step .icon { font-size: 22px; margin-right: 4px; }
+  /* ---------- SPLASH SCREEN ---------- */
+  .splash-screen {
+    position: fixed; inset: 0;
+    background: var(--grad-twilight);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 30px;
+    opacity: 1;
+    transition: opacity 0.8s ease-out;
+    overflow: hidden;
+  }
+  .splash-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .splash-bg {
+    position: absolute; inset: 0;
+    overflow: hidden;
+  }
+  .splash-sun {
+    position: absolute;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, #f4e6b5 0%, #e9c46a 40%, transparent 70%);
+    border-radius: 50%;
+    top: 32%; left: 50%;
+    transform: translate(-50%, -50%);
+    filter: blur(2px);
+    animation: sunPulse 4s ease-in-out infinite;
+  }
+  @keyframes sunPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.85; }
+    50% { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+  }
+  .splash-wave {
+    position: absolute;
+    left: -10%; right: -10%;
+    height: 80px;
+    border-radius: 50%;
+  }
+  .splash-wave-1 {
+    bottom: 18%;
+    background: rgba(42, 157, 143, 0.35);
+    animation: waveFloat 5s ease-in-out infinite;
+  }
+  .splash-wave-2 {
+    bottom: 8%;
+    background: rgba(38, 70, 83, 0.4);
+    animation: waveFloat 7s ease-in-out infinite reverse;
+  }
+  @keyframes waveFloat {
+    0%, 100% { transform: translateX(-15px) scaleY(1); }
+    50% { transform: translateX(15px) scaleY(1.1); }
+  }
+  .splash-bird {
+    position: absolute;
+    top: 22%; left: -10%;
+    font-size: 28px;
+    color: white;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    animation: birdFly 7s ease-in-out infinite;
+  }
+  @keyframes birdFly {
+    0% { left: -10%; top: 22%; }
+    50% { top: 15%; }
+    100% { left: 110%; top: 22%; }
+  }
+  .splash-content {
+    position: relative;
+    text-align: center;
+    z-index: 2;
+  }
+  .splash-logo {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: white;
+    text-shadow: 0 3px 12px rgba(0,0,0,0.25);
+    margin-bottom: 40px;
+    animation: slideDown 0.8s ease-out;
+  }
+  .splash-quote {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    font-style: italic;
+    max-width: 340px;
+    margin: 0 auto 16px;
+    opacity: 0;
+    animation: fadeInSlow 1.2s ease-out 0.5s forwards;
+  }
+  .splash-author {
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    opacity: 0;
+    animation: fadeInSlow 1.2s ease-out 1.2s forwards;
+  }
+  @keyframes slideDown {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes fadeInSlow {
+    to { opacity: 1; }
+  }
 
 </style>
 </head>
 <body>
+
+<!-- Offline indicator -->
+<div id="offline-banner" class="offline-banner">📡 Sei offline — le modifiche verranno sincronizzate al ritorno online</div>
+
+<!-- ====================================================== -->
+<!-- SPLASH SCREEN — appare al caricamento con frase viaggio -->
+<!-- ====================================================== -->
+<div id="splash-screen" class="splash-screen">
+  <div class="splash-bg">
+    <div class="splash-sun"></div>
+    <div class="splash-wave splash-wave-1"></div>
+    <div class="splash-wave splash-wave-2"></div>
+    <div class="splash-bird">✈</div>
+  </div>
+  <div class="splash-content">
+    <div class="splash-logo">IO Travel</div>
+    <div class="splash-quote" id="splash-quote"></div>
+    <div class="splash-author" id="splash-author"></div>
+  </div>
+</div>
 
 <div id="app">
 
@@ -1220,27 +1825,64 @@
 
     <!-- HOME -->
     <div id="page-home" class="page">
-      <header class="header">
-        <h1>IO <span class="accent">Travel</span></h1>
+      <header class="header header-gradient">
+        <div>
+          <div style="font-size:12px; opacity:.85; margin-bottom:2px">Benvenuto</div>
+          <h1 style="margin:0; font-size:22px" id="home-greeting">Ciao!</h1>
+        </div>
         <div class="avatar" id="user-avatar" onclick="showPage('profile')">?</div>
       </header>
 
       <div class="home-section">
-        <div id="countdown-area"></div>
+        <!-- Stories bar (viaggio attivo + amici + crea) -->
+        <div class="stories-bar" id="stories-bar"></div>
 
-        <div class="quick-actions">
-          <button class="quick-action" onclick="openModal('new-trip-modal')">
-            <div class="qa-icon blue">➕</div>
-            <div class="qa-label">Nuovo<br/>viaggio</div>
+        <!-- Viaggio attivo in evidenza -->
+        <div id="active-trip-card"></div>
+
+        <!-- Search -->
+        <div class="home-search">
+          <span style="font-size:16px; color:var(--text-muted)">🔍</span>
+          <input id="home-search-input" type="text" placeholder="Cerca tra i tuoi viaggi…" oninput="searchTrips(this.value)" />
+        </div>
+
+        <!-- Quick actions compatte -->
+        <div class="quick-actions-compact">
+          <button class="qa-chip" onclick="openModal('new-trip-modal')">
+            <span class="qa-chip-icon">✈️</span>
+            <span>Nuovo viaggio</span>
           </button>
-          <button class="quick-action" onclick="openModal('join-trip-modal')">
-            <div class="qa-icon orange">🎟️</div>
-            <div class="qa-label">Usa codice<br/>invito</div>
+          <button class="qa-chip" onclick="openModal('join-trip-modal')">
+            <span class="qa-chip-icon">🎟️</span>
+            <span>Codice invito</span>
+          </button>
+          <button class="qa-chip" onclick="showPage('wishlist')">
+            <span class="qa-chip-icon">⭐</span>
+            <span>Desideri</span>
           </button>
         </div>
 
+        <!-- Offri un caffè inline sulla dashboard -->
+        <div class="coffee-card-inline">
+          <div class="coffee-card-left">
+            <div class="coffee-icon-wrap">☕</div>
+            <div>
+              <div class="coffee-inline-title">Ti piace IO Travel?</div>
+              <div class="coffee-inline-sub">Con 1€ ripaghi il lavoro fatto per te</div>
+            </div>
+          </div>
+          <a id="coffee-link-home" href="https://ko-fi.com" target="_blank" class="coffee-inline-btn">Offri un caffè</a>
+        </div>
+
+        <!-- Feed viaggi -->
+        <div id="countdown-area"></div>
         <div class="section-header">
-          <h2>I tuoi viaggi</h2>
+          <h2 id="trips-section-title">I tuoi viaggi</h2>
+          <div class="trip-filter-chips">
+            <button class="trip-filter active" data-filter="all" onclick="filterTrips('all')">Tutti</button>
+            <button class="trip-filter" data-filter="upcoming" onclick="filterTrips('upcoming')">Futuri</button>
+            <button class="trip-filter" data-filter="past" onclick="filterTrips('past')">Passati</button>
+          </div>
         </div>
         <div id="trips-list"></div>
       </div>
@@ -1330,6 +1972,8 @@
         </div>
 
         <button class="btn btn-secondary" style="margin-bottom:10px" onclick="openEditProfileV5()">✏️ Modifica profilo</button>
+        <button class="btn btn-secondary" style="margin-bottom:10px" onclick="showPage('travelmap')">🗺️ La mia mappa del mondo</button>
+        <button class="btn btn-secondary" style="margin-bottom:10px" onclick="showPage('wrapped')">✨ Il mio anno in viaggio</button>
         <button class="btn btn-secondary" style="margin-bottom:10px" onclick="showPage('wishlist')">⭐ Lista dei desideri</button>
 
         <div class="coffee-banner">
@@ -1340,6 +1984,7 @@
         </div>
 
         <button class="btn btn-danger" style="margin-top:14px" onclick="doLogout()">Esci</button>
+        <button class="btn" style="margin-top:10px; color:var(--text-light); font-size:12px; background:transparent; box-shadow:none" onclick="openModal('delete-account-modal')">Elimina account</button>
         <p style="text-align:center; color:var(--text-light); font-size:11px; margin-top:20px">IO Travel v1.0 • made with ✈️</p>
       </div>
     </div>
@@ -1360,6 +2005,47 @@
           ⭐<br>Nessun desiderio ancora.<br><br>Tocca + per aggiungere una destinazione.
         </div>
       </div>
+    </div>
+
+    <!-- TRAVEL MAP — mappa globale dei viaggi -->
+    <div id="page-travelmap" class="page" style="display:none">
+      <header class="header header-gradient">
+        <button class="detail-back" onclick="showPage('profile')" style="color:white">‹ Indietro</button>
+        <h1 style="color:white">🗺️ Il mio mondo</h1>
+        <div></div>
+      </header>
+      <div class="home-section">
+        <div class="travel-stats-mini">
+          <div class="travel-stat-box">
+            <strong id="tm-countries">0</strong>
+            <span>Paesi</span>
+          </div>
+          <div class="travel-stat-box">
+            <strong id="tm-places">0</strong>
+            <span>Luoghi</span>
+          </div>
+          <div class="travel-stat-box">
+            <strong id="tm-trips">0</strong>
+            <span>Viaggi</span>
+          </div>
+        </div>
+        <div class="travel-map-container">
+          <div id="world-map" style="width:100%; height:100%"></div>
+        </div>
+        <p style="font-size:12px; color:var(--text-muted); text-align:center; margin-top:10px">
+          Ogni pallino è un posto dove sei stato. Tocca per rivedere il viaggio.
+        </p>
+      </div>
+    </div>
+
+    <!-- WRAPPED — statistiche annuali -->
+    <div id="page-wrapped" class="page" style="display:none">
+      <header class="header header-gradient">
+        <button class="detail-back" onclick="showPage('profile')" style="color:white">‹ Indietro</button>
+        <h1 style="color:white">✨ Il tuo anno</h1>
+        <div></div>
+      </header>
+      <div class="home-section" id="wrapped-content"></div>
     </div>
 
     <!-- USER PROFILE (altri utenti) -->
@@ -1484,17 +2170,11 @@
           <button class="map-tool-btn active" id="tool-none" onclick="setMapTool('none')" title="Seleziona / Naviga">
             🖐️ <span>Naviga</span>
           </button>
+          <button class="map-tool-btn" id="tool-addstage" onclick="setMapTool('addstage')" title="Aggiungi tappa cliccando sulla mappa">
+            ➕ <span>Tappa</span>
+          </button>
           <button class="map-tool-btn" id="tool-marker" onclick="setMapTool('marker')" title="Aggiungi marker emoji">
             📍 <span>Marker</span>
-          </button>
-          <button class="map-tool-btn" id="tool-route" onclick="setMapTool('route')" title="Disegna itinerario cliccando i punti">
-            ✏️ <span>Itinerario</span>
-          </button>
-          <button class="map-tool-btn" id="tool-finish" onclick="finishRoute()" title="Completa l'itinerario" style="color:#2ecc71; display:none">
-            ✅ <span>Completa</span>
-          </button>
-          <button class="map-tool-btn" id="tool-clear" onclick="clearDrawing()" title="Cancella disegno corrente" style="color:var(--danger)">
-            🗑️ <span>Cancella</span>
           </button>
           <button class="map-tool-btn" onclick="document.getElementById('gpx-file-input').click()" title="Importa traccia GPX">
             📂 <span>GPX</span>
@@ -1589,7 +2269,10 @@
         <div class="invite-code">
           <div class="lbl">Codice invito</div>
           <div class="code" id="invite-code-display">————</div>
-          <button class="btn btn-sm btn-primary" style="margin: 0 auto; width:auto" onclick="shareInvite()">📤 Condividi</button>
+          <div style="display:flex; gap:8px; justify-content:center">
+            <button class="btn btn-sm btn-primary" style="width:auto" onclick="shareInvite()">📤 Condividi</button>
+            <button class="btn btn-sm btn-secondary" style="width:auto" onclick="showInviteQR()">📱 Mostra QR</button>
+          </div>
         </div>
 
         <div class="section-header"><h2>Partecipanti</h2></div>
@@ -1625,6 +2308,108 @@
 <!-- ================================================================= -->
 
 <!-- New trip -->
+<!-- QR CODE INVITE -->
+<div id="qr-invite-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>📱 Invito rapido</h2>
+      <button class="modal-close" onclick="closeModal('qr-invite-modal')">×</button>
+    </div>
+    <div class="qr-invite-wrap">
+      <p style="font-size:13px; color:var(--text-muted); margin:0 0 10px">Fai scansionare questo QR per entrare automaticamente nel viaggio</p>
+      <div class="qr-invite-box">
+        <img id="qr-invite-img" src="" alt="QR" style="display:block; width:260px; height:260px" />
+      </div>
+      <div style="margin:14px 0 8px; font-size:13px; color:var(--text-muted)">oppure codice:</div>
+      <div id="qr-invite-code" style="font-size:28px; font-weight:800; letter-spacing:6px; color:var(--primary); margin-bottom:14px">——————</div>
+    </div>
+    <div style="background:var(--surface-2); padding:10px; border-radius:10px; display:flex; gap:8px; align-items:center; margin-bottom:10px">
+      <input id="qr-invite-link" type="text" readonly style="flex:1; border:none; background:transparent; font-size:12px; color:var(--text)" />
+      <button class="btn btn-sm btn-secondary" style="width:auto; padding:6px 12px" onclick="copyInviteLink()">📋 Copia</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE ACCOUNT (GDPR) -->
+<div id="delete-account-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 style="color:var(--danger)">⚠️ Elimina account</h2>
+      <button class="modal-close" onclick="closeModal('delete-account-modal')">×</button>
+    </div>
+    <p style="font-size:14px; color:var(--text-muted); line-height:1.5; margin-bottom:16px">
+      Questa azione è <strong style="color:var(--danger)">permanente e irreversibile</strong>. Verranno eliminati:
+    </p>
+    <ul style="font-size:13px; color:var(--text-muted); line-height:1.7; padding-left:20px; margin-bottom:20px">
+      <li>Il tuo profilo e i dati personali</li>
+      <li>Le tue note e la tua wishlist</li>
+      <li>Il tuo profilo pubblico e i follower</li>
+      <li>Verrai rimosso da tutti i viaggi a cui partecipi</li>
+      <li>I viaggi da te creati diventeranno orfani (altri partecipanti rimangono)</li>
+    </ul>
+    <p style="font-size:13px; margin-bottom:10px">Per confermare, scrivi <strong>ELIMINA</strong> qui sotto:</p>
+    <div class="field">
+      <input id="delete-confirm" type="text" placeholder="ELIMINA" autocomplete="off" />
+    </div>
+    <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px">
+      Per motivi di sicurezza, ti chiederemo anche di inserire la password.
+    </p>
+    <div class="field">
+      <input id="delete-password" type="password" placeholder="La tua password" autocomplete="current-password" />
+    </div>
+    <button class="btn btn-danger" onclick="doDeleteAccount()">🗑️ Elimina account definitivamente</button>
+  </div>
+</div>
+
+<!-- ONBOARDING (primo accesso) -->
+<div id="onboarding-modal" class="modal-overlay" style="align-items:center">
+  <div class="modal onboarding-modal">
+    <div id="onb-content">
+      <!-- Step 1 -->
+      <div class="onb-step" data-step="1">
+        <div class="onb-emoji">✈️</div>
+        <h2 class="onb-title">Benvenuto su IO Travel!</h2>
+        <p class="onb-text">Il modo più semplice per <strong>organizzare viaggi di gruppo</strong>. Itinerari, spese, foto e chat — tutto in un'unica app.</p>
+      </div>
+      <!-- Step 2 -->
+      <div class="onb-step" data-step="2" style="display:none">
+        <div class="onb-emoji">👥</div>
+        <h2 class="onb-title">Invita gli amici</h2>
+        <p class="onb-text">Crea un viaggio e condividi il <strong>codice invito</strong>. Ognuno potrà aggiungere tappe, spese, foto e messaggi in tempo reale.</p>
+      </div>
+      <!-- Step 3 -->
+      <div class="onb-step" data-step="3" style="display:none">
+        <div class="onb-emoji">🗺️</div>
+        <h2 class="onb-title">Una mappa che si disegna da sola</h2>
+        <p class="onb-text">Aggiungi tappe: IO Travel le <strong>collega automaticamente</strong> con una linea curva animata. Un aereo percorre l'itinerario in tempo reale.</p>
+      </div>
+      <!-- Step 4 -->
+      <div class="onb-step" data-step="4" style="display:none">
+        <div class="onb-emoji">💰</div>
+        <h2 class="onb-title">Dividi le spese senza stress</h2>
+        <p class="onb-text">Aggiungi chi paga e con chi dividere: <strong>calcoliamo i saldi in automatico</strong>. A fine viaggio sai esattamente chi deve cosa.</p>
+      </div>
+      <!-- Step 5 -->
+      <div class="onb-step" data-step="5" style="display:none">
+        <div class="onb-emoji">🎉</div>
+        <h2 class="onb-title">Pronto a partire?</h2>
+        <p class="onb-text">Crea il tuo primo viaggio o unisciti a quello di un amico con un codice invito. <strong>Buon viaggio!</strong></p>
+      </div>
+    </div>
+    <div class="onb-progress">
+      <div class="onb-dot active" data-step="1"></div>
+      <div class="onb-dot" data-step="2"></div>
+      <div class="onb-dot" data-step="3"></div>
+      <div class="onb-dot" data-step="4"></div>
+      <div class="onb-dot" data-step="5"></div>
+    </div>
+    <div class="onb-actions">
+      <button class="btn btn-secondary" onclick="onboardingSkip()" id="onb-skip">Salta</button>
+      <button class="btn btn-primary" onclick="onboardingNext()" id="onb-next">Continua</button>
+    </div>
+  </div>
+</div>
+
 <div id="new-trip-modal" class="modal-overlay">
   <div class="modal">
     <div class="modal-header">
@@ -2123,6 +2908,92 @@ async function doLogout() {
 }
 window.doLogout = doLogout;
 
+/* =================================================================
+   DELETE ACCOUNT (GDPR)
+   ================================================================= */
+async function doDeleteAccount() {
+  const confirmText = document.getElementById('delete-confirm').value.trim();
+  const password = document.getElementById('delete-password').value;
+
+  if (confirmText !== 'ELIMINA') {
+    showToast('Scrivi esattamente ELIMINA per confermare', 'error');
+    return;
+  }
+  if (!password) {
+    showToast('Inserisci la password', 'error');
+    return;
+  }
+
+  try {
+    showLoader(true);
+
+    // 1) Re-autentica per sicurezza
+    const { EmailAuthProvider, reauthenticateWithCredential, deleteUser } =
+      await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    const cred = EmailAuthProvider.credential(state.user.email, password);
+    await reauthenticateWithCredential(state.user, cred);
+
+    const uid = state.user.uid;
+
+    // 2) Rimuovimi da tutti i viaggi a cui partecipo
+    for (const trip of state.trips) {
+      try {
+        const pInfo = trip.participantsInfo || {};
+        const pList = Array.isArray(pInfo) ? pInfo : Object.values(pInfo);
+        const newList = pList.filter(p => p.uid !== uid);
+        const newParticipants = (trip.participants || []).filter(x => x !== uid);
+        await window.FB.updateDoc(
+          window.FB.doc(window.FB.db, 'trips', trip.id),
+          {
+            participants: newParticipants,
+            participantsInfo: newList
+          }
+        );
+      } catch (e) { console.warn('rm participant from trip', trip.id, e); }
+    }
+
+    // 3) Cancella sotto-collezioni utente
+    const subcols = ['notes', 'wishes', 'events', 'following', 'followers'];
+    for (const sc of subcols) {
+      try {
+        const snap = await window.FB.getDocs(window.FB.collection(window.FB.db, 'users', uid, sc));
+        for (const d of snap.docs) {
+          try { await window.FB.deleteDoc(d.ref); } catch (_) {}
+        }
+      } catch (_) {}
+    }
+
+    // 4) Cancella profilo privato
+    try { await window.FB.deleteDoc(window.FB.doc(window.FB.db, 'users', uid)); } catch (e) { console.warn(e); }
+    // 5) Cancella profilo pubblico
+    try { await window.FB.deleteDoc(window.FB.doc(window.FB.db, 'publicProfiles', uid)); } catch (e) { console.warn(e); }
+
+    // 6) Cancella utente Auth (irreversibile)
+    await deleteUser(state.user);
+
+    // 7) Pulisci localStorage
+    try {
+      localStorage.removeItem('iotravel-theme');
+      localStorage.removeItem('iotravel-onboarded');
+    } catch (_) {}
+
+    showLoader(false);
+    alert('Account eliminato. Addio! 👋');
+    location.reload();
+  } catch (e) {
+    showLoader(false);
+    console.error('delete account error', e);
+    if (e.code === 'auth/wrong-password' || e.code === 'auth/invalid-credential') {
+      showToast('Password errata', 'error');
+    } else if (e.code === 'auth/requires-recent-login') {
+      showToast('Sessione scaduta. Esci e rientra per eliminare l\'account.', 'error');
+    } else {
+      showToast('Errore: ' + e.message, 'error');
+    }
+  }
+}
+window.doDeleteAccount = doDeleteAccount;
+
 function mapAuthError(code) {
   const map = {
     'auth/invalid-email': 'Email non valida',
@@ -2138,6 +3009,146 @@ function mapAuthError(code) {
 }
 
 /* Auth state listener — set once Firebase is ready */
+/* =================================================================
+   SPLASH SCREEN — frase viaggio casuale
+   ================================================================= */
+const TRAVEL_QUOTES = [
+  { q: "Il mondo è un libro, e chi non viaggia ne legge solo una pagina.", a: "— Sant'Agostino" },
+  { q: "Non si viaggia per sfuggire alla vita, ma perché la vita non ci sfugga.", a: "— Anonimo" },
+  { q: "Viaggiare è una brutalità. Ci costringe a fidarci degli sconosciuti.", a: "— Cesare Pavese" },
+  { q: "Un viaggio di mille miglia inizia con un singolo passo.", a: "— Lao Tzu" },
+  { q: "Viaggia finché puoi. Gli orizzonti sono una promessa che il cuore non dimentica.", a: "— IO Travel" },
+  { q: "Due strade divergevano in un bosco, e io — io presi quella meno battuta.", a: "— Robert Frost" },
+  { q: "Chi non viaggia non conosce il valore degli uomini.", a: "— Proverbio arabo" },
+  { q: "La vita è o una magnifica avventura, o non è niente.", a: "— Helen Keller" },
+  { q: "I viaggi sono i viaggiatori. Ciò che vediamo non è ciò che vediamo, ma ciò che siamo.", a: "— Fernando Pessoa" },
+  { q: "Se vuoi andare veloce, vai da solo. Se vuoi andare lontano, vai insieme.", a: "— Proverbio africano" },
+  { q: "Alla fine non contano gli anni della tua vita, ma la vita nei tuoi anni.", a: "— Abraham Lincoln" },
+  { q: "Viaggia. Perché il denaro torna, il tempo no.", a: "— Anonimo" },
+  { q: "La felicità si trova nei luoghi in cui non cerchi.", a: "— Anonimo" },
+  { q: "Ci sono posti nel mondo dove non sei mai stato e dove il tuo cuore ti aspetta.", a: "— IO Travel" }
+];
+
+function showSplashQuote() {
+  const pick = TRAVEL_QUOTES[Math.floor(Math.random() * TRAVEL_QUOTES.length)];
+  const qEl = document.getElementById('splash-quote');
+  const aEl = document.getElementById('splash-author');
+  if (qEl) qEl.textContent = '"' + pick.q + '"';
+  if (aEl) aEl.textContent = pick.a;
+}
+function hideSplash() {
+  const splash = document.getElementById('splash-screen');
+  if (splash) {
+    splash.classList.add('hidden');
+    setTimeout(() => { splash.style.display = 'none'; }, 900);
+  }
+}
+// Mostra la frase subito
+showSplashQuote();
+// Nasconde lo splash dopo 2.5 secondi minimi
+setTimeout(hideSplash, 2500);
+
+/* =================================================================
+   ONBOARDING (primo accesso)
+   ================================================================= */
+let _onbStep = 1;
+const _onbTotalSteps = 5;
+
+function onboardingStart() {
+  _onbStep = 1;
+  _onbShow();
+  const modal = document.getElementById('onboarding-modal');
+  if (modal) modal.classList.add('active');
+}
+window.onboardingStart = onboardingStart;
+
+function _onbShow() {
+  document.querySelectorAll('.onb-step').forEach(el => {
+    el.style.display = (parseInt(el.dataset.step) === _onbStep) ? 'block' : 'none';
+  });
+  document.querySelectorAll('.onb-dot').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.step) === _onbStep);
+  });
+  const nextBtn = document.getElementById('onb-next');
+  const skipBtn = document.getElementById('onb-skip');
+  if (_onbStep === _onbTotalSteps) {
+    nextBtn.textContent = 'Inizia ✈️';
+    skipBtn.style.display = 'none';
+  } else {
+    nextBtn.textContent = 'Continua';
+    skipBtn.style.display = '';
+  }
+}
+
+function onboardingNext() {
+  if (_onbStep < _onbTotalSteps) {
+    _onbStep++;
+    _onbShow();
+  } else {
+    onboardingComplete();
+  }
+}
+window.onboardingNext = onboardingNext;
+
+function onboardingSkip() {
+  onboardingComplete();
+}
+window.onboardingSkip = onboardingSkip;
+
+function onboardingComplete() {
+  try { localStorage.setItem('iotravel-onboarded', '1'); } catch (_) {}
+  const modal = document.getElementById('onboarding-modal');
+  if (modal) modal.classList.remove('active');
+}
+window.onboardingComplete = onboardingComplete;
+
+function checkOnboarding() {
+  let done = '0';
+  try { done = localStorage.getItem('iotravel-onboarded') || '0'; } catch (_) {}
+  if (done !== '1') {
+    setTimeout(onboardingStart, 600);
+  }
+}
+window.checkOnboarding = checkOnboarding;
+
+/* =================================================================
+   ONLINE / OFFLINE DETECTION
+   ================================================================= */
+let _wasOffline = false;
+function updateOnlineStatus() {
+  const banner = document.getElementById('offline-banner');
+  if (!banner) return;
+  if (!navigator.onLine) {
+    banner.textContent = '📡 Sei offline — le modifiche verranno sincronizzate al ritorno online';
+    banner.classList.remove('back');
+    banner.classList.add('show');
+    _wasOffline = true;
+  } else if (_wasOffline) {
+    banner.textContent = '✅ Connessione ripristinata';
+    banner.classList.add('back');
+    banner.classList.add('show');
+    setTimeout(() => {
+      banner.classList.remove('show');
+      banner.classList.remove('back');
+    }, 2500);
+    _wasOffline = false;
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+// Check iniziale
+setTimeout(updateOnlineStatus, 1000);
+
+/* Wrapper per azioni che richiedono connessione */
+function requireOnline(actionLabel) {
+  if (!navigator.onLine) {
+    showToast(`📡 Serve connessione internet per ${actionLabel}`, 'error');
+    return false;
+  }
+  return true;
+}
+window.requireOnline = requireOnline;
+
 window.addEventListener('firebase-ready', () => {
   window.FB.onAuthStateChanged(window.FB.auth, async (user) => {
     if (user) {
@@ -2176,6 +3187,7 @@ function enterApp() {
   setupRealtimeListeners();
   if (typeof window.setupV5UserListeners === 'function') window.setupV5UserListeners();
   showPage('home');
+  if (typeof checkOnboarding === 'function') checkOnboarding();
 }
 
 function exitApp() {
@@ -2262,40 +3274,176 @@ function setupRealtimeListeners() {
    HOME / TRIPS LIST
    ================================================================= */
 function renderHome() {
+  // Saluto personalizzato
+  const greetEl = document.getElementById('home-greeting');
+  if (greetEl) {
+    const name = (state.profile?.name || 'viaggiatore').split(' ')[0];
+    const h = new Date().getHours();
+    const saluto = h < 12 ? 'Buongiorno' : h < 18 ? 'Ciao' : 'Buonasera';
+    greetEl.textContent = `${saluto}, ${name}!`;
+  }
+
+  renderStoriesBar();
+  renderActiveTripCard();
+  renderTripsList(state.tripFilter || 'all');
+  renderCountdown();
+
+  // Link caffè sulla home
+  const cofHome = document.getElementById('coffee-link-home');
+  if (cofHome && typeof COFFEE_URL !== 'undefined') cofHome.href = COFFEE_URL;
+}
+
+function renderStoriesBar() {
+  const bar = document.getElementById('stories-bar');
+  if (!bar) return;
+  const stories = [];
+
+  // Il tuo avatar → apre profilo
+  const myName = state.profile?.name || 'Tu';
+  const myPhoto = state.profile?.photoURL || '';
+  const myInitials = myName.split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase();
+  stories.push({
+    kind: 'me',
+    label: 'Tu',
+    avatar: myPhoto ? `<img src="${myPhoto}" alt="" />` : myInitials,
+    onclick: "showPage('profile')",
+    hasStory: false
+  });
+
+  // + nuovo viaggio
+  stories.push({
+    kind: 'add',
+    label: 'Nuovo',
+    avatar: '+',
+    onclick: "openModal('new-trip-modal')",
+    hasStory: false,
+    addClass: ' add'
+  });
+
+  // Partecipanti dei tuoi viaggi (unici)
+  const seen = new Set([state.user.uid]);
+  state.trips.forEach(t => {
+    const pInfo = t.participantsInfo || {};
+    const pList = Array.isArray(pInfo) ? pInfo : Object.values(pInfo);
+    pList.forEach(p => {
+      if (!p || !p.uid || seen.has(p.uid)) return;
+      seen.add(p.uid);
+      const initials = (p.name || 'U').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase();
+      stories.push({
+        kind: 'person',
+        label: p.name?.split(' ')[0] || 'Utente',
+        avatar: p.photoURL ? `<img src="${p.photoURL}" alt="" />` : initials,
+        onclick: `openUserProfile('${p.uid}')`,
+        hasStory: true
+      });
+    });
+  });
+
+  bar.innerHTML = stories.map(s => `
+    <div class="story-item${s.hasStory?' has-story':''}${s.addClass||''}" onclick="${s.onclick}">
+      <div class="story-avatar">${s.avatar}</div>
+      <div class="story-label">${escapeHtml(s.label)}</div>
+    </div>
+  `).join('');
+}
+
+function renderActiveTripCard() {
+  const container = document.getElementById('active-trip-card');
+  if (!container) return;
+  const now = Date.now();
+  const active = state.trips.find(t =>
+    t.startDate && t.endDate &&
+    new Date(t.startDate).getTime() <= now &&
+    new Date(t.endDate).getTime() + 86400000 > now
+  );
+  if (!active) { container.innerHTML = ''; return; }
+
+  const type = TRIP_TYPES[active.type] || TRIP_TYPES.mixed;
+  const totalDays = daysBetween(active.startDate, active.endDate);
+  const dayNum = Math.max(1, Math.floor((now - new Date(active.startDate).getTime()) / 86400000) + 1);
+  const nPpl = (active.participants || []).length;
+
+  container.innerHTML = `
+    <div class="active-trip-card" onclick="openTrip('${active.id}')">
+      <div class="active-trip-badge">🎉 VIAGGIO IN CORSO</div>
+      <div class="active-trip-name">${escapeHtml(active.name)} ${type.emoji}</div>
+      <div class="active-trip-meta">${escapeHtml(active.destination || '—')} · ${formatDateRange(active.startDate, active.endDate)}</div>
+      <div class="active-trip-stats">
+        <div class="active-trip-stat"><strong>${dayNum}/${totalDays}</strong>Giorno</div>
+        <div class="active-trip-stat"><strong>${nPpl}</strong>Persone</div>
+        <div class="active-trip-stat"><strong>${type.label}</strong>Tipo</div>
+      </div>
+    </div>`;
+}
+
+function filterTrips(filter) {
+  state.tripFilter = filter;
+  document.querySelectorAll('.trip-filter').forEach(b => {
+    b.classList.toggle('active', b.dataset.filter === filter);
+  });
+  renderTripsList(filter);
+}
+window.filterTrips = filterTrips;
+
+function renderTripsList(filter) {
   const list = document.getElementById('trips-list');
-  if (state.trips.length === 0) {
+  if (!list) return;
+  const now = Date.now();
+
+  let trips = [...(state.trips || [])];
+  if (filter === 'upcoming') {
+    trips = trips.filter(t => t.startDate && new Date(t.startDate).getTime() > now);
+  } else if (filter === 'past') {
+    trips = trips.filter(t => t.endDate && new Date(t.endDate).getTime() + 86400000 < now);
+  }
+
+  if (trips.length === 0) {
+    const msg = filter === 'upcoming' ? 'Nessun viaggio futuro in programma'
+             : filter === 'past' ? 'Nessun viaggio passato'
+             : 'Nessun viaggio ancora';
     list.innerHTML = `
       <div class="empty-state">
         <div class="emoji">✈️</div>
-        <h3>Nessun viaggio ancora</h3>
-        <p>Crea il tuo primo viaggio o unisciti con un codice!</p>
+        <h3>${msg}</h3>
+        <p>Crea un viaggio o unisciti con un codice invito</p>
         <button class="btn btn-primary" onclick="openModal('new-trip-modal')" style="width:auto; margin: 0 auto">Inizia ora</button>
       </div>`;
-    renderCountdown();
     return;
   }
 
-  list.innerHTML = state.trips.map(t => {
+  list.innerHTML = trips.map(t => {
     const type = TRIP_TYPES[t.type] || TRIP_TYPES.mixed;
     const dateRange = formatDateRange(t.startDate, t.endDate);
     const nPpl = (t.participants || []).length;
+    // Status badge
+    let statusBadge = '';
+    if (t.startDate && t.endDate) {
+      const start = new Date(t.startDate).getTime();
+      const end = new Date(t.endDate).getTime() + 86400000;
+      if (start > now) {
+        const days = Math.ceil((start - now) / 86400000);
+        statusBadge = `<span class="tag" style="background:var(--accent-soft); color:var(--accent)">🕐 tra ${days}g</span>`;
+      } else if (end > now) {
+        statusBadge = `<span class="tag" style="background:var(--primary-soft); color:var(--primary)">🎉 in corso</span>`;
+      } else {
+        statusBadge = `<span class="tag">✓ concluso</span>`;
+      }
+    }
     return `
       <div class="trip-card" onclick="openTrip('${t.id}')">
         <div class="trip-icon ${type.cls}">${type.emoji}</div>
         <div class="trip-info">
           <div class="trip-name">${escapeHtml(t.name)}</div>
           <div class="trip-meta">
-            ${escapeHtml(t.destination || '—')} • ${dateRange}
+            ${escapeHtml(t.destination || '—')} · ${dateRange}
           </div>
           <div class="tag-list">
+            ${statusBadge}
             <span class="tag">${nPpl} 👥</span>
-            <span class="tag">${type.label}</span>
           </div>
         </div>
       </div>`;
   }).join('');
-
-  renderCountdown();
 }
 
 function renderCountdown() {
@@ -2342,7 +3490,7 @@ function countdownHtml(targetDate) {
 function showPage(page) {
   state.currentPage = page;
 
-  ['home', 'calendar', 'notes', 'profile', 'wishlist', 'userprofile', 'trip'].forEach(p => {
+  ['home', 'calendar', 'notes', 'profile', 'wishlist', 'userprofile', 'travelmap', 'wrapped', 'trip'].forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.style.display = 'none';
   });
@@ -2370,6 +3518,8 @@ function showPage(page) {
   if (page === 'notes') renderNotes();
   if (page === 'profile') renderProfileStats();
   if (page === 'wishlist') renderWishlist();
+  if (page === 'travelmap') setTimeout(renderTravelMap, 100);
+  if (page === 'wrapped') renderWrapped();
 }
 window.showPage = showPage;
 
@@ -3236,88 +4386,85 @@ function setMapTool(tool) {
   document.querySelectorAll('.map-tool-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tool-' + tool)?.classList.add('active');
 
-  const finishBtn = document.getElementById('tool-finish');
-  if (finishBtn) finishBtn.style.display = tool === 'route' ? 'flex' : 'none';
-
   const hint = document.getElementById('map-tool-hint');
   const map = state.mapInstance;
   if (!map) return;
 
+  map.dragging.enable();
+
   if (tool === 'none') {
-    map.dragging.enable();
-    hint.textContent = '';
+    if (hint) hint.textContent = '';
     map.getContainer().style.cursor = '';
   } else if (tool === 'marker') {
-    map.dragging.enable();
-    hint.textContent = '📍 Tocca la mappa per scegliere il punto, poi compila il form';
+    if (hint) hint.textContent = '📍 Tocca la mappa per aggiungere un marker emoji';
     map.getContainer().style.cursor = 'crosshair';
-  } else if (tool === 'route') {
-    map.dragging.enable();
-    hint.textContent = '✏️ Tocca per aggiungere punti — poi premi ✅ Completa';
+  } else if (tool === 'addstage') {
+    if (hint) hint.textContent = '➕ Tocca la mappa dove vuoi aggiungere una nuova tappa';
     map.getContainer().style.cursor = 'crosshair';
   }
 }
 window.setMapTool = setMapTool;
 
+// Mantiene API vecchie ma non disegna più manualmente — la linea è automatica fra tappe
 function clearDrawing() {
+  // Rimuove solo le rotte GPX/custom dalla mappa (non le tappe)
   const map = state.mapInstance;
   if (!map) return;
-  // Rimuovi polilinea in costruzione
-  if (mapState.drawPolyline) { map.removeLayer(mapState.drawPolyline); mapState.drawPolyline = null; }
-  mapState.drawDots.forEach(d => map.removeLayer(d));
-  mapState.drawDots = [];
-  mapState.drawPoints = [];
-  // Rimuovi anche le rotte salvate in questa sessione
   mapState.savedRoutes.forEach(r => { try { map.removeLayer(r); } catch (_) {} });
   mapState.savedRoutes = [];
-  setMapTool('none');
-  showToast('Disegno cancellato');
+  showToast('Itinerari GPX rimossi dalla visualizzazione');
 }
 window.clearDrawing = clearDrawing;
 
+// finishRoute è obsoleto ma manteniamo per retrocompatibilità
 function finishRoute() {
-  const map = state.mapInstance;
-  if (!map || mapState.drawPoints.length < 2) {
-    showToast('Aggiungi almeno 2 punti', 'error');
-    return;
-  }
-  // Salva la rotta come permanente (su Firestore)
-  const coords = [...mapState.drawPoints];
-  const color = '#4f7cff';
-  const poly = L.polyline(coords, { color, weight: 4, opacity: 0.85 }).addTo(map);
-  poly.bindPopup('<strong>Itinerario</strong><br/><button onclick="window.deleteRoute(this)" style="color:#ff5a5f;font-weight:700;background:none;border:none;cursor:pointer">🗑️ Elimina</button>');
-  poly._deleteRef = poly;
-  mapState.savedRoutes.push(poly);
-
-  // Salva su Firestore
-  if (state.currentTripId) {
-    window.FB.addDoc(window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'routes'), {
-      coords: coords.map(c => ({ lat: c[0], lng: c[1] })),
-      color,
-      createdBy: state.user.uid,
-      createdAt: window.FB.serverTimestamp()
-    }).catch(e => console.error('save route error', e));
-  }
-
-  // Pulisci disegno temporaneo
-  if (mapState.drawPolyline) { map.removeLayer(mapState.drawPolyline); mapState.drawPolyline = null; }
-  mapState.drawDots.forEach(d => map.removeLayer(d));
-  mapState.drawDots = [];
-  mapState.drawPoints = [];
-  setMapTool('none');
-  showToast('Itinerario salvato! ✅', 'success');
+  showToast('Aggiungi tappe: la linea si disegna da sola!', 'success');
 }
 window.finishRoute = finishRoute;
 
-window.deleteRoute = function(btn) {
-  const popup = btn.closest('.leaflet-popup');
-  // Trova la poly associata e rimuovila
-  mapState.savedRoutes.forEach(p => {
-    if (p.isPopupOpen()) {
-      state.mapInstance.removeLayer(p);
-    }
-  });
-};
+window.deleteRoute = function() {}; // placeholder per retrocompatibilità
+
+/* =================================================================
+   MAPPA REINVENTATA v2 — tappe auto-connesse con linea curva animata
+   ================================================================= */
+
+// Calcola un punto di controllo per una curva di Bezier quadratica tra A e B
+// Lo sposta perpendicolarmente al segmento AB per creare una curva naturale
+function _curveControlPoint(a, b, offsetRatio = 0.2) {
+  const mx = (a[0] + b[0]) / 2;
+  const my = (a[1] + b[1]) / 2;
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  // Perpendicolare rispetto al segmento
+  return [mx - dy * offsetRatio, my + dx * offsetRatio];
+}
+
+// Genera N punti lungo una curva Bezier quadratica
+function _bezierPoints(a, c, b, n = 32) {
+  const pts = [];
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    const x = (1 - t) * (1 - t) * a[0] + 2 * (1 - t) * t * c[0] + t * t * b[0];
+    const y = (1 - t) * (1 - t) * a[1] + 2 * (1 - t) * t * c[1] + t * t * b[1];
+    pts.push([x, y]);
+  }
+  return pts;
+}
+
+// Concatena una serie di curve Bezier tra una lista di tappe
+function _curvedPath(stages) {
+  const pts = stages.map(s => [s.lat, s.lng]);
+  let full = [];
+  for (let i = 0; i < pts.length - 1; i++) {
+    // Alterna il lato della curva per un effetto "onda"
+    const ratio = (i % 2 === 0) ? 0.18 : -0.18;
+    const ctrl = _curveControlPoint(pts[i], pts[i + 1], ratio);
+    const seg = _bezierPoints(pts[i], ctrl, pts[i + 1], 30);
+    if (i > 0) seg.shift(); // evita duplicati
+    full = full.concat(seg);
+  }
+  return full;
+}
 
 function renderMap() {
   const container = document.getElementById('trip-map');
@@ -3329,6 +4476,8 @@ function renderMap() {
   mapState.drawPolyline = null;
   mapState.drawDots = [];
   mapState.savedRoutes = [];
+  mapState.planeMarker = null;
+  if (mapState.planeAnim) { cancelAnimationFrame(mapState.planeAnim); mapState.planeAnim = null; }
 
   document.querySelectorAll('.map-tool-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tool-none')?.classList.add('active');
@@ -3343,8 +4492,9 @@ function renderMap() {
   // Centro iniziale
   let center = [41.9, 12.5];
   let zoom = 5;
+  const stagesWithCoords = state.currentStages.filter(s => s.lat != null && s.lng != null);
   const allPoints = [
-    ...state.currentStages.filter(s => s.lat != null).map(s => [s.lat, s.lng]),
+    ...stagesWithCoords.map(s => [s.lat, s.lng]),
     ...state.currentMarkers.map(m => [m.lat, m.lng])
   ];
   if (allPoints.length) {
@@ -3355,61 +4505,129 @@ function renderMap() {
   }
 
   state.mapInstance = L.map(container, { zoomControl: true }).setView(center, zoom);
+  // Tile layer con stile più "caldo" che si adatta bene al tema viaggio
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19, attribution: '© OpenStreetMap'
   }).addTo(state.mapInstance);
 
-  // ── Tappe numerate + linea itinerario automatica ──
-  const stageCoords = [];
+  // ── Curva automatica tra tappe ──
+  if (stagesWithCoords.length > 1) {
+    const curved = _curvedPath(stagesWithCoords);
+
+    // Alone esterno (effetto glow)
+    L.polyline(curved, {
+      color: '#d97757',
+      weight: 10,
+      opacity: 0.18,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(state.mapInstance);
+
+    // Linea principale arancio tramonto
+    const mainLine = L.polyline(curved, {
+      color: '#d97757',
+      weight: 4,
+      opacity: 0.9,
+      lineCap: 'round',
+      lineJoin: 'round'
+    }).addTo(state.mapInstance);
+
+    // Linea punteggiata animata sopra (effetto "cammino")
+    const dashLine = L.polyline(curved, {
+      color: '#ffffff',
+      weight: 3,
+      opacity: 0.85,
+      dashArray: '2, 14',
+      lineCap: 'round'
+    }).addTo(state.mapInstance);
+
+    // Animazione: sposta il dashOffset per far "muovere" i trattini
+    let dashOffset = 0;
+    const animateDash = () => {
+      dashOffset -= 1;
+      try {
+        const path = dashLine.getElement();
+        if (path) path.style.strokeDashoffset = dashOffset;
+      } catch (_) {}
+      mapState.planeAnim = requestAnimationFrame(animateDash);
+    };
+    animateDash();
+
+    // Aereo animato che percorre la traccia
+    const planeIcon = L.divIcon({
+      html: `<div style="font-size:24px; transform-origin:center; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35))">✈️</div>`,
+      iconSize: [28, 28], iconAnchor: [14, 14], className: ''
+    });
+    const plane = L.marker(curved[0], { icon: planeIcon, interactive: false }).addTo(state.mapInstance);
+    mapState.planeMarker = plane;
+
+    let idx = 0;
+    const step = () => {
+      idx = (idx + 1) % curved.length;
+      plane.setLatLng(curved[idx]);
+      // Rotazione dell'aereo verso il prossimo punto
+      try {
+        const next = curved[(idx + 1) % curved.length];
+        const dx = next[1] - curved[idx][1];
+        const dy = next[0] - curved[idx][0];
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        const el = plane.getElement();
+        if (el) {
+          const inner = el.querySelector('div');
+          if (inner) inner.style.transform = `rotate(${-angle}deg)`;
+        }
+      } catch (_) {}
+    };
+    mapState.planeStepInterval = setInterval(step, 80);
+  }
+
+  // ── Tappe numerate con colore palette tramonto ──
   state.currentStages.forEach((s, i) => {
     if (s.lat != null && s.lng != null) {
       const icon = L.divIcon({
-        html: `<div style="background:#4f7cff;color:#fff;width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,.3);border:2px solid #fff"><span style="transform:rotate(45deg)">${i + 1}</span></div>`,
-        iconSize: [32, 32], iconAnchor: [16, 32], className: ''
+        html: `<div style="background:linear-gradient(135deg,#d97757,#f4a261);color:#fff;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(217,119,87,0.5);border:2.5px solid #fff"><span style="transform:rotate(45deg)">${i + 1}</span></div>`,
+        iconSize: [36, 36], iconAnchor: [18, 36], className: ''
       });
       L.marker([s.lat, s.lng], { icon }).addTo(state.mapInstance)
         .bindPopup(`<strong>${escapeHtml(s.title)}</strong>${s.date ? '<br/>📅 ' + formatDate(s.date) : ''}${s.notes ? '<br/>' + escapeHtml(s.notes) : ''}`);
-      stageCoords.push([s.lat, s.lng]);
     }
   });
-  if (stageCoords.length > 1) {
-    L.polyline(stageCoords, { color: '#4f7cff', weight: 3.5, opacity: 0.7, dashArray: '8, 6' }).addTo(state.mapInstance);
-  }
 
   // ── Marker emoji personalizzati ──
   state.currentMarkers.forEach(m => {
     const icon = L.divIcon({
-      html: `<div style="background:#fff;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 12px rgba(0,0,0,.25);border:2.5px solid #fff">${m.emoji || '📌'}</div>`,
-      iconSize: [38, 38], iconAnchor: [19, 19], className: ''
+      html: `<div style="background:#fff;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 14px rgba(0,0,0,.25);border:2.5px solid #fff">${m.emoji || '📌'}</div>`,
+      iconSize: [40, 40], iconAnchor: [20, 20], className: ''
     });
     L.marker([m.lat, m.lng], { icon }).addTo(state.mapInstance)
-      .bindPopup(`<strong>${escapeHtml(m.title || 'Marker')}</strong>${m.note ? '<br/>' + escapeHtml(m.note) : ''}<br/><button style="margin-top:6px;color:#ff5a5f;background:none;border:none;cursor:pointer;font-weight:700" onclick="window.deleteMarker('${m.id}')">🗑️ Elimina</button>`);
+      .bindPopup(`<strong>${escapeHtml(m.title || 'Marker')}</strong>${m.note ? '<br/>' + escapeHtml(m.note) : ''}<br/><button style="margin-top:6px;color:#c1504a;background:none;border:none;cursor:pointer;font-weight:700" onclick="window.deleteMarker('${m.id}')">🗑️ Elimina</button>`);
   });
 
-  // ── Carica rotte salvate da Firestore ──
+  // ── Carica rotte GPX importate (diverse dalle curve auto) ──
   if (state.currentTripId) {
     window.FB.getDocs(window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'routes'))
       .then(snap => {
         snap.docs.forEach(d => {
           const route = d.data();
-          if (route.coords?.length > 1) {
-            const latlngs = route.coords.map(c => [c.lat, c.lng]);
-            const poly = L.polyline(latlngs, { color: route.color || '#4f7cff', weight: 4, opacity: 0.85 }).addTo(state.mapInstance);
+          // Supporta sia "points" (da GPX) sia "coords" (vecchio formato)
+          const pts = route.points || route.coords;
+          if (pts && pts.length > 1) {
+            const latlngs = pts.map(c => Array.isArray(c) ? c : [c.lat, c.lng]);
+            const poly = L.polyline(latlngs, { color: route.color || '#264653', weight: 4, opacity: 0.85 }).addTo(state.mapInstance);
             const rid = d.id;
-            poly.bindPopup(`<strong>Itinerario salvato</strong><br/><button style="margin-top:6px;color:#ff5a5f;background:none;border:none;cursor:pointer;font-weight:700" onclick="window.deleteRouteById('${rid}')">🗑️ Elimina</button>`);
+            poly.bindPopup(`<strong>${escapeHtml(route.name || 'Itinerario')}</strong><br/><button style="margin-top:6px;color:#c1504a;background:none;border:none;cursor:pointer;font-weight:700" onclick="window.deleteRouteById('${rid}')">🗑️ Elimina</button>`);
             mapState.savedRoutes.push(poly);
           }
         });
       }).catch(e => console.error('load routes', e));
   }
 
-  // ── Gestione click sulla mappa ──
+  // ── Click su mappa: solo per aggiungere marker ──
   state.mapInstance.on('click', (e) => {
     const { lat, lng } = e.latlng;
     const tool = mapState.tool;
 
     if (tool === 'marker') {
-      // Apri modal marker con coordinate preimpostate
       state.newMarkerData = { emoji: '⭐', lat, lng };
       document.getElementById('mk-title').value = '';
       document.getElementById('mk-note').value = '';
@@ -3419,43 +4637,28 @@ function renderMap() {
       openModal('map-marker-modal');
       return;
     }
-
-    if (tool === 'route') {
-      const point = [lat, lng];
-      mapState.drawPoints.push(point);
-
-      // Dot di anteprima
-      const dot = L.circleMarker(point, {
-        radius: 6, color: '#fff', weight: 2,
-        fillColor: '#ff8a3d', fillOpacity: 1
-      }).addTo(state.mapInstance);
-      mapState.drawDots.push(dot);
-
-      // Aggiorna polilinea temporanea
-      if (mapState.drawPolyline) {
-        state.mapInstance.removeLayer(mapState.drawPolyline);
-      }
-      if (mapState.drawPoints.length > 1) {
-        mapState.drawPolyline = L.polyline(mapState.drawPoints, {
-          color: '#ff8a3d', weight: 3, opacity: 0.8, dashArray: '6,4'
-        }).addTo(state.mapInstance);
-      }
-
-      const hint = document.getElementById('map-tool-hint');
-      if (hint) hint.textContent = `✏️ ${mapState.drawPoints.length} punti aggiunti — tocca ancora per continuare`;
-    }
-  });
-
-  // Doppio click per completare la rotta
-  state.mapInstance.on('dblclick', (e) => {
-    if (mapState.tool === 'route' && mapState.drawPoints.length >= 2) {
-      L.DomEvent.stopPropagation(e);
-      finishRoute();
+    if (tool === 'addstage') {
+      // Aggiungi una tappa con coordinate dirette
+      state.newStageData = { lat, lng };
+      document.getElementById('ns-title').value = '';
+      document.getElementById('ns-date').value = '';
+      document.getElementById('ns-notes').value = '';
+      // Geocoding inverso per pre-compilare il nome
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=14`)
+        .then(r => r.json())
+        .then(data => {
+          if (data?.display_name) {
+            const shortName = data.display_name.split(',').slice(0,2).join(',').trim();
+            document.getElementById('ns-title').value = shortName;
+          }
+        }).catch(() => {});
+      openModal('new-stage-modal');
+      return;
     }
   });
 
   if (allPoints.length > 1) {
-    try { state.mapInstance.fitBounds(allPoints, { padding: [40, 40] }); } catch (_) {}
+    try { state.mapInstance.fitBounds(allPoints, { padding: [50, 50] }); } catch (_) {}
   }
 }
 
@@ -5444,6 +6647,290 @@ function renderAffiliateLinks() {
   `;
 }
 window.renderAffiliateLinks = renderAffiliateLinks;
+
+/* =================================================================
+   RICERCA VIAGGI — filtra in home
+   ================================================================= */
+function searchTrips(query) {
+  const q = (query || '').trim().toLowerCase();
+  state.tripSearchQuery = q;
+  // Reuse filterTrips + apply text filter
+  const list = document.getElementById('trips-list');
+  if (!list) return;
+  const now = Date.now();
+  let trips = [...(state.trips || [])];
+  const filter = state.tripFilter || 'all';
+  if (filter === 'upcoming') {
+    trips = trips.filter(t => t.startDate && new Date(t.startDate).getTime() > now);
+  } else if (filter === 'past') {
+    trips = trips.filter(t => t.endDate && new Date(t.endDate).getTime() + 86400000 < now);
+  }
+  if (q) {
+    trips = trips.filter(t =>
+      (t.name || '').toLowerCase().includes(q) ||
+      (t.destination || '').toLowerCase().includes(q) ||
+      (t.description || '').toLowerCase().includes(q)
+    );
+  }
+  if (trips.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="emoji">🔍</div><h3>Nessun viaggio trovato</h3><p>Prova con un'altra parola</p></div>`;
+    return;
+  }
+  list.innerHTML = trips.map(t => {
+    const type = TRIP_TYPES[t.type] || TRIP_TYPES.mixed;
+    const dateRange = formatDateRange(t.startDate, t.endDate);
+    const nPpl = (t.participants || []).length;
+    let statusBadge = '';
+    if (t.startDate && t.endDate) {
+      const start = new Date(t.startDate).getTime();
+      const end = new Date(t.endDate).getTime() + 86400000;
+      if (start > now) {
+        const days = Math.ceil((start - now) / 86400000);
+        statusBadge = `<span class="tag" style="background:var(--accent-soft); color:var(--accent)">🕐 tra ${days}g</span>`;
+      } else if (end > now) {
+        statusBadge = `<span class="tag" style="background:var(--primary-soft); color:var(--primary)">🎉 in corso</span>`;
+      } else {
+        statusBadge = `<span class="tag">✓ concluso</span>`;
+      }
+    }
+    return `
+      <div class="trip-card" onclick="openTrip('${t.id}')">
+        <div class="trip-icon ${type.cls}">${type.emoji}</div>
+        <div class="trip-info">
+          <div class="trip-name">${escapeHtml(t.name)}</div>
+          <div class="trip-meta">${escapeHtml(t.destination || '—')} · ${dateRange}</div>
+          <div class="tag-list">${statusBadge}<span class="tag">${nPpl} 👥</span></div>
+        </div>
+      </div>`;
+  }).join('');
+}
+window.searchTrips = searchTrips;
+
+/* =================================================================
+   TRAVEL MAP — la mia mappa del mondo
+   ================================================================= */
+let _travelMapInstance = null;
+
+async function renderTravelMap() {
+  const container = document.getElementById('world-map');
+  if (!container) return;
+  if (_travelMapInstance) { _travelMapInstance.remove(); _travelMapInstance = null; }
+
+  _travelMapInstance = L.map(container, { zoomControl: true, worldCopyJump: true }).setView([30, 10], 2);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18, attribution: '© OpenStreetMap'
+  }).addTo(_travelMapInstance);
+
+  // Raccogli tutte le tappe di tutti i viaggi
+  const allPlaces = [];
+  const countries = new Set();
+
+  for (const trip of state.trips) {
+    try {
+      const snap = await window.FB.getDocs(window.FB.collection(window.FB.db, 'trips', trip.id, 'stages'));
+      snap.docs.forEach(d => {
+        const s = d.data();
+        if (s.lat != null && s.lng != null) {
+          allPlaces.push({
+            ...s, tripId: trip.id, tripName: trip.name,
+            tripType: trip.type, tripDate: trip.startDate
+          });
+        }
+      });
+    } catch (e) { console.warn('travel map stages', e); }
+  }
+
+  // Aggiorna statistiche
+  document.getElementById('tm-places').textContent = allPlaces.length;
+  document.getElementById('tm-trips').textContent = state.trips.length;
+
+  // Geocoding inverso per paesi (con cache in memoria, async soft)
+  const coordsBatch = allPlaces.map(p => [p.lat, p.lng]);
+
+  // Aggiungi pallini sulla mappa
+  const bounds = [];
+  allPlaces.forEach(p => {
+    const type = TRIP_TYPES[p.tripType] || TRIP_TYPES.mixed;
+    const icon = L.divIcon({
+      html: `<div style="width:16px;height:16px;background:linear-gradient(135deg,#d97757,#f4a261);border:2px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.35)"></div>`,
+      iconSize: [16, 16], iconAnchor: [8, 8], className: ''
+    });
+    const marker = L.marker([p.lat, p.lng], { icon }).addTo(_travelMapInstance);
+    marker.bindPopup(`
+      <strong>${escapeHtml(p.title || p.name || 'Tappa')}</strong><br/>
+      ${type.emoji} ${escapeHtml(p.tripName)}<br/>
+      ${p.tripDate ? '📅 ' + formatDate(p.tripDate) : ''}<br/>
+      <a href="javascript:void(0)" onclick="closeTravelMapPopup(); openTrip('${p.tripId}')" style="color:#d97757;font-weight:700">Apri il viaggio →</a>
+    `);
+    bounds.push([p.lat, p.lng]);
+  });
+
+  // Countries count via reverse geocoding (solo per le prime 30 per non saturare)
+  const sample = allPlaces.slice(0, 30);
+  for (const p of sample) {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${p.lat}&lon=${p.lng}&format=json&zoom=3`, {
+        headers: { 'User-Agent': 'IOTravel' }
+      });
+      const data = await res.json();
+      if (data?.address?.country) countries.add(data.address.country);
+    } catch (_) {}
+  }
+  document.getElementById('tm-countries').textContent = countries.size || '—';
+
+  if (bounds.length > 0) {
+    try { _travelMapInstance.fitBounds(bounds, { padding: [50, 50], maxZoom: 6 }); } catch (_) {}
+  }
+}
+window.renderTravelMap = renderTravelMap;
+window.closeTravelMapPopup = function() { if (_travelMapInstance) _travelMapInstance.closePopup(); };
+
+/* =================================================================
+   WRAPPED — l'anno in viaggio
+   ================================================================= */
+function renderWrapped() {
+  const container = document.getElementById('wrapped-content');
+  if (!container) return;
+  const currentYear = new Date().getFullYear();
+
+  // Filtra viaggi dell'anno corrente
+  const yearTrips = state.trips.filter(t => {
+    if (!t.startDate) return false;
+    return new Date(t.startDate).getFullYear() === currentYear;
+  });
+
+  if (yearTrips.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="emoji">✨</div>
+        <h3>Ancora nessun viaggio nel ${currentYear}</h3>
+        <p>Inizia a viaggiare per vedere le tue statistiche annuali!</p>
+        <button class="btn btn-primary" onclick="openModal('new-trip-modal')" style="width:auto; margin:0 auto">Crea un viaggio</button>
+      </div>`;
+    return;
+  }
+
+  // Calcola stats
+  let totalDays = 0;
+  let totalStages = 0;
+  let totalPpl = new Set();
+  let typesCount = {};
+  let destinations = new Set();
+
+  yearTrips.forEach(t => {
+    if (t.startDate && t.endDate) totalDays += daysBetween(t.startDate, t.endDate);
+    (t.participants || []).forEach(u => totalPpl.add(u));
+    const type = t.type || 'mixed';
+    typesCount[type] = (typesCount[type] || 0) + 1;
+    if (t.destination) destinations.add(t.destination);
+  });
+
+  const topType = Object.entries(typesCount).sort((a,b) => b[1]-a[1])[0];
+  const topTypeLabel = topType ? (TRIP_TYPES[topType[0]]?.label || topType[0]) : '';
+  const topTypeEmoji = topType ? (TRIP_TYPES[topType[0]]?.emoji || '✈️') : '✈️';
+
+  container.innerHTML = `
+    <div class="wrapped-card">
+      <div class="wrapped-year">IO TRAVEL · ${currentYear}</div>
+      <div class="wrapped-title">Il tuo viaggio quest'anno</div>
+
+      <div class="wrapped-stat">
+        Hai viaggiato per<br>
+        <strong>${totalDays}</strong> giorni
+      </div>
+
+      <div class="wrapped-stat">
+        Hai organizzato<br>
+        <strong>${yearTrips.length}</strong> ${yearTrips.length === 1 ? 'viaggio' : 'viaggi'}
+      </div>
+
+      <div class="wrapped-stat">
+        Hai esplorato<br>
+        <strong>${destinations.size}</strong> ${destinations.size === 1 ? 'destinazione' : 'destinazioni'}
+      </div>
+
+      <div class="wrapped-stat">
+        Ci sono andato con<br>
+        <strong>${totalPpl.size}</strong> ${totalPpl.size === 1 ? 'persona' : 'persone'}
+      </div>
+
+      <div class="wrapped-stat">
+        Il tuo stile di viaggio preferito<br>
+        <strong>${topTypeEmoji} ${topTypeLabel}</strong>
+      </div>
+    </div>
+
+    <div style="background:var(--surface); padding:18px; border-radius:var(--radius); box-shadow:var(--shadow); margin-bottom:14px">
+      <h3 style="margin:0 0 12px">📌 I tuoi viaggi del ${currentYear}</h3>
+      ${yearTrips.map(t => {
+        const type = TRIP_TYPES[t.type] || TRIP_TYPES.mixed;
+        return `
+          <div onclick="openTrip('${t.id}')" style="display:flex; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer">
+            <div style="font-size:22px">${type.emoji}</div>
+            <div style="flex:1">
+              <div style="font-weight:700; font-size:14px">${escapeHtml(t.name)}</div>
+              <div style="font-size:12px; color:var(--text-muted)">${escapeHtml(t.destination || '')} · ${formatDate(t.startDate)}</div>
+            </div>
+          </div>`;
+      }).join('')}
+    </div>
+
+    <button class="btn btn-primary" onclick="shareWrapped()">📤 Condividi il tuo anno</button>
+  `;
+}
+window.renderWrapped = renderWrapped;
+
+async function shareWrapped() {
+  const currentYear = new Date().getFullYear();
+  const yearTrips = state.trips.filter(t => t.startDate && new Date(t.startDate).getFullYear() === currentYear);
+  let totalDays = 0;
+  yearTrips.forEach(t => { if (t.startDate && t.endDate) totalDays += daysBetween(t.startDate, t.endDate); });
+  const text = `✨ Il mio ${currentYear} in viaggio con IO Travel:\n🗓️ ${totalDays} giorni in viaggio\n✈️ ${yearTrips.length} viaggi organizzati\n\nPrendi in mano anche tu i tuoi viaggi!`;
+  if (navigator.share) {
+    try { await navigator.share({ title: `Il mio ${currentYear}`, text }); return; } catch (_) {}
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast('Copiato! Incolla dove vuoi', 'success');
+  } catch { prompt('Copia:', text); }
+}
+window.shareWrapped = shareWrapped;
+
+/* =================================================================
+   QR CODE INVITE — genera QR per il codice invito
+   ================================================================= */
+// Usa la libreria QRServer.com (gratis, via URL) — nessuna dipendenza extra da caricare
+function generateQRCodeUrl(text, size = 200) {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(text)}&margin=10&color=2d2416&bgcolor=ffffff`;
+}
+window.generateQRCodeUrl = generateQRCodeUrl;
+
+// Enhance shareInvite con possibilità di vedere QR
+function showInviteQR() {
+  const t = state.currentTrip;
+  if (!t) return;
+  const joinUrl = `${location.origin}${location.pathname}?join=${t.inviteCode}`;
+  const qrUrl = generateQRCodeUrl(joinUrl, 260);
+  const modal = document.getElementById('qr-invite-modal');
+  if (modal) {
+    document.getElementById('qr-invite-img').src = qrUrl;
+    document.getElementById('qr-invite-code').textContent = t.inviteCode;
+    document.getElementById('qr-invite-link').value = joinUrl;
+    openModal('qr-invite-modal');
+  }
+}
+window.showInviteQR = showInviteQR;
+
+function copyInviteLink() {
+  const input = document.getElementById('qr-invite-link');
+  if (!input) return;
+  input.select();
+  try {
+    navigator.clipboard.writeText(input.value);
+    showToast('Link copiato 📋', 'success');
+  } catch { document.execCommand('copy'); }
+}
+window.copyInviteLink = copyInviteLink;
 
 </script>
 
