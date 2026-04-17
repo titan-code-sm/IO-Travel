@@ -1,5 +1,5 @@
-// IO Travel Service Worker v2
-const CACHE_NAME = 'io-travel-v2';
+// IO Travel Service Worker v5
+const CACHE_NAME = 'io-travel-v5';
 
 const PRECACHE = [
   './index.html',
@@ -11,7 +11,6 @@ const PRECACHE = [
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      // Cacha i file locali
       return cache.addAll(PRECACHE).catch(() => {});
     })
   );
@@ -30,14 +29,18 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Non intercettare Firebase, Nominatim, tile OSM
+  // Non intercettare API esterne e CDN
   if (
     url.hostname.includes('firebase') ||
     url.hostname.includes('googleapis.com') ||
     url.hostname.includes('nominatim.openstreetmap.org') ||
     url.hostname.includes('tile.openstreetmap.org') ||
     url.hostname.includes('unpkg.com') ||
-    url.hostname.includes('fonts.g')
+    url.hostname.includes('cdnjs.cloudflare.com') ||
+    url.hostname.includes('fonts.g') ||
+    url.hostname.includes('api.imgbb.com') ||
+    url.hostname.includes('i.ibb.co') ||
+    url.hostname.includes('openweathermap.org')
   ) return;
 
   e.respondWith(
