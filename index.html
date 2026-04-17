@@ -686,6 +686,53 @@
     min-height: 300px;
   }
 
+  /* ---- SEZIONI DINAMICHE PER TIPO VIAGGIO ---- */
+  .type-section {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 16px; margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .type-section-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .type-section-icon {
+    width: 38px; height: 38px; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  .type-section-header h3 { margin: 0; font-size: 16px; font-weight: 700; }
+  .type-field-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .type-field {
+    background: var(--surface-2); padding: 12px;
+    border-radius: 12px;
+  }
+  .type-field .lbl { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+  .type-field .val { font-size: 15px; font-weight: 700; margin-top: 3px; }
+  .type-field-full { grid-column: 1 / -1; }
+  .checklist-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+  }
+  .checklist-item:last-child { border-bottom: none; }
+  .checklist-item input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--primary); flex-shrink: 0; }
+  .checklist-item label { font-size: 14px; flex: 1; }
+  .checklist-item label.checked { text-decoration: line-through; color: var(--text-light); }
+  .tracker-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px;
+  }
+  .tracker-row:last-child { border-bottom: none; }
+  .tracker-row .lbl { font-size: 14px; font-weight: 600; flex: 1; }
+  .tracker-row input {
+    width: 100px; padding: 8px 10px; border: 1.5px solid var(--border);
+    border-radius: 10px; background: var(--surface-2); text-align: right;
+    font-size: 14px; font-weight: 700;
+  }
+  .tracker-unit { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+
   /* Leaflet popup theming */
   .leaflet-popup-content-wrapper { border-radius: 12px; }
   .leaflet-popup-content { margin: 12px 14px; font-family: inherit; font-size: 13px; }
@@ -934,6 +981,7 @@
 
       <div class="tab-bar">
         <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')">📋 Panoramica</button>
+        <button class="tab-btn" data-tab="extra" onclick="switchTab('extra')" id="tab-btn-extra">⚙️ Extra</button>
         <button class="tab-btn" data-tab="stages" onclick="switchTab('stages')">📍 Tappe</button>
         <button class="tab-btn" data-tab="map" onclick="switchTab('map')">🗺️ Mappa</button>
         <button class="tab-btn" data-tab="expenses" onclick="switchTab('expenses')">💰 Spese</button>
@@ -963,6 +1011,13 @@
 
         <button class="btn btn-secondary" style="margin-top:20px" onclick="openEditTripModal()">✏️ Modifica viaggio</button>
         <button class="btn btn-danger" style="margin-top:10px" onclick="deleteCurrentTrip()">🗑️ Elimina viaggio</button>
+      </div>
+
+      <!-- Tab: Extra (dinamico per tipo viaggio) -->
+      <div id="tab-extra" class="tab-content">
+        <div id="extra-content">
+          <!-- Riempito dinamicamente da renderExtraTab() -->
+        </div>
       </div>
 
       <!-- Tab: Stages -->
@@ -1843,38 +1898,60 @@ async function doJoinTrip() {
 window.doJoinTrip = doJoinTrip;
 
 async function joinByCode(code) {
+  if (!code) return showToast('Inserisci un codice', 'error');
+  code = code.trim().toUpperCase();
   try {
     showLoader(true);
-    const inviteSnap = await window.FB.getDoc(window.FB.doc(window.FB.db, 'invites', code));
-    if (!inviteSnap.exists()) {
-      showToast('Codice non valido', 'error');
+    let tripId = null;
+
+    // Strategia 1: cerca nella collection invites (document ID = codice)
+    try {
+      const inviteSnap = await window.FB.getDoc(window.FB.doc(window.FB.db, 'invites', code));
+      if (inviteSnap.exists()) tripId = inviteSnap.data().tripId;
+    } catch (e) { console.warn('invites lookup:', e.code); }
+
+    // Strategia 2: cerca direttamente nei trips per campo inviteCode (fallback se Firestore rules bloccano invites)
+    if (!tripId) {
+      const tripsQ = window.FB.query(
+        window.FB.collection(window.FB.db, 'trips'),
+        window.FB.where('inviteCode', '==', code)
+      );
+      const tripsSnap = await window.FB.getDocs(tripsQ);
+      if (!tripsSnap.empty) tripId = tripsSnap.docs[0].id;
+    }
+
+    if (!tripId) {
+      showToast('Codice non valido ❌', 'error');
       return;
     }
-    const tripId = inviteSnap.data().tripId;
+
     const tripRef = window.FB.doc(window.FB.db, 'trips', tripId);
     const tripSnap = await window.FB.getDoc(tripRef);
-    if (!tripSnap.exists()) {
-      showToast('Viaggio non trovato', 'error');
-      return;
-    }
+    if (!tripSnap.exists()) { showToast('Viaggio non trovato', 'error'); return; }
+
     const trip = tripSnap.data();
     const uid = state.user.uid;
+
     if ((trip.participants || []).includes(uid)) {
-      showToast('Sei già nel viaggio!');
-      openTrip(tripId);
+      showToast('Sei già in questo viaggio! 👋');
+      setTimeout(() => openTrip(tripId), 300);
       return;
     }
+
     await window.FB.updateDoc(tripRef, {
       participants: window.FB.arrayUnion(uid),
       participantsInfo: window.FB.arrayUnion({
-        uid, name: state.profile?.name || 'Utente', email: state.user.email, role: 'member'
+        uid,
+        name: state.profile?.name || state.user.displayName || 'Utente',
+        email: state.user.email,
+        role: 'member'
       })
     });
-    showToast('Ti sei unito al viaggio! 🎉', 'success');
-    setTimeout(() => openTrip(tripId), 400);
+    showToast('Benvenuto nel viaggio! 🎉', 'success');
+    setTimeout(() => openTrip(tripId), 500);
   } catch (e) {
-    console.error(e);
-    showToast('Errore: ' + e.message, 'error');
+    console.error('joinByCode error', e);
+    showToast('Errore: ' + (e.message || 'riprova'), 'error');
   } finally {
     showLoader(false);
   }
@@ -1966,6 +2043,11 @@ function renderTripDetail() {
   document.getElementById('trip-description').textContent = t.description || 'Nessuna descrizione.';
   document.getElementById('trip-transport').textContent = t.transport || 'Nessuna info inserita.';
 
+  // Aggiorna label tab Extra con quella specifica del tipo
+  const extraCfg = TRIP_EXTRA[t.type] || TRIP_EXTRA.mixed;
+  const extraTabBtn = document.getElementById('tab-btn-extra');
+  if (extraTabBtn) extraTabBtn.textContent = extraCfg.tabLabel;
+
   // countdown if future
   const cdArea = document.getElementById('trip-countdown-detail');
   const now = Date.now();
@@ -1996,6 +2078,8 @@ function switchTab(tab) {
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
 
+  if (tab === 'overview') renderTripDetail();
+  if (tab === 'extra') renderExtraTab();
   if (tab === 'stages') renderStages();
   if (tab === 'map') setTimeout(renderMap, 100);
   if (tab === 'expenses') renderExpenses();
@@ -2005,8 +2089,320 @@ function switchTab(tab) {
 window.switchTab = switchTab;
 
 /* =================================================================
-   STAGES
+   EXTRA TAB — sezioni dinamiche per tipo di viaggio
    ================================================================= */
+
+// Config per ogni tipo: icona colore, label tab, sezioni
+const TRIP_EXTRA = {
+  walk: {
+    tabLabel: '🥾 Trekking',
+    color: '#2ecc71', bg: '#e6f9ee',
+    sections: [
+      {
+        icon: '📏', title: 'Statistiche percorso',
+        fields: [
+          { key: 'totalKm',       label: 'Km totali',        unit: 'km',  type: 'number' },
+          { key: 'dailyKm',       label: 'Km al giorno',     unit: 'km',  type: 'number' },
+          { key: 'elevationUp',   label: 'Dislivello +',     unit: 'm',   type: 'number' },
+          { key: 'elevationDown', label: 'Dislivello −',     unit: 'm',   type: 'number' },
+          { key: 'difficulty',    label: 'Difficoltà',       unit: '',    type: 'select', options: ['Facile','Media','Difficile','Esperto'] },
+          { key: 'terrain',       label: 'Terreno',          unit: '',    type: 'text', placeholder: 'Es. sentiero, asfalto, misto' }
+        ]
+      },
+      {
+        icon: '🎒', title: 'Equipaggiamento',
+        checklist: ['Scarponi', 'Zaino', 'Bastoni da trekking', 'Impermeabile', 'Kit pronto soccorso', 'Mappa / GPS', 'Acqua (2L)', 'Cibo / snack', 'Torcia frontale', 'Crema solare', 'Cambio vestiti', 'Sacco a pelo']
+      },
+      {
+        icon: '⚠️', title: 'Note sentieri / sicurezza',
+        textarea: { key: 'trailNotes', placeholder: 'Es. sentiero segnato CAI n.10, tratto esposto km 5-7…' }
+      }
+    ]
+  },
+  camper: {
+    tabLabel: '🚐 Camper',
+    color: '#ff8a3d', bg: '#fff1e6',
+    sections: [
+      {
+        icon: '⛽', title: 'Carburante & consumi',
+        fields: [
+          { key: 'totalKm',     label: 'Km totali',     unit: 'km',  type: 'number' },
+          { key: 'consumption', label: 'Consumo medio', unit: 'L/100km', type: 'number' },
+          { key: 'fuelBudget',  label: 'Budget carburante', unit: '€', type: 'number' },
+          { key: 'tankSize',    label: 'Serbatoio',     unit: 'L',   type: 'number' }
+        ]
+      },
+      {
+        icon: '🏕️', title: 'Soste & campeggi',
+        textarea: { key: 'campingNotes', placeholder: 'Es. Camping Bella Vista €25/notte, Area sosta Comune di X gratuita…' }
+      },
+      {
+        icon: '🔧', title: 'Check pre-partenza',
+        checklist: ['Livello olio', 'Pressione pneumatici', 'Acqua potabile caricata', 'Serbatoi grigi vuoti', 'GPL / batterie ok', 'Documenti camper', 'Assicurazione', 'Kit pronto soccorso', 'Estintore', 'Catene neve (se necessario)']
+      },
+      {
+        icon: '🗺️', title: 'Aree sosta & servizi',
+        textarea: { key: 'serviceAreas', placeholder: 'Es. carico acqua, scarico, colonnine elettriche…' }
+      }
+    ]
+  },
+  boat: {
+    tabLabel: '⛵ Navigazione',
+    color: '#4f7cff', bg: '#e6f4ff',
+    sections: [
+      {
+        icon: '⚓', title: 'Info imbarcazione',
+        fields: [
+          { key: 'boatName',   label: 'Nome barca',   unit: '',    type: 'text', placeholder: 'Es. Stella Maris', full: true },
+          { key: 'boatType',   label: 'Tipo',         unit: '',    type: 'select', options: ['Vela', 'Motore', 'Catamarano', 'Gommone', 'Altro'] },
+          { key: 'boatLength', label: 'Lunghezza',    unit: 'm',   type: 'number' },
+          { key: 'totalNm',    label: 'Miglia totali', unit: 'nm', type: 'number' },
+          { key: 'fuelL',      label: 'Carburante',   unit: 'L',   type: 'number' },
+          { key: 'crewN',      label: 'Equipaggio',   unit: 'pers', type: 'number' }
+        ]
+      },
+      {
+        icon: '🌊', title: 'Rotte & ormeggi',
+        textarea: { key: 'routeNotes', placeholder: 'Es. Waypoint, porti, coordinate ancoraggio…' }
+      },
+      {
+        icon: '🌤️', title: 'Meteo & condizioni mare',
+        textarea: { key: 'weatherNotes', placeholder: 'Es. vento NE 15 nodi, mare forza 2, maree…' }
+      },
+      {
+        icon: '🔧', title: 'Check sicurezza barca',
+        checklist: ['Giubbotti di salvataggio', 'Razzi di segnalazione', 'EPIRB attivo', 'Radio VHF', 'Ancora + catena', 'Estintore', 'Pompa di sentina', 'Kit pronto soccorso', 'Documenti nautica', 'Assicurazione', 'Carburante sufficiente']
+      }
+    ]
+  },
+  sup: {
+    tabLabel: '🏄 SUP',
+    color: '#1abc9c', bg: '#e6fcfa',
+    sections: [
+      {
+        icon: '💨', title: 'Condizioni ideali',
+        fields: [
+          { key: 'maxWind',   label: 'Vento max',    unit: 'nodi', type: 'number' },
+          { key: 'maxWaves',  label: 'Onde max',     unit: 'm',    type: 'number' },
+          { key: 'totalKm',   label: 'Km totali',    unit: 'km',   type: 'number' },
+          { key: 'supType',   label: 'Tipo SUP',     unit: '',     type: 'select', options: ['Touring', 'Race', 'Wave', 'Yoga', 'Gonfiabile'] }
+        ]
+      },
+      {
+        icon: '📍', title: 'Spot & tragitti',
+        textarea: { key: 'spotNotes', placeholder: 'Es. Spot A: ottimo vento NE, parcheggio comodo. Portage km 3…' }
+      },
+      {
+        icon: '🦺', title: 'Sicurezza',
+        checklist: ['Leash', 'Giubbotto gonfiabile', 'Fischietto', 'Luce di segnalazione', 'Telefono impermeabile', 'Crema solare', 'Pagaia di riserva']
+      }
+    ]
+  },
+  car: {
+    tabLabel: '🚗 Auto',
+    color: '#7a5cff', bg: '#f3ebff',
+    sections: [
+      {
+        icon: '⛽', title: 'Viaggio su strada',
+        fields: [
+          { key: 'totalKm',      label: 'Km totali',       unit: 'km',  type: 'number' },
+          { key: 'fuelBudget',   label: 'Budget carburante', unit: '€', type: 'number' },
+          { key: 'tollsBudget',  label: 'Budget caselli',  unit: '€',   type: 'number' },
+          { key: 'carPlate',     label: 'Targa auto',      unit: '',    type: 'text', placeholder: 'AB123CD' },
+          { key: 'carModel',     label: 'Modello',         unit: '',    type: 'text', placeholder: 'Es. Fiat Panda' },
+          { key: 'consumption',  label: 'Consumo medio',   unit: 'L/100km', type: 'number' }
+        ]
+      },
+      {
+        icon: '🏨', title: 'Soste & alloggi',
+        textarea: { key: 'hotelNotes', placeholder: 'Es. Hotel Roma centro €80/notte, Airbnb Napoli…' }
+      },
+      {
+        icon: '🔧', title: 'Check pre-partenza',
+        checklist: ['Olio motore', 'Pneumatici', 'Acqua radiatore', 'Luci', 'Documenti auto', 'Assicurazione', 'Kit emergenza', 'Valigie caricate', 'GPS aggiornato', 'Cavi di emergenza']
+      }
+    ]
+  },
+  flight: {
+    tabLabel: '✈️ Volo',
+    color: '#ff5a85', bg: '#ffe6f0',
+    sections: [
+      {
+        icon: '✈️', title: 'Dettagli volo andata',
+        fields: [
+          { key: 'flightNumOut',  label: 'N° volo',       unit: '',    type: 'text', placeholder: 'Es. AZ1234', full: false },
+          { key: 'airportOut',    label: 'Aeroporto partenza', unit: '', type: 'text', placeholder: 'Es. MXP - Malpensa' },
+          { key: 'airportIn',     label: 'Aeroporto arrivo', unit: '',  type: 'text', placeholder: 'Es. JFK - New York' },
+          { key: 'depTimeOut',    label: 'Decollo',        unit: '',    type: 'time' },
+          { key: 'arrTimeOut',    label: 'Atterraggio',    unit: '',    type: 'time' },
+          { key: 'terminalOut',   label: 'Terminal',       unit: '',    type: 'text', placeholder: 'Es. T1' }
+        ]
+      },
+      {
+        icon: '🔄', title: 'Volo ritorno',
+        fields: [
+          { key: 'flightNumRet', label: 'N° volo ritorno', unit: '',   type: 'text', placeholder: 'Es. AZ5678' },
+          { key: 'depTimeRet',   label: 'Decollo ritorno', unit: '',   type: 'time' },
+          { key: 'arrTimeRet',   label: 'Atterraggio',     unit: '',   type: 'time' }
+        ]
+      },
+      {
+        icon: '🧳', title: 'Bagaglio & check-in',
+        fields: [
+          { key: 'baggageKg',    label: 'Bagaglio stiva', unit: 'kg',  type: 'number' },
+          { key: 'cabinKg',      label: 'Bagaglio cabina', unit: 'kg', type: 'number' },
+          { key: 'checkinTime',  label: 'Check-in apre',  unit: 'h prima', type: 'number' }
+        ]
+      },
+      {
+        icon: '📋', title: 'Checklist partenza',
+        checklist: ['Passaporto / CIE', 'Boarding pass scaricato', 'Valuta locale', 'Adattatore prese', 'Assicurazione viaggio', 'Farmaci / ricette', 'Cambio in borsa a mano', 'Telefono carico', 'Caricabatterie', 'Connettore VPN']
+      }
+    ]
+  },
+  bike: {
+    tabLabel: '🚴 Bici',
+    color: '#ffb648', bg: '#fff9e6',
+    sections: [
+      {
+        icon: '📏', title: 'Statistiche percorso',
+        fields: [
+          { key: 'totalKm',       label: 'Km totali',        unit: 'km',  type: 'number' },
+          { key: 'dailyKm',       label: 'Km al giorno',     unit: 'km',  type: 'number' },
+          { key: 'elevationUp',   label: 'Dislivello +',     unit: 'm',   type: 'number' },
+          { key: 'bikeType',      label: 'Tipo bici',        unit: '',    type: 'select', options: ['Gravel', 'MTB', 'Strada', 'Touring', 'E-bike'] },
+          { key: 'loadKg',        label: 'Carico borse',     unit: 'kg',  type: 'number' },
+          { key: 'difficulty',    label: 'Difficoltà',       unit: '',    type: 'select', options: ['Facile','Media','Difficile','Esperto'] }
+        ]
+      },
+      {
+        icon: '🔧', title: 'Manutenzione & officine',
+        textarea: { key: 'bikeNotes', placeholder: 'Es. officine sulla rotta, pezzi di ricambio portati…' }
+      },
+      {
+        icon: '🎒', title: 'Equipaggiamento',
+        checklist: ['Casco', 'Guanti', 'Occhiali', 'Kit riparazioni', 'Camera d\'aria', 'Pompa', 'Multi-tool', 'Luci F+R', 'Lucchetto', 'Borracce', 'Abbigliamento impermeabile', 'Crema anti-sfregamento']
+      }
+    ]
+  },
+  mixed: {
+    tabLabel: '🌍 Info extra',
+    color: '#4f7cff', bg: '#e8efff',
+    sections: [
+      {
+        icon: '📋', title: 'Note generali',
+        textarea: { key: 'generalNotes', placeholder: 'Aggiungi qui informazioni specifiche del viaggio…' }
+      },
+      {
+        icon: '📋', title: 'Checklist generale',
+        checklist: ['Documenti', 'Assicurazione', 'Valuta locale', 'Adattatori', 'Farmaci', 'Kit pronto soccorso', 'Telefono carico', 'Caricabatterie', 'Vestiti per il clima', 'Scarpe comode']
+      }
+    ]
+  }
+};
+
+function renderExtraTab() {
+  const t = state.currentTrip;
+  if (!t) return;
+  const cfg = TRIP_EXTRA[t.type] || TRIP_EXTRA.mixed;
+  const extraData = t.extraData || {};
+
+  // Aggiorna label tab
+  const tabBtn = document.getElementById('tab-btn-extra');
+  if (tabBtn) tabBtn.textContent = cfg.tabLabel;
+
+  const container = document.getElementById('extra-content');
+
+  let html = '';
+  cfg.sections.forEach((section, si) => {
+    html += `<div class="type-section">
+      <div class="type-section-header">
+        <div class="type-section-icon" style="background:${cfg.bg}; color:${cfg.color}">${section.icon}</div>
+        <h3>${section.title}</h3>
+      </div>`;
+
+    if (section.fields) {
+      html += `<div class="type-field-grid">`;
+      section.fields.forEach(f => {
+        const val = extraData[f.key] || '';
+        const fullClass = f.full ? 'type-field-full' : '';
+        html += `<div class="type-field ${fullClass}">
+          <div class="lbl">${f.label}</div>`;
+        if (f.type === 'select') {
+          html += `<select class="extra-field" data-key="${f.key}" onchange="saveExtraField('${f.key}', this.value)"
+            style="width:100%;border:none;background:transparent;font-size:15px;font-weight:700;color:var(--text);outline:none;padding:2px 0;margin-top:3px">
+            <option value="">—</option>
+            ${f.options.map(o => `<option value="${o}" ${val === o ? 'selected' : ''}>${o}</option>`).join('')}
+          </select>`;
+        } else if (f.type === 'time') {
+          html += `<input type="time" class="extra-field" data-key="${f.key}" value="${val}"
+            onchange="saveExtraField('${f.key}', this.value)"
+            style="border:none;background:transparent;font-size:15px;font-weight:700;color:var(--text);outline:none;width:100%;padding:2px 0;margin-top:3px" />`;
+        } else {
+          html += `<input type="${f.type}" class="extra-field" data-key="${f.key}" value="${escapeHtml(val)}"
+            placeholder="${f.placeholder || ''}"
+            onchange="saveExtraField('${f.key}', this.value)"
+            style="border:none;background:transparent;font-size:15px;font-weight:700;color:var(--text);outline:none;width:100%;padding:2px 0;margin-top:3px" />`;
+        }
+        if (f.unit) html += `<div style="font-size:11px;color:var(--text-light);margin-top:2px">${f.unit}</div>`;
+        html += `</div>`;
+      });
+      html += `</div>`;
+    }
+
+    if (section.checklist) {
+      const saved = extraData['check_' + si] || {};
+      section.checklist.forEach((item, ci) => {
+        const checked = saved[ci] || false;
+        html += `<div class="checklist-item">
+          <input type="checkbox" id="chk_${si}_${ci}" ${checked ? 'checked' : ''}
+            onchange="saveChecklistItem(${si}, ${ci}, this.checked)" />
+          <label for="chk_${si}_${ci}" class="${checked ? 'checked' : ''}">${item}</label>
+        </div>`;
+      });
+    }
+
+    if (section.textarea) {
+      const val = extraData[section.textarea.key] || '';
+      html += `<textarea class="extra-field" data-key="${section.textarea.key}"
+        placeholder="${section.textarea.placeholder || ''}"
+        onchange="saveExtraField('${section.textarea.key}', this.value)"
+        style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:14px;background:var(--surface-2);color:var(--text);resize:none;outline:none;margin-top:4px"
+        rows="4">${escapeHtml(val)}</textarea>`;
+    }
+
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+async function saveExtraField(key, value) {
+  if (!state.currentTripId) return;
+  try {
+    await window.FB.updateDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId), {
+      [`extraData.${key}`]: value
+    });
+    if (state.currentTrip) {
+      if (!state.currentTrip.extraData) state.currentTrip.extraData = {};
+      state.currentTrip.extraData[key] = value;
+    }
+  } catch (e) { console.error('saveExtraField', e); }
+}
+window.saveExtraField = saveExtraField;
+
+async function saveChecklistItem(sectionIdx, itemIdx, checked) {
+  const key = `extraData.check_${sectionIdx}.${itemIdx}`;
+  try {
+    // Aggiorna label visiva
+    const lbl = document.querySelector(`label[for="chk_${sectionIdx}_${itemIdx}"]`);
+    if (lbl) lbl.className = checked ? 'checked' : '';
+    await window.FB.updateDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId), {
+      [key]: checked
+    });
+  } catch (e) { console.error('saveChecklistItem', e); }
+}
+window.saveChecklistItem = saveChecklistItem;
 function renderStages() {
   const list = document.getElementById('stages-list');
   if (!state.currentStages.length) {
