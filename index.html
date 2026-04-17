@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="IO Travel" />
 <meta name="application-name" content="IO Travel" />
 <meta name="msapplication-TileColor" content="#4f7cff" />
-<meta name="msapplication-TileImage" content="icons/icon-144.png" />
+<meta name="msapplication-TileImage" content="icon-144.png" />
 <meta name="description" content="Organizza, esplora e condividi i tuoi viaggi con IO Travel" />
 
 <title>IO Travel</title>
@@ -19,18 +19,18 @@
 <link rel="manifest" href="manifest.json" />
 
 <!-- Apple Touch Icons -->
-<link rel="apple-touch-icon" href="icons/icon-152.png" />
-<link rel="apple-touch-icon" sizes="72x72" href="icons/icon-72.png" />
-<link rel="apple-touch-icon" sizes="96x96" href="icons/icon-96.png" />
-<link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.png" />
-<link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144.png" />
-<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png" />
-<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png" />
-<link rel="apple-touch-icon" sizes="512x512" href="icons/icon-512.png" />
+<link rel="apple-touch-icon" href="icon-152.png" />
+<link rel="apple-touch-icon" sizes="72x72" href="icon-72.png" />
+<link rel="apple-touch-icon" sizes="96x96" href="icon-96.png" />
+<link rel="apple-touch-icon" sizes="128x128" href="icon-128.png" />
+<link rel="apple-touch-icon" sizes="144x144" href="icon-144.png" />
+<link rel="apple-touch-icon" sizes="152x152" href="icon-152.png" />
+<link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
 
 <!-- Favicon -->
-<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-96.png" />
-<link rel="icon" type="image/png" sizes="16x16" href="icons/icon-72.png" />
+<link rel="icon" type="image/png" sizes="32x32" href="icon-96.png" />
+<link rel="icon" type="image/png" sizes="16x16" href="icon-72.png" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -667,6 +667,25 @@
   .pulse { animation: pulse 1.5s infinite; }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
+  /* Map toolbar */
+  .map-tool-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 9px 14px; border-radius: 10px;
+    background: var(--surface); border: 2px solid var(--border);
+    font-size: 13px; font-weight: 600; color: var(--text-muted);
+    box-shadow: var(--shadow); transition: all .15s;
+  }
+  .map-tool-btn.active {
+    background: var(--primary-soft); border-color: var(--primary);
+    color: var(--primary);
+  }
+  .map-container {
+    height: calc(100vh - var(--safe-top) - 240px);
+    border-radius: var(--radius); overflow: hidden;
+    position: relative; background: var(--surface-2);
+    min-height: 300px;
+  }
+
   /* Leaflet popup theming */
   .leaflet-popup-content-wrapper { border-radius: 12px; }
   .leaflet-popup-content { margin: 12px 14px; font-family: inherit; font-size: 13px; }
@@ -763,7 +782,7 @@
       </div>
       <div class="field">
         <label>Password</label>
-        <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password" />
+        <input id="login-password" type="password" placeholder="La tua password" autocomplete="current-password" />
       </div>
       <button class="btn btn-primary" onclick="doLogin()">Accedi</button>
       <p class="auth-switch">Non hai un account? <button onclick="toggleAuth('register')">Registrati</button></p>
@@ -957,10 +976,27 @@
 
       <!-- Tab: Map -->
       <div id="tab-map" class="tab-content">
+        <!-- Toolbar strumenti mappa -->
+        <div id="map-toolbar" style="display:flex; gap:8px; padding:0 0 12px; flex-wrap:wrap">
+          <button class="map-tool-btn active" id="tool-none" onclick="setMapTool('none')" title="Seleziona / Naviga">
+            🖐️ <span>Naviga</span>
+          </button>
+          <button class="map-tool-btn" id="tool-marker" onclick="setMapTool('marker')" title="Aggiungi marker emoji">
+            📍 <span>Marker</span>
+          </button>
+          <button class="map-tool-btn" id="tool-route" onclick="setMapTool('route')" title="Disegna itinerario cliccando i punti">
+            ✏️ <span>Itinerario</span>
+          </button>
+          <button class="map-tool-btn" id="tool-finish" onclick="finishRoute()" title="Completa l'itinerario" style="color:#2ecc71; display:none">
+            ✅ <span>Completa</span>
+          </button>
+          <button class="map-tool-btn" id="tool-clear" onclick="clearDrawing()" title="Cancella disegno corrente" style="color:var(--danger)">
+            🗑️ <span>Cancella</span>
+          </button>
+        </div>
+        <div id="map-tool-hint" style="font-size:12px; color:var(--text-muted); margin-bottom:10px; min-height:18px"></div>
         <div class="map-container">
           <div id="trip-map"></div>
-          <button class="map-fab" onclick="openModal('map-marker-modal')" title="Aggiungi marker">📍</button>
-          <div class="map-legend">Tocca la mappa per aggiungere un marker personalizzato</div>
         </div>
       </div>
 
@@ -1198,7 +1234,7 @@
       <h2>📌 Aggiungi marker</h2>
       <button class="modal-close" onclick="closeModal('map-marker-modal')">×</button>
     </div>
-    <p style="color:var(--text-muted); font-size:13px; margin-top:0">Scegli un'emoji e una nota, poi clicca sulla mappa per posizionarlo.</p>
+    <p style="color:var(--text-muted); font-size:13px; margin-top:0">Scegli emoji e titolo, poi tocca <strong>Salva</strong> — il marker verrà posizionato nel punto che hai toccato sulla mappa.</p>
     <div class="field">
       <label>Titolo</label>
       <input id="mk-title" type="text" placeholder="Es. Bellissima baia" />
@@ -1224,8 +1260,8 @@
       <label>Nota (opzionale)</label>
       <textarea id="mk-note" rows="3" placeholder="Info utili, ricordi, ecc."></textarea>
     </div>
-    <p style="text-align:center; color:var(--primary); font-weight:700; font-size:13px" class="pulse">👆 Ora tocca sulla mappa per posizionare</p>
-    <button class="btn btn-secondary" onclick="closeModal('map-marker-modal')">Annulla</button>
+    <button class="btn btn-primary" onclick="window.saveNewMarker()">📍 Salva marker</button>
+    <button class="btn btn-secondary" style="margin-top:8px" onclick="closeModal('map-marker-modal')">Annulla</button>
   </div>
 </div>
 
@@ -2093,18 +2129,127 @@ async function searchLocation() {
 window.searchLocation = searchLocation;
 
 /* =================================================================
-   MAP
+   MAP — stato disegno
    ================================================================= */
+const mapState = {
+  tool: 'none',       // 'none' | 'marker' | 'route'
+  drawPoints: [],     // punti della polilinea in costruzione
+  drawPolyline: null, // L.Polyline temporanea mentre si disegna
+  drawDots: [],       // cerchietti di anteprima punti
+  savedRoutes: [],    // L.Polyline salvate
+  allMarkerLayers: [] // tutti i marker layer per pulizia
+};
+
+function setMapTool(tool) {
+  mapState.tool = tool;
+  document.querySelectorAll('.map-tool-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tool-' + tool)?.classList.add('active');
+
+  const finishBtn = document.getElementById('tool-finish');
+  if (finishBtn) finishBtn.style.display = tool === 'route' ? 'flex' : 'none';
+
+  const hint = document.getElementById('map-tool-hint');
+  const map = state.mapInstance;
+  if (!map) return;
+
+  if (tool === 'none') {
+    map.dragging.enable();
+    hint.textContent = '';
+    map.getContainer().style.cursor = '';
+  } else if (tool === 'marker') {
+    map.dragging.enable();
+    hint.textContent = '📍 Tocca la mappa per scegliere il punto, poi compila il form';
+    map.getContainer().style.cursor = 'crosshair';
+  } else if (tool === 'route') {
+    map.dragging.enable();
+    hint.textContent = '✏️ Tocca per aggiungere punti — poi premi ✅ Completa';
+    map.getContainer().style.cursor = 'crosshair';
+  }
+}
+window.setMapTool = setMapTool;
+
+function clearDrawing() {
+  const map = state.mapInstance;
+  if (!map) return;
+  // Rimuovi polilinea in costruzione
+  if (mapState.drawPolyline) { map.removeLayer(mapState.drawPolyline); mapState.drawPolyline = null; }
+  mapState.drawDots.forEach(d => map.removeLayer(d));
+  mapState.drawDots = [];
+  mapState.drawPoints = [];
+  // Rimuovi anche le rotte salvate in questa sessione
+  mapState.savedRoutes.forEach(r => { try { map.removeLayer(r); } catch (_) {} });
+  mapState.savedRoutes = [];
+  setMapTool('none');
+  showToast('Disegno cancellato');
+}
+window.clearDrawing = clearDrawing;
+
+function finishRoute() {
+  const map = state.mapInstance;
+  if (!map || mapState.drawPoints.length < 2) {
+    showToast('Aggiungi almeno 2 punti', 'error');
+    return;
+  }
+  // Salva la rotta come permanente (su Firestore)
+  const coords = [...mapState.drawPoints];
+  const color = '#4f7cff';
+  const poly = L.polyline(coords, { color, weight: 4, opacity: 0.85 }).addTo(map);
+  poly.bindPopup('<strong>Itinerario</strong><br/><button onclick="window.deleteRoute(this)" style="color:#ff5a5f;font-weight:700;background:none;border:none;cursor:pointer">🗑️ Elimina</button>');
+  poly._deleteRef = poly;
+  mapState.savedRoutes.push(poly);
+
+  // Salva su Firestore
+  if (state.currentTripId) {
+    window.FB.addDoc(window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'routes'), {
+      coords: coords.map(c => ({ lat: c[0], lng: c[1] })),
+      color,
+      createdBy: state.user.uid,
+      createdAt: window.FB.serverTimestamp()
+    }).catch(e => console.error('save route error', e));
+  }
+
+  // Pulisci disegno temporaneo
+  if (mapState.drawPolyline) { map.removeLayer(mapState.drawPolyline); mapState.drawPolyline = null; }
+  mapState.drawDots.forEach(d => map.removeLayer(d));
+  mapState.drawDots = [];
+  mapState.drawPoints = [];
+  setMapTool('none');
+  showToast('Itinerario salvato! ✅', 'success');
+}
+window.finishRoute = finishRoute;
+
+window.deleteRoute = function(btn) {
+  const popup = btn.closest('.leaflet-popup');
+  // Trova la poly associata e rimuovila
+  mapState.savedRoutes.forEach(p => {
+    if (p.isPopupOpen()) {
+      state.mapInstance.removeLayer(p);
+    }
+  });
+};
+
 function renderMap() {
   const container = document.getElementById('trip-map');
   if (!container) return;
+
+  // Reset tool state
+  mapState.tool = 'none';
+  mapState.drawPoints = [];
+  mapState.drawPolyline = null;
+  mapState.drawDots = [];
+  mapState.savedRoutes = [];
+
+  document.querySelectorAll('.map-tool-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tool-none')?.classList.add('active');
+  const hint = document.getElementById('map-tool-hint');
+  if (hint) hint.textContent = '';
 
   if (state.mapInstance) {
     state.mapInstance.remove();
     state.mapInstance = null;
   }
 
-  // Determine initial center
+  // Centro iniziale
   let center = [41.9, 12.5];
   let zoom = 5;
   const allPoints = [
@@ -2118,60 +2263,119 @@ function renderMap() {
     zoom = allPoints.length > 1 ? 6 : 11;
   }
 
-  state.mapInstance = L.map(container, { zoomControl: true, attributionControl: true }).setView(center, zoom);
+  state.mapInstance = L.map(container, { zoomControl: true }).setView(center, zoom);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OSM'
+    maxZoom: 19, attribution: '© OpenStreetMap'
   }).addTo(state.mapInstance);
 
-  // Stages markers + route line
+  // ── Tappe numerate + linea itinerario automatica ──
   const stageCoords = [];
   state.currentStages.forEach((s, i) => {
     if (s.lat != null && s.lng != null) {
       const icon = L.divIcon({
-        html: `<div style="background:#4f7cff;color:#fff;width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,.3);border:2px solid #fff"><span style="transform:rotate(45deg)">${i + 1}</span></div>`,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        className: ''
+        html: `<div style="background:#4f7cff;color:#fff;width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,.3);border:2px solid #fff"><span style="transform:rotate(45deg)">${i + 1}</span></div>`,
+        iconSize: [32, 32], iconAnchor: [16, 32], className: ''
       });
       L.marker([s.lat, s.lng], { icon }).addTo(state.mapInstance)
-        .bindPopup(`<strong>${escapeHtml(s.title)}</strong>${s.notes ? '<br/>' + escapeHtml(s.notes) : ''}`);
+        .bindPopup(`<strong>${escapeHtml(s.title)}</strong>${s.date ? '<br/>📅 ' + formatDate(s.date) : ''}${s.notes ? '<br/>' + escapeHtml(s.notes) : ''}`);
       stageCoords.push([s.lat, s.lng]);
     }
   });
   if (stageCoords.length > 1) {
-    L.polyline(stageCoords, { color: '#4f7cff', weight: 3, opacity: 0.7, dashArray: '8, 6' }).addTo(state.mapInstance);
+    L.polyline(stageCoords, { color: '#4f7cff', weight: 3.5, opacity: 0.7, dashArray: '8, 6' }).addTo(state.mapInstance);
   }
 
-  // Custom user markers (emoji)
+  // ── Marker emoji personalizzati ──
   state.currentMarkers.forEach(m => {
     const icon = L.divIcon({
-      html: `<div style="background:#fff;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 4px 10px rgba(0,0,0,.25);border:2px solid #fff">${m.emoji || '📌'}</div>`,
-      iconSize: [38, 38],
-      iconAnchor: [19, 19],
-      className: ''
+      html: `<div style="background:#fff;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 12px rgba(0,0,0,.25);border:2.5px solid #fff">${m.emoji || '📌'}</div>`,
+      iconSize: [38, 38], iconAnchor: [19, 19], className: ''
     });
-    const popupHtml = `
-      <strong>${escapeHtml(m.title || 'Marker')}</strong>
-      ${m.note ? '<br/>' + escapeHtml(m.note) : ''}
-      <br/><button style="margin-top:6px; color:#ff5a5f; background:none; border:none; cursor:pointer; font-weight:600" onclick="window.deleteMarker('${m.id}')">🗑️ Elimina</button>`;
-    L.marker([m.lat, m.lng], { icon }).addTo(state.mapInstance).bindPopup(popupHtml);
+    L.marker([m.lat, m.lng], { icon }).addTo(state.mapInstance)
+      .bindPopup(`<strong>${escapeHtml(m.title || 'Marker')}</strong>${m.note ? '<br/>' + escapeHtml(m.note) : ''}<br/><button style="margin-top:6px;color:#ff5a5f;background:none;border:none;cursor:pointer;font-weight:700" onclick="window.deleteMarker('${m.id}')">🗑️ Elimina</button>`);
   });
 
-  // If user is adding a new marker, capture next click
-  state.mapClickHandler = (e) => {
-    if (state.newMarkerData) {
-      saveNewMarker(e.latlng.lat, e.latlng.lng);
+  // ── Carica rotte salvate da Firestore ──
+  if (state.currentTripId) {
+    window.FB.getDocs(window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'routes'))
+      .then(snap => {
+        snap.docs.forEach(d => {
+          const route = d.data();
+          if (route.coords?.length > 1) {
+            const latlngs = route.coords.map(c => [c.lat, c.lng]);
+            const poly = L.polyline(latlngs, { color: route.color || '#4f7cff', weight: 4, opacity: 0.85 }).addTo(state.mapInstance);
+            const rid = d.id;
+            poly.bindPopup(`<strong>Itinerario salvato</strong><br/><button style="margin-top:6px;color:#ff5a5f;background:none;border:none;cursor:pointer;font-weight:700" onclick="window.deleteRouteById('${rid}')">🗑️ Elimina</button>`);
+            mapState.savedRoutes.push(poly);
+          }
+        });
+      }).catch(e => console.error('load routes', e));
+  }
+
+  // ── Gestione click sulla mappa ──
+  state.mapInstance.on('click', (e) => {
+    const { lat, lng } = e.latlng;
+    const tool = mapState.tool;
+
+    if (tool === 'marker') {
+      // Apri modal marker con coordinate preimpostate
+      state.newMarkerData = { emoji: '⭐', lat, lng };
+      document.getElementById('mk-title').value = '';
+      document.getElementById('mk-note').value = '';
+      document.querySelectorAll('#emoji-picker button').forEach(b => b.classList.remove('selected'));
+      const starBtn = [...document.querySelectorAll('#emoji-picker button')].find(b => b.textContent.trim() === '⭐');
+      if (starBtn) starBtn.classList.add('selected');
+      openModal('map-marker-modal');
+      return;
     }
-  };
-  state.mapInstance.on('click', state.mapClickHandler);
+
+    if (tool === 'route') {
+      const point = [lat, lng];
+      mapState.drawPoints.push(point);
+
+      // Dot di anteprima
+      const dot = L.circleMarker(point, {
+        radius: 6, color: '#fff', weight: 2,
+        fillColor: '#ff8a3d', fillOpacity: 1
+      }).addTo(state.mapInstance);
+      mapState.drawDots.push(dot);
+
+      // Aggiorna polilinea temporanea
+      if (mapState.drawPolyline) {
+        state.mapInstance.removeLayer(mapState.drawPolyline);
+      }
+      if (mapState.drawPoints.length > 1) {
+        mapState.drawPolyline = L.polyline(mapState.drawPoints, {
+          color: '#ff8a3d', weight: 3, opacity: 0.8, dashArray: '6,4'
+        }).addTo(state.mapInstance);
+      }
+
+      const hint = document.getElementById('map-tool-hint');
+      if (hint) hint.textContent = `✏️ ${mapState.drawPoints.length} punti aggiunti — tocca ancora per continuare`;
+    }
+  });
+
+  // Doppio click per completare la rotta
+  state.mapInstance.on('dblclick', (e) => {
+    if (mapState.tool === 'route' && mapState.drawPoints.length >= 2) {
+      L.DomEvent.stopPropagation(e);
+      finishRoute();
+    }
+  });
 
   if (allPoints.length > 1) {
-    try {
-      state.mapInstance.fitBounds(allPoints, { padding: [40, 40] });
-    } catch (e) {}
+    try { state.mapInstance.fitBounds(allPoints, { padding: [40, 40] }); } catch (_) {}
   }
 }
+
+window.deleteRouteById = async function(routeId) {
+  if (!confirm('Eliminare questo itinerario?')) return;
+  try {
+    await window.FB.deleteDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'routes', routeId));
+    renderMap();
+    showToast('Itinerario eliminato');
+  } catch (e) { showToast('Errore', 'error'); }
+};
 
 function selectEmoji(em, btn) {
   if (!state.newMarkerData) state.newMarkerData = {};
@@ -2200,10 +2404,13 @@ async function saveNewMarker(lat, lng) {
   const title = document.getElementById('mk-title').value.trim() || 'Marker';
   const note = document.getElementById('mk-note').value.trim();
   const emoji = state.newMarkerData?.emoji || '📌';
+  // Usa le coordinate dal modal se già presenti (click su mappa), altrimenti quelle passate
+  const finalLat = state.newMarkerData?.lat ?? lat;
+  const finalLng = state.newMarkerData?.lng ?? lng;
   try {
     showLoader(true);
     await window.FB.addDoc(window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'markers'), {
-      lat, lng, title, note, emoji,
+      lat: finalLat, lng: finalLng, title, note, emoji,
       createdBy: state.user.uid,
       createdAt: window.FB.serverTimestamp()
     });
@@ -2213,6 +2420,8 @@ async function saveNewMarker(lat, lng) {
   } catch (e) { console.error(e); showToast('Errore: ' + e.message, 'error'); }
   finally { showLoader(false); }
 }
+// Esponi per il pulsante "Salva" nel modal
+window.saveNewMarker = () => saveNewMarker(0, 0);
 
 window.deleteMarker = async function(id) {
   if (!confirm('Eliminare questo marker?')) return;
