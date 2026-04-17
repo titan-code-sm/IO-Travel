@@ -977,6 +977,94 @@
   /* ---------- BACK BUTTON VISIBILITY ---------- */
   .detail-back { background: transparent; }
 
+  /* ---------- AFFILIAZIONI ---------- */
+  .affiliate-section {
+    margin-top: 20px;
+  }
+  .affiliate-section h3 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin: 0 0 10px;
+  }
+  .affiliate-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .affiliate-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 10px;
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    text-decoration: none;
+    color: var(--text);
+    transition: transform .15s, box-shadow .15s;
+    border: 1.5px solid var(--border);
+    text-align: center;
+  }
+  .affiliate-card:active { transform: scale(0.96); box-shadow: none; }
+  .affiliate-card .af-icon { font-size: 26px; }
+  .affiliate-card .af-label { font-size: 12px; font-weight: 700; }
+  .affiliate-card .af-sub { font-size: 10px; color: var(--text-muted); }
+  .affiliate-card.booking { border-color: #003580; }
+  .affiliate-card.booking .af-label { color: #003580; }
+  .affiliate-card.airbnb { border-color: #ff5a5f; }
+  .affiliate-card.airbnb .af-label { color: #ff5a5f; }
+  .affiliate-card.skyscanner { border-color: #0770e3; }
+  .affiliate-card.skyscanner .af-label { color: #0770e3; }
+  .affiliate-card.getyourguide { border-color: #ff8000; }
+  .affiliate-card.getyourguide .af-label { color: #ff8000; }
+  [data-theme="dark"] .affiliate-card.booking { border-color: #4a7fd4; }
+  [data-theme="dark"] .affiliate-card.booking .af-label { color: #4a7fd4; }
+  [data-theme="dark"] .affiliate-card.airbnb { border-color: #ff8a8d; }
+  [data-theme="dark"] .affiliate-card.airbnb .af-label { color: #ff8a8d; }
+  [data-theme="dark"] .affiliate-card.skyscanner { border-color: #4da3ff; }
+  [data-theme="dark"] .affiliate-card.skyscanner .af-label { color: #4da3ff; }
+  [data-theme="dark"] .affiliate-card.getyourguide { border-color: #ffaa44; }
+  [data-theme="dark"] .affiliate-card.getyourguide .af-label { color: #ffaa44; }
+
+  /* ---------- CAFFÈ BUTTON ---------- */
+  .coffee-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #FFDD00 0%, #FFC800 100%);
+    color: #1a1a1a;
+    border-radius: var(--radius);
+    font-weight: 800;
+    font-size: 15px;
+    text-decoration: none;
+    box-shadow: 0 4px 16px rgba(255, 200, 0, 0.35);
+    transition: transform .15s, box-shadow .15s;
+    margin-top: 4px;
+  }
+  .coffee-btn:active { transform: scale(0.97); box-shadow: none; }
+  .coffee-banner {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+    margin-top: 10px;
+    text-align: center;
+  }
+  .coffee-banner p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+    line-height: 1.5;
+  }
+
   /* ---- PWA INSTALL BANNER ---- */
   #pwa-banner {
     position: fixed;
@@ -1243,7 +1331,15 @@
 
         <button class="btn btn-secondary" style="margin-bottom:10px" onclick="openEditProfileV5()">✏️ Modifica profilo</button>
         <button class="btn btn-secondary" style="margin-bottom:10px" onclick="showPage('wishlist')">⭐ Lista dei desideri</button>
-        <button class="btn btn-danger" onclick="doLogout()">Esci</button>
+
+        <div class="coffee-banner">
+          <p>IO Travel è gratis e fatto con ❤️<br>Se ti è utile, offrimi un caffè ☕</p>
+          <a id="coffee-link" href="https://ko-fi.com" target="_blank" class="coffee-btn">
+            ☕ Offrimi un caffè
+          </a>
+        </div>
+
+        <button class="btn btn-danger" style="margin-top:14px" onclick="doLogout()">Esci</button>
         <p style="text-align:center; color:var(--text-light); font-size:11px; margin-top:20px">IO Travel v1.0 • made with ✈️</p>
       </div>
     </div>
@@ -1356,6 +1452,9 @@
         </div>
 
         <div id="budget-card-container"></div>
+
+        <!-- Affiliazioni: generate dinamicamente da renderAffiliateLinks() -->
+        <div id="affiliate-links-container"></div>
 
         <button class="btn btn-secondary" style="margin-top:20px" onclick="openEditTripModal()">✏️ Modifica viaggio</button>
         <button class="btn btn-secondary" style="margin-top:10px" onclick="exportTripPDF()">📄 Esporta itinerario PDF</button>
@@ -2659,6 +2758,8 @@ function renderTripDetail() {
   document.getElementById('invite-code-display').textContent = t.inviteCode || '——————';
   // budget card
   if (typeof renderBudgetCard === 'function') renderBudgetCard();
+  // affiliate links
+  if (typeof renderAffiliateLinks === 'function') renderAffiliateLinks();
   // participants list
   renderParticipants();
 }
@@ -5206,6 +5307,143 @@ window.handleAvatarUpload = async function(event) {
   try { await ensurePublicProfile(); } catch (_) {}
 };
 
+/* =================================================================
+   ☕ CAFFÈ — CONFIGURAZIONE
+   ================================================================= */
+// ⚙️ PERSONALIZZA: incolla qui il tuo link Ko-fi, PayPal.me o Buy Me a Coffee
+const COFFEE_URL = 'https://ko-fi.com';  // es. 'https://ko-fi.com/tuonome'
+                                          // oppure 'https://paypal.me/tuonome'
+                                          // oppure 'https://www.buymeacoffee.com/tuonome'
+
+// Aggiorna il link caffè nel profilo (chiamato all'avvio)
+function initCoffeeLink() {
+  const el = document.getElementById('coffee-link');
+  if (el) el.href = COFFEE_URL;
+}
+// Viene chiamato dentro enterApp via setupV5UserListeners
+const _origSetupV5 = window.setupV5UserListeners;
+window.setupV5UserListeners = function() {
+  if (typeof _origSetupV5 === 'function') _origSetupV5();
+  initCoffeeLink();
+};
+
+/* =================================================================
+   🔗 AFFILIAZIONI — CONFIGURAZIONE
+   ================================================================= */
+// ⚙️ PERSONALIZZA: inserisci i tuoi ID affiliato per ogni piattaforma
+// Se non hai ancora un account, lascia vuoto (''): il link funziona lo stesso
+// ma senza traccking/commissione.
+//
+// Come ottenere gli ID:
+//   Booking.com  → https://www.booking.com/affiliate-program.html
+//   Airbnb       → https://www.airbnb.com/associates
+//   Skyscanner   → https://partners.skyscanner.net
+//   GetYourGuide → https://partner.getyourguide.com
+
+const AFFILIATE_IDS = {
+  booking:     '',  // es. '1234567'   (il tuo "aid" di Booking)
+  airbnb:      '',  // es. 'xxx'       (affiliate token Airbnb)
+  skyscanner:  '',  // es. 'xxx'       (partner ID Skyscanner)
+  getyourguide: '', // es. 'XXXXX'     (partner_id GetYourGuide)
+};
+
+/* Costruisce un URL di affiliazione per una query e un servizio */
+function buildAffiliateUrl(service, destination, startDate, endDate) {
+  const dest = encodeURIComponent(destination || '');
+  const ids = AFFILIATE_IDS;
+
+  switch (service) {
+    case 'booking': {
+      const base = `https://www.booking.com/searchresults.it.html?ss=${dest}`;
+      const dates = startDate && endDate
+        ? `&checkin=${startDate}&checkout=${endDate}`
+        : '';
+      const aid = ids.booking ? `&aid=${ids.booking}` : '';
+      return base + dates + aid;
+    }
+    case 'airbnb': {
+      const base = `https://www.airbnb.it/s/${dest}/homes`;
+      const dates = startDate && endDate
+        ? `?checkin=${startDate}&checkout=${endDate}`
+        : '';
+      // Airbnb associates non usa query param semplice, ma puoi usare un link custom
+      return base + dates;
+    }
+    case 'skyscanner': {
+      // Skyscanner cerca voli: usa la destinazione come aeroporto generico
+      const base = `https://www.skyscanner.it/voli-economici/a/${dest}.html`;
+      return ids.skyscanner
+        ? `https://www.skyscanner.net/transport/flights/anywhere/${dest}/?partnerId=${ids.skyscanner}`
+        : base;
+    }
+    case 'getyourguide': {
+      const base = `https://www.getyourguide.it/s/?q=${dest}`;
+      const pid = ids.getyourguide ? `&partner_id=${ids.getyourguide}` : '';
+      return base + pid;
+    }
+    default:
+      return '#';
+  }
+}
+
+/* Renderizza il blocco affiliazioni sotto la panoramica del viaggio */
+function renderAffiliateLinks() {
+  const trip = state.currentTrip;
+  const container = document.getElementById('affiliate-links-container');
+  if (!container || !trip) return;
+
+  const dest = trip.destination || '';
+  const start = trip.startDate || '';
+  const end = trip.endDate || '';
+
+  // Mostra il blocco solo se c'è una destinazione
+  if (!dest.trim()) {
+    container.innerHTML = '';
+    return;
+  }
+
+  const destLabel = dest.length > 20 ? dest.slice(0, 18) + '…' : dest;
+
+  container.innerHTML = `
+    <div class="affiliate-section">
+      <h3>🔍 Trova per ${escapeHtml(destLabel)}</h3>
+      <div class="affiliate-grid">
+        <a class="affiliate-card booking"
+           href="${buildAffiliateUrl('booking', dest, start, end)}"
+           target="_blank" rel="noopener">
+          <div class="af-icon">🏨</div>
+          <div class="af-label">Booking.com</div>
+          <div class="af-sub">Hotel & alloggi</div>
+        </a>
+        <a class="affiliate-card airbnb"
+           href="${buildAffiliateUrl('airbnb', dest, start, end)}"
+           target="_blank" rel="noopener">
+          <div class="af-icon">🏠</div>
+          <div class="af-label">Airbnb</div>
+          <div class="af-sub">Case & appartamenti</div>
+        </a>
+        <a class="affiliate-card skyscanner"
+           href="${buildAffiliateUrl('skyscanner', dest, start, end)}"
+           target="_blank" rel="noopener">
+          <div class="af-icon">✈️</div>
+          <div class="af-label">Skyscanner</div>
+          <div class="af-sub">Voli economici</div>
+        </a>
+        <a class="affiliate-card getyourguide"
+           href="${buildAffiliateUrl('getyourguide', dest, start, end)}"
+           target="_blank" rel="noopener">
+          <div class="af-icon">🎫</div>
+          <div class="af-label">GetYourGuide</div>
+          <div class="af-sub">Esperienze & tour</div>
+        </a>
+      </div>
+      <div style="font-size:10px; color:var(--text-light); margin-top:6px; text-align:center">
+        🤝 Link sponsorizzati — ci aiutano a mantenere l'app gratuita
+      </div>
+    </div>
+  `;
+}
+window.renderAffiliateLinks = renderAffiliateLinks;
 
 </script>
 
