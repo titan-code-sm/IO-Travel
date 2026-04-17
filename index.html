@@ -959,6 +959,24 @@
   /* Loader dark mode */
   [data-theme="dark"] .loader { background: rgba(15, 20, 32, 0.85); }
 
+  /* ---------- MENTIONS ---------- */
+  .mention {
+    background: var(--primary-soft);
+    color: var(--primary);
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-block;
+  }
+  .chat-msg.me .bubble .mention {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+  }
+
+  /* ---------- BACK BUTTON VISIBILITY ---------- */
+  .detail-back { background: transparent; }
+
   /* ---- PWA INSTALL BANNER ---- */
   #pwa-banner {
     position: fixed;
@@ -1223,7 +1241,7 @@
           <div class="toggle-switch" id="theme-toggle-switch"></div>
         </div>
 
-        <button class="btn btn-secondary" style="margin-bottom:10px" onclick="openModal('edit-profile-modal')">✏️ Modifica profilo</button>
+        <button class="btn btn-secondary" style="margin-bottom:10px" onclick="openEditProfileV5()">✏️ Modifica profilo</button>
         <button class="btn btn-secondary" style="margin-bottom:10px" onclick="showPage('wishlist')">⭐ Lista dei desideri</button>
         <button class="btn btn-danger" onclick="doLogout()">Esci</button>
         <p style="text-align:center; color:var(--text-light); font-size:11px; margin-top:20px">IO Travel v1.0 • made with ✈️</p>
@@ -1244,6 +1262,53 @@
         <div id="wishlist-list"></div>
         <div id="wishlist-empty" style="padding:32px; text-align:center; color:var(--text-muted); display:none">
           ⭐<br>Nessun desiderio ancora.<br><br>Tocca + per aggiungere una destinazione.
+        </div>
+      </div>
+    </div>
+
+    <!-- USER PROFILE (altri utenti) -->
+    <div id="page-userprofile" class="page" style="display:none">
+      <header class="header">
+        <button class="detail-back" onclick="goBack()" style="color:white">‹ Indietro</button>
+        <h1>Profilo</h1>
+        <div></div>
+      </header>
+      <div class="home-section">
+        <div style="text-align:center; margin: 24px 0">
+          <div class="avatar" id="up-avatar" style="width:90px; height:90px; font-size:34px; margin:0 auto 12px">?</div>
+          <h2 id="up-name" style="margin: 0 0 4px; font-size:22px">—</h2>
+          <p id="up-location" style="color:var(--text-muted); margin: 0; font-size:13px">—</p>
+          <p id="up-bio" style="margin: 10px 20px 0; font-size:14px; line-height:1.5"></p>
+        </div>
+
+        <div class="info-grid" style="margin-bottom:14px">
+          <div class="info-box">
+            <div class="lbl">Viaggi</div>
+            <div class="val" id="up-stat-trips">0</div>
+          </div>
+          <div class="info-box">
+            <div class="lbl">Giorni viaggiati</div>
+            <div class="val" id="up-stat-days">0</div>
+          </div>
+          <div class="info-box">
+            <div class="lbl">Follower</div>
+            <div class="val" id="up-stat-followers">0</div>
+          </div>
+          <div class="info-box">
+            <div class="lbl">Segue</div>
+            <div class="val" id="up-stat-following">0</div>
+          </div>
+        </div>
+
+        <div id="up-action-buttons" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px">
+          <button class="btn btn-primary" id="up-follow-btn" onclick="toggleFollow()">➕ Segui</button>
+          <button class="btn btn-secondary" onclick="mentionInCurrentChat()">💬 Menziona</button>
+        </div>
+
+        <div class="section-header"><h2>Viaggi in comune</h2></div>
+        <div id="up-shared-trips"></div>
+        <div id="up-shared-empty" style="padding:20px; text-align:center; color:var(--text-muted); font-size:13px; display:none">
+          Nessun viaggio in comune.
         </div>
       </div>
     </div>
@@ -1662,6 +1727,8 @@
       <button class="modal-close" onclick="closeModal('edit-profile-modal')">×</button>
     </div>
     <div class="field"><label>Nome</label><input id="ep-name" type="text" /></div>
+    <div class="field"><label>Città / Paese</label><input id="ep-location" type="text" placeholder="Es. Milano, Italia" /></div>
+    <div class="field"><label>Bio (visibile agli altri)</label><textarea id="ep-bio" rows="3" placeholder="Raccontati in poche parole: le tue passioni, i tuoi viaggi preferiti…" maxlength="200"></textarea></div>
     <button class="btn btn-primary" onclick="saveProfile()">Salva</button>
   </div>
 </div>
@@ -1799,7 +1866,13 @@ const state = {
   mapRouteLayer: null,
   mapClickHandler: null,
   currentPage: 'home',
-  currentTab: 'overview'
+  currentTab: 'overview',
+  wishes: [],
+  tripPhotos: [],
+  packingItems: [],
+  following: [], // uid segutii
+  followers: [],
+  viewingProfileUid: null
 };
 
 const TRIP_TYPES = {
@@ -2002,6 +2075,7 @@ function enterApp() {
   document.getElementById('bottom-nav').style.display = 'flex';
   updateAvatars();
   setupRealtimeListeners();
+  if (typeof window.setupV5UserListeners === 'function') window.setupV5UserListeners();
   showPage('home');
 }
 
@@ -2169,7 +2243,7 @@ function countdownHtml(targetDate) {
 function showPage(page) {
   state.currentPage = page;
 
-  ['home', 'calendar', 'notes', 'profile', 'wishlist', 'trip'].forEach(p => {
+  ['home', 'calendar', 'notes', 'profile', 'wishlist', 'userprofile', 'trip'].forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.style.display = 'none';
   });
@@ -2478,6 +2552,7 @@ let tripListeners = [];
 function detachTripListeners() {
   tripListeners.forEach(u => { try { u(); } catch (_) {} });
   tripListeners = [];
+  if (typeof window.detachV5Listeners === 'function') window.detachV5Listeners();
 }
 
 async function openTrip(tripId) {
@@ -3540,13 +3615,13 @@ function renderChat() {
           const mineR = users.includes(state.user.uid);
           return `<span class="msg-reaction ${mineR?'mine':''}" onclick="toggleReaction('${m.id}', '${emoji}')">${emoji} ${users.length}</span>`;
         }).join('') +
-        `</span></div>`;
+        `</div>`;
     }
     return `
       <div class="chat-msg ${mine ? 'me' : 'other'}">
-        ${!mine ? `<div class="sender">${escapeHtml(m.senderName)}</div>` : ''}
+        ${!mine ? `<div class="sender" style="cursor:pointer" onclick="openUserProfile('${m.senderUid}')">${escapeHtml(m.senderName)}</div>` : ''}
         <div class="bubble" style="position:relative">
-          ${escapeHtml(m.text)}
+          ${renderMentions(escapeHtml(m.text))}
           <button class="msg-reaction-btn" style="position:absolute; ${mine?'left:-30px':'right:-30px'}; top:50%; transform:translateY(-50%)" onclick="event.stopPropagation(); showReactionPicker(this, '${m.id}')">😊</button>
         </div>
         ${reactionsHtml}
@@ -3571,13 +3646,16 @@ function renderParticipants() {
     const avatar = p.photoURL
       ? `<div class="participant-avatar"><img src="${p.photoURL}" alt="" /></div>`
       : `<div class="participant-avatar">${initials}</div>`;
+    const isMe = p.uid === state.user.uid;
+    const clickHandler = isMe ? '' : `onclick="openUserProfile('${p.uid}')" style="cursor:pointer"`;
     return `
-      <div class="participant-item">
+      <div class="participant-item" ${clickHandler}>
         ${avatar}
         <div class="participant-info">
-          <div class="participant-name">${escapeHtml(p.name)}${p.uid === state.user.uid ? ' <span style="color:var(--text-light); font-size:12px">(tu)</span>' : ''}</div>
+          <div class="participant-name">${escapeHtml(p.name)}${isMe ? ' <span style="color:var(--text-light); font-size:12px">(tu)</span>' : ''}</div>
           <div class="participant-role">${p.role === 'admin' ? '👑 Organizzatore' : '👤 Membro'}</div>
         </div>
+        ${isMe ? '' : '<div style="color:var(--text-light); font-size:18px">›</div>'}
       </div>`;
   }).join('');
 }
@@ -4000,7 +4078,6 @@ initTheme();
 /* =================================================================
    PROFILE STATS (enhanced)
    ================================================================= */
-const _origRenderProfileStats = window.renderProfileStats;
 function renderProfileStatsV5() {
   const el = document.getElementById('stat-trips');
   if (el) el.textContent = state.trips.length;
@@ -4018,6 +4095,7 @@ function renderProfileStatsV5() {
   const elW = document.getElementById('stat-wishes');
   if (elW) elW.textContent = (state.wishes || []).length;
 }
+// Override diretto: renderProfileStats è una function locale, la sovrascrivo via var window
 window.renderProfileStats = renderProfileStatsV5;
 
 /* =================================================================
@@ -4357,7 +4435,7 @@ window.loadSuggestedPackingList = loadSuggestedPackingList;
    ================================================================= */
 // IMPORTANT: per usare il meteo, ottieni una API key gratuita su https://openweathermap.org/api
 // e incollala qui. Senza key il tab mostrerà un messaggio di configurazione.
-const OWM_API_KEY = 'c1ae3e1438dc87198da7efbdc2164ea1'; // <-- INSERIRE API KEY OpenWeatherMap
+const OWM_API_KEY = ''; // <-- INSERIRE API KEY OpenWeatherMap
 
 async function loadWeatherForecast() {
   const trip = state.currentTrip;
@@ -4725,20 +4803,20 @@ function showReactionPicker(btn, msgId) {
 window.showReactionPicker = showReactionPicker;
 
 /* =================================================================
-   CLEANUP LISTENERS on detach
+   CLEANUP LISTENERS on detach — extend existing detachTripListeners
    ================================================================= */
-const _origDetachTripListeners = window.detachTripListeners;
-function detachTripListenersV5() {
-  if (typeof _origDetachTripListeners === 'function') _origDetachTripListeners();
+// Estendo state.listeners-based cleanup aggiungendo i nuovi listener
+// tramite un hook nella funzione esistente
+function detachV5Listeners() {
   if (state._photosListener) { try { state._photosListener(); } catch(_){} state._photosListener = null; }
   if (state._packingListener) { try { state._packingListener(); } catch(_){} state._packingListener = null; }
   state.tripPhotos = [];
   state.packingItems = [];
 }
-window.detachTripListeners = detachTripListenersV5;
+window.detachV5Listeners = detachV5Listeners;
 
 /* =================================================================
-   WISHES REALTIME LISTENER
+   WISHES + FOLLOWING REALTIME LISTENERS
    ================================================================= */
 function setupWishesListener() {
   if (state._wishesListener) return;
@@ -4750,19 +4828,384 @@ function setupWishesListener() {
     if (state.currentPage === 'profile') renderProfileStatsV5();
   });
 }
-// Hook into login flow: attach when user loads
-const _origLoadUserProfile = window.loadUserProfile;
-// Invece di modificare loadUserProfile, attacchiamo al cambio di auth state se disponibile
-// tramite una funzione che viene chiamata al primo renderHome
-let _wishesSetupDone = false;
-const _origRenderHome = window.renderHome;
-window.renderHome = function() {
-  if (!_wishesSetupDone && state.user) {
-    setupWishesListener();
-    _wishesSetupDone = true;
-  }
-  if (typeof _origRenderHome === 'function') return _origRenderHome.apply(this, arguments);
+
+function setupFollowingListener() {
+  if (state._followingListener) return;
+  const q = window.FB.collection(window.FB.db, 'users', state.user.uid, 'following');
+  state._followingListener = window.FB.onSnapshot(q, (snap) => {
+    state.following = snap.docs.map(d => d.id);
+  });
+}
+
+// Attach listeners al primo enterApp — chiamato manualmente sotto
+window.setupV5UserListeners = function() {
+  if (!state.user) return;
+  setupWishesListener();
+  setupFollowingListener();
+  ensurePublicProfile();
 };
+
+/* =================================================================
+   PUBLIC PROFILES
+   ================================================================= */
+// Assicura che esista un documento /publicProfiles/{uid} con i miei dati pubblici
+async function ensurePublicProfile() {
+  if (!state.user || !state.profile) return;
+  try {
+    const ref = window.FB.doc(window.FB.db, 'publicProfiles', state.user.uid);
+    await window.FB.setDoc(ref, {
+      uid: state.user.uid,
+      name: state.profile.name || 'Utente',
+      photoURL: state.profile.photoURL || '',
+      bio: state.profile.bio || '',
+      location: state.profile.location || '',
+      updatedAt: Date.now()
+    }, { merge: true });
+  } catch (e) { console.warn('ensurePublicProfile:', e.message); }
+}
+
+async function openUserProfile(uid) {
+  if (!uid || uid === state.user.uid) {
+    showPage('profile');
+    return;
+  }
+  state.viewingProfileUid = uid;
+  showPage('userprofile');
+
+  const container = {
+    avatar: document.getElementById('up-avatar'),
+    name: document.getElementById('up-name'),
+    loc: document.getElementById('up-location'),
+    bio: document.getElementById('up-bio'),
+    trips: document.getElementById('up-stat-trips'),
+    days: document.getElementById('up-stat-days'),
+    followers: document.getElementById('up-stat-followers'),
+    following: document.getElementById('up-stat-following'),
+    shared: document.getElementById('up-shared-trips'),
+    sharedEmpty: document.getElementById('up-shared-empty'),
+    followBtn: document.getElementById('up-follow-btn')
+  };
+
+  // Placeholder iniziale
+  container.avatar.textContent = '…';
+  container.name.textContent = 'Caricamento…';
+  container.loc.textContent = '';
+  container.bio.textContent = '';
+  container.trips.textContent = '0';
+  container.days.textContent = '0';
+  container.followers.textContent = '0';
+  container.following.textContent = '0';
+  container.shared.innerHTML = '';
+
+  try {
+    // Carica profilo pubblico
+    const snap = await window.FB.getDoc(window.FB.doc(window.FB.db, 'publicProfiles', uid));
+    let profile = snap.exists() ? snap.data() : null;
+
+    if (!profile) {
+      // Fallback: cerca nei participantsInfo dei viaggi condivisi
+      let fallbackName = 'Utente';
+      let fallbackPhoto = '';
+      for (const t of state.trips) {
+        const pInfo = t.participantsInfo || {};
+        const pList = Array.isArray(pInfo) ? pInfo : Object.values(pInfo);
+        const p = pList.find(x => x.uid === uid);
+        if (p) { fallbackName = p.name; fallbackPhoto = p.photoURL || ''; break; }
+      }
+      profile = { name: fallbackName, photoURL: fallbackPhoto, bio: '', location: '' };
+    }
+
+    // Avatar
+    const initials = (profile.name || 'U').split(' ').map(s => s[0]).slice(0,2).join('').toUpperCase();
+    if (profile.photoURL) {
+      container.avatar.innerHTML = `<img src="${profile.photoURL}" alt="" />`;
+    } else {
+      container.avatar.textContent = initials;
+    }
+    container.name.textContent = profile.name || 'Utente';
+    container.loc.textContent = profile.location || '';
+    container.bio.textContent = profile.bio || '';
+
+    // Viaggi in comune (quelli dove entrambi partecipano)
+    const sharedTrips = state.trips.filter(t => (t.participants || []).includes(uid));
+    container.trips.textContent = sharedTrips.length;
+
+    let totalDays = 0;
+    sharedTrips.forEach(t => {
+      if (t.startDate && t.endDate) totalDays += daysBetween(t.startDate, t.endDate);
+    });
+    container.days.textContent = totalDays;
+
+    // Follower / Following counts (leggi le subcollection se permesso)
+    try {
+      const flw = await window.FB.getDocs(window.FB.collection(window.FB.db, 'users', uid, 'followers'));
+      container.followers.textContent = flw.size;
+    } catch (_) { container.followers.textContent = '—'; }
+    try {
+      const fg = await window.FB.getDocs(window.FB.collection(window.FB.db, 'users', uid, 'following'));
+      container.following.textContent = fg.size;
+    } catch (_) { container.following.textContent = '—'; }
+
+    // Pulsante follow
+    const amFollowing = (state.following || []).includes(uid);
+    container.followBtn.textContent = amFollowing ? '✓ Segui già' : '➕ Segui';
+    container.followBtn.classList.toggle('btn-primary', !amFollowing);
+    container.followBtn.classList.toggle('btn-secondary', amFollowing);
+
+    // Viaggi in comune (lista)
+    if (sharedTrips.length === 0) {
+      container.sharedEmpty.style.display = 'block';
+    } else {
+      container.sharedEmpty.style.display = 'none';
+      container.shared.innerHTML = sharedTrips.map(t => {
+        const type = (typeof TRIP_TYPES !== 'undefined' && TRIP_TYPES[t.type]) || { emoji: '✈️', label: '' };
+        return `
+          <div class="trip-card" onclick="openTrip('${t.id}')" style="cursor:pointer; margin-bottom:8px">
+            <div style="display:flex; align-items:center; gap:10px">
+              <div style="font-size:24px">${type.emoji}</div>
+              <div style="flex:1">
+                <div style="font-weight:700">${escapeHtml(t.name || '—')}</div>
+                <div style="font-size:12px; color:var(--text-muted)">${escapeHtml(t.destination || '')} · ${formatDateRange(t.startDate, t.endDate)}</div>
+              </div>
+              <div style="color:var(--text-light); font-size:18px">›</div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+  } catch (e) {
+    console.error('openUserProfile:', e);
+    container.name.textContent = 'Profilo non disponibile';
+    container.bio.textContent = e.message;
+  }
+}
+window.openUserProfile = openUserProfile;
+
+/* =================================================================
+   FOLLOW / UNFOLLOW
+   ================================================================= */
+async function toggleFollow() {
+  const targetUid = state.viewingProfileUid;
+  if (!targetUid) return;
+  const myUid = state.user.uid;
+  const isFollowing = (state.following || []).includes(targetUid);
+  try {
+    const myRef = window.FB.doc(window.FB.db, 'users', myUid, 'following', targetUid);
+    const theirRef = window.FB.doc(window.FB.db, 'users', targetUid, 'followers', myUid);
+    if (isFollowing) {
+      // Unfollow
+      await window.FB.deleteDoc(myRef);
+      try { await window.FB.deleteDoc(theirRef); } catch (_) {}
+      showToast('Non segui più');
+    } else {
+      // Follow
+      await window.FB.setDoc(myRef, { uid: targetUid, createdAt: Date.now() });
+      try {
+        await window.FB.setDoc(theirRef, {
+          uid: myUid,
+          name: state.profile?.name || 'Utente',
+          photoURL: state.profile?.photoURL || '',
+          createdAt: Date.now()
+        });
+      } catch (_) {}
+      showToast('Ora segui questa persona ✨', 'success');
+    }
+    // Refresh button
+    setTimeout(() => openUserProfile(targetUid), 200);
+  } catch (e) {
+    showToast('Errore: ' + e.message, 'error');
+  }
+}
+window.toggleFollow = toggleFollow;
+
+/* =================================================================
+   MENTIONS (@nome in chat)
+   ================================================================= */
+function renderMentions(escapedText) {
+  if (!escapedText) return '';
+  // Sostituisce @Nome con un link cliccabile
+  const trip = state.currentTrip;
+  if (!trip) return escapedText;
+  const pInfo = trip.participantsInfo || {};
+  const pList = Array.isArray(pInfo) ? pInfo : Object.values(pInfo);
+
+  // Ordina per nome più lungo (per catturare "Mario Rossi" prima di "Mario")
+  const sorted = [...pList].sort((a,b) => (b.name||'').length - (a.name||'').length);
+  let out = escapedText;
+  for (const p of sorted) {
+    if (!p.name) continue;
+    const escapedName = escapeHtml(p.name);
+    // Regex globale, case-insensitive, preceduto da @
+    const re = new RegExp('@' + escapedName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    out = out.replace(re, (m) =>
+      `<span class="mention" onclick="openUserProfile('${p.uid}')">@${escapeHtml(p.name)}</span>`
+    );
+  }
+  return out;
+}
+window.renderMentions = renderMentions;
+
+function mentionInCurrentChat() {
+  const targetUid = state.viewingProfileUid;
+  if (!targetUid) return;
+  // Trova nome del target dal trip corrente
+  const trip = state.currentTrip;
+  if (!trip) {
+    showToast('Apri un viaggio condiviso per menzionare', 'error');
+    return;
+  }
+  const pInfo = trip.participantsInfo || {};
+  const pList = Array.isArray(pInfo) ? pInfo : Object.values(pInfo);
+  const target = pList.find(p => p.uid === targetUid);
+  if (!target) {
+    showToast('Questa persona non è nel viaggio corrente', 'error');
+    return;
+  }
+  // Torna al viaggio, apri tab chat, pre-compila messaggio
+  goBack();
+  setTimeout(() => {
+    switchTab('chat');
+    setTimeout(() => {
+      const field = document.getElementById('chat-input-field');
+      if (field) {
+        field.value = '@' + target.name + ' ';
+        field.focus();
+      }
+    }, 200);
+  }, 100);
+}
+window.mentionInCurrentChat = mentionInCurrentChat;
+
+/* =================================================================
+   BACK STACK (tasto indietro Android)
+   ================================================================= */
+const navHistory = [];
+
+function pushHistory(state_) {
+  try {
+    history.pushState(state_, '', '');
+  } catch (_) {}
+  navHistory.push(state_);
+}
+
+// Intercetta popstate (tasto indietro Android / gesture)
+window.addEventListener('popstate', (ev) => {
+  // Priorità 1: chiudi lightbox se aperto
+  const lightbox = document.getElementById('lightbox');
+  if (lightbox && lightbox.classList.contains('active')) {
+    closeLightbox();
+    // Ri-aggiungi uno stato per non uscire se ripremuto subito
+    pushHistory({ kind: 'guard' });
+    return;
+  }
+  // Priorità 2: chiudi qualsiasi modal aperta
+  const openModalEl = document.querySelector('.modal-overlay.active');
+  if (openModalEl) {
+    openModalEl.classList.remove('active');
+    pushHistory({ kind: 'guard' });
+    return;
+  }
+  // Priorità 3: se sono in trip detail, torna a home
+  if (state.currentPage === 'trip') {
+    showPage('home');
+    pushHistory({ kind: 'home' });
+    return;
+  }
+  // Priorità 4: se sono in userprofile/wishlist/calendar/notes/profile, torna a home
+  if (['userprofile', 'wishlist', 'calendar', 'notes', 'profile'].includes(state.currentPage)) {
+    showPage('home');
+    pushHistory({ kind: 'home' });
+    return;
+  }
+  // Se sono già in home, lascia che il browser/OS chiuda l'app
+  // Ma ri-aggiungiamo uno stato per evitare uscite accidentali la prossima volta
+  pushHistory({ kind: 'home-guard' });
+});
+
+// Inizializza lo stack appena carica l'app
+setTimeout(() => {
+  try { history.replaceState({ kind: 'home-init' }, '', ''); } catch (_) {}
+}, 100);
+
+// Hook: ogni openModal deve pushare uno stato
+const _origOpenModalV5 = window.openModal;
+window.openModal = function(id) {
+  if (typeof _origOpenModalV5 === 'function') _origOpenModalV5(id);
+  pushHistory({ kind: 'modal', id });
+};
+
+// goBack: torna indietro manualmente
+function goBack() {
+  if (window.history.length > 1) {
+    history.back();
+  } else {
+    showPage('home');
+  }
+}
+window.goBack = goBack;
+
+// Hook: showPage deve pushare history tranne quando viene chiamato da popstate
+const _origShowPageV5 = window.showPage;
+let _showPageFromPopstate = false;
+window.showPage = function(page) {
+  if (typeof _origShowPageV5 === 'function') _origShowPageV5(page);
+  if (!_showPageFromPopstate) {
+    pushHistory({ kind: 'page', page });
+  }
+};
+
+/* =================================================================
+   ENHANCED saveProfile with bio and location
+   ================================================================= */
+async function saveProfileV5() {
+  const name = document.getElementById('ep-name').value.trim();
+  const location = document.getElementById('ep-location')?.value.trim() || '';
+  const bio = document.getElementById('ep-bio')?.value.trim() || '';
+  if (!name) return showToast('Inserisci un nome', 'error');
+  try {
+    showLoader(true);
+    await window.FB.updateProfile(state.user, { displayName: name });
+    await window.FB.updateDoc(window.FB.doc(window.FB.db, 'users', state.user.uid), {
+      name, location, bio
+    });
+    state.profile.name = name;
+    state.profile.location = location;
+    state.profile.bio = bio;
+    // Aggiorna anche il profilo pubblico
+    try {
+      await window.FB.setDoc(window.FB.doc(window.FB.db, 'publicProfiles', state.user.uid), {
+        uid: state.user.uid,
+        name, location, bio,
+        photoURL: state.profile.photoURL || '',
+        updatedAt: Date.now()
+      }, { merge: true });
+    } catch (_) {}
+    updateAvatars();
+    closeModal('edit-profile-modal');
+    showToast('Profilo aggiornato ✨', 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
+}
+window.saveProfile = saveProfileV5;
+
+// Hook: quando apro la modal di modifica profilo, pre-compila bio e location
+function openEditProfileV5() {
+  document.getElementById('ep-name').value = state.profile?.name || '';
+  const loc = document.getElementById('ep-location');
+  if (loc) loc.value = state.profile?.location || '';
+  const bio = document.getElementById('ep-bio');
+  if (bio) bio.value = state.profile?.bio || '';
+  window.openModal('edit-profile-modal');
+}
+window.openEditProfileV5 = openEditProfileV5;
+
+// Anche quando carico ensurePublicProfile, aggiorno photoURL dopo cambio avatar
+const _origHandleAvatarUpload = window.handleAvatarUpload;
+window.handleAvatarUpload = async function(event) {
+  if (typeof _origHandleAvatarUpload === 'function') await _origHandleAvatarUpload(event);
+  // Aggiorna public profile con la nuova foto
+  try { await ensurePublicProfile(); } catch (_) {}
+};
+
 
 </script>
 
