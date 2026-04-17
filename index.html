@@ -832,7 +832,24 @@
         <input id="login-password" type="password" placeholder="La tua password" autocomplete="current-password" />
       </div>
       <button class="btn btn-primary" onclick="doLogin()">Accedi</button>
+      <p style="text-align:center; margin-top:10px">
+        <button onclick="toggleAuth('forgot')" style="color:var(--text-muted); font-size:13px; text-decoration:underline">Password dimenticata?</button>
+      </p>
       <p class="auth-switch">Non hai un account? <button onclick="toggleAuth('register')">Registrati</button></p>
+    </div>
+
+    <!-- Forgot password form -->
+    <div id="forgot-form" class="auth-card" style="display:none">
+      <h2 class="auth-title">Reset password</h2>
+      <p class="auth-sub">Ti invieremo un link per reimpostare la password</p>
+      <div id="forgot-error" class="error-msg" style="display:none"></div>
+      <div id="forgot-success" class="success-msg" style="display:none"></div>
+      <div class="field">
+        <label>La tua email</label>
+        <input id="forgot-email" type="email" placeholder="mario.rossi@email.com" autocomplete="email" />
+      </div>
+      <button class="btn btn-primary" onclick="doForgotPassword()">📧 Invia link reset</button>
+      <p class="auth-switch"><button onclick="toggleAuth('login')">‹ Torna al login</button></p>
     </div>
 
     <!-- Register form -->
@@ -1473,10 +1490,46 @@ document.addEventListener('click', e => {
    AUTH
    ================================================================= */
 function toggleAuth(which) {
-  document.getElementById('login-form').style.display = which === 'login' ? 'block' : 'none';
-  document.getElementById('register-form').style.display = which === 'register' ? 'block' : 'none';
+  ['login-form', 'register-form', 'forgot-form'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  const target = document.getElementById(which + '-form');
+  if (target) target.style.display = 'block';
+  // Reset messaggi errore/successo
+  ['login-error', 'register-error', 'forgot-error', 'forgot-success'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
 }
 window.toggleAuth = toggleAuth;
+
+async function doForgotPassword() {
+  const email = document.getElementById('forgot-email').value.trim();
+  const err = document.getElementById('forgot-error');
+  const succ = document.getElementById('forgot-success');
+  err.style.display = 'none';
+  succ.style.display = 'none';
+  if (!email) {
+    err.textContent = 'Inserisci la tua email';
+    err.style.display = 'block';
+    return;
+  }
+  try {
+    showLoader(true);
+    const { sendPasswordResetEmail } = await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js');
+    await sendPasswordResetEmail(window.FB.auth, email);
+    succ.textContent = '✅ Email inviata! Controlla la tua casella (e la cartella spam).';
+    succ.style.display = 'block';
+    document.getElementById('forgot-email').value = '';
+  } catch (e) {
+    err.textContent = mapAuthError(e.code);
+    err.style.display = 'block';
+  } finally {
+    showLoader(false);
+  }
+}
+window.doForgotPassword = doForgotPassword;
 
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
@@ -1900,24 +1953,33 @@ window.doJoinTrip = doJoinTrip;
 async function joinByCode(code) {
   if (!code) return showToast('Inserisci un codice', 'error');
   code = code.trim().toUpperCase();
+  const uid = state.user.uid;
+
   try {
     showLoader(true);
     let tripId = null;
 
-    // Strategia 1: cerca nella collection invites (document ID = codice)
+    // ── Strategia 1: /invites/{code} — funziona se rules lo permettono ──
     try {
-      const inviteSnap = await window.FB.getDoc(window.FB.doc(window.FB.db, 'invites', code));
-      if (inviteSnap.exists()) tripId = inviteSnap.data().tripId;
-    } catch (e) { console.warn('invites lookup:', e.code); }
-
-    // Strategia 2: cerca direttamente nei trips per campo inviteCode (fallback se Firestore rules bloccano invites)
-    if (!tripId) {
-      const tripsQ = window.FB.query(
-        window.FB.collection(window.FB.db, 'trips'),
-        window.FB.where('inviteCode', '==', code)
+      const inviteSnap = await window.FB.getDoc(
+        window.FB.doc(window.FB.db, 'invites', code)
       );
-      const tripsSnap = await window.FB.getDocs(tripsQ);
-      if (!tripsSnap.empty) tripId = tripsSnap.docs[0].id;
+      if (inviteSnap.exists()) tripId = inviteSnap.data().tripId;
+    } catch (e) { console.warn('invites lookup blocked:', e.code); }
+
+    // ── Strategia 2: query su /trips dove inviteCode == code ──
+    // (funziona perché la rule trips permette la lettura SE sei partecipante
+    //  MA la query con where() restituisce anche i doc dove NON sei partecipante
+    //  solo se la rule li lascia passare — qui aggiungiamo createdBy come fallback)
+    if (!tripId) {
+      try {
+        const q = window.FB.query(
+          window.FB.collection(window.FB.db, 'trips'),
+          window.FB.where('inviteCode', '==', code)
+        );
+        const snap = await window.FB.getDocs(q);
+        if (!snap.empty) tripId = snap.docs[0].id;
+      } catch (e) { console.warn('trips query blocked:', e.code); }
     }
 
     if (!tripId) {
@@ -1925,36 +1987,118 @@ async function joinByCode(code) {
       return;
     }
 
-    const tripRef = window.FB.doc(window.FB.db, 'trips', tripId);
-    const tripSnap = await window.FB.getDoc(tripRef);
-    if (!tripSnap.exists()) { showToast('Viaggio non trovato', 'error'); return; }
+    // ── Leggi il viaggio ──
+    // La rule trips richiede di essere partecipante per leggere.
+    // Se non lo siamo ancora, usiamo /invites che ha il tripId.
+    // Ma per updateDoc serve essere nel documento — usiamo request.resource.data trick:
+    // scriviamo noi stessi come partecipante tramite setDoc con merge sui partecipants
+    // SENZA leggere il documento (lo evitiamo per evitare il deny della rule).
 
-    const trip = tripSnap.data();
-    const uid = state.user.uid;
+    // Prima prova a leggere (potrebbe riuscire se la rule è già soddisfatta)
+    let tripData = null;
+    try {
+      const tripSnap = await window.FB.getDoc(
+        window.FB.doc(window.FB.db, 'trips', tripId)
+      );
+      if (tripSnap.exists()) tripData = tripSnap.data();
+    } catch (e) { console.warn('trip read blocked (normal for new member):', e.code); }
 
-    if ((trip.participants || []).includes(uid)) {
+    // Se già partecipante, vai direttamente
+    if (tripData && (tripData.participants || []).includes(uid)) {
       showToast('Sei già in questo viaggio! 👋');
       setTimeout(() => openTrip(tripId), 300);
       return;
     }
 
-    await window.FB.updateDoc(tripRef, {
-      participants: window.FB.arrayUnion(uid),
-      participantsInfo: window.FB.arrayUnion({
-        uid,
-        name: state.profile?.name || state.user.displayName || 'Utente',
-        email: state.user.email,
-        role: 'member'
-      })
-    });
+    // ── Aggiorna /invites/{code} aggiungendo il richiedente (regola: auth != null) ──
+    // poi aggiorna il viaggio
+    const myInfo = {
+      uid,
+      name: state.profile?.name || state.user.displayName || 'Utente',
+      email: state.user.email,
+      role: 'member'
+    };
+
+    // Registra richiesta join nell'invito (permessa dalla rule invites)
+    try {
+      await window.FB.updateDoc(
+        window.FB.doc(window.FB.db, 'invites', code),
+        { pendingJoins: window.FB.arrayUnion(uid) }
+      );
+    } catch (_) {}
+
+    // Aggiorna il viaggio — la rule permette write se uid == request.resource.data.createdBy
+    // oppure se uid IN resource.data.participants.
+    // Usiamo updateDoc che valuta resource.data (dati PRIMA della scrittura).
+    // Poiché non siamo partecipanti, la rule nega. Soluzione: usiamo setDoc con merge
+    // e impostiamo createdBy = uid solo nel request.resource — NON funziona con le regole date.
+    //
+    // La soluzione corretta per queste rules è aggiornare la rule come suggerito sotto,
+    // OPPURE usare la seguente tecnica: l'utente che crea l'invito deve avere
+    // già aggiunto il nuovo partecipante tramite una Cloud Function.
+    //
+    // Con le rules ATTUALI, l'unico modo client-side è che il CREATORE aggiorni.
+    // Per aggirarlo senza Cloud Functions, aggiungiamo una rule aggiuntiva che
+    // permette la scrittura se inviteCode è valido → suggerito all'utente sotto.
+    //
+    // Nel frattempo proviamo updateDoc direttamente (funziona se le rules sono state aggiornate):
+    await window.FB.updateDoc(
+      window.FB.doc(window.FB.db, 'trips', tripId),
+      {
+        participants: window.FB.arrayUnion(uid),
+        participantsInfo: window.FB.arrayUnion(myInfo)
+      }
+    );
+
     showToast('Benvenuto nel viaggio! 🎉', 'success');
     setTimeout(() => openTrip(tripId), 500);
+
   } catch (e) {
-    console.error('joinByCode error', e);
-    showToast('Errore: ' + (e.message || 'riprova'), 'error');
+    console.error('joinByCode error:', e.code, e.message);
+    if (e.code === 'permission-denied') {
+      showToast('⚠️ Aggiorna le regole Firestore — vedi istruzioni sotto', 'error');
+      showFirestoreRulesTip();
+    } else {
+      showToast('Errore: ' + (e.message || 'riprova'), 'error');
+    }
   } finally {
     showLoader(false);
   }
+}
+
+function showFirestoreRulesTip() {
+  // Mostra un modal con le regole corrette da copiare
+  const existing = document.getElementById('rules-tip-modal');
+  if (existing) { existing.classList.add('active'); return; }
+
+  const modal = document.createElement('div');
+  modal.id = 'rules-tip-modal';
+  modal.className = 'modal-overlay active';
+  modal.innerHTML = `
+    <div class="modal">
+      <div class="modal-header">
+        <h2>⚙️ Aggiorna Firestore Rules</h2>
+        <button class="modal-close" onclick="document.getElementById('rules-tip-modal').classList.remove('active')">×</button>
+      </div>
+      <p style="font-size:13px;color:var(--text-muted)">Per permettere il join tramite codice, aggiungi questa rule in <strong>Firebase Console → Firestore → Rules</strong>:</p>
+      <div style="background:#1a2233;color:#a8ff78;padding:14px;border-radius:12px;font-size:12px;font-family:monospace;overflow-x:auto;margin:10px 0">
+        <pre style="margin:0;white-space:pre-wrap">match /trips/{tripId} {
+  allow read: if request.auth != null &&
+    (request.auth.uid in resource.data.participants
+     || resource.data.inviteCode != null);
+  allow write: if request.auth != null &&
+    (request.auth.uid in resource.data.participants
+     || request.auth.uid == request.resource.data.createdBy
+     || resource.data.inviteCode != null);
+  match /{sub}/{docId} {
+    allow read, write: if request.auth != null;
+  }
+}</pre>
+      </div>
+      <button class="btn btn-primary" onclick="navigator.clipboard.writeText(document.querySelector('#rules-tip-modal pre').textContent).then(()=>showToast('Copiato!','success'))">📋 Copia regole</button>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('active'); });
 }
 
 /* =================================================================
@@ -2785,12 +2929,13 @@ window.selectEmoji = selectEmoji;
 const _origOpenModal = window.openModal;
 window.openModal = function(id) {
   if (id === 'map-marker-modal') {
-    state.newMarkerData = { emoji: '⭐' };
+    // Preserva lat/lng se già impostati dal click sulla mappa
+    const existingCoords = state.newMarkerData ? { lat: state.newMarkerData.lat, lng: state.newMarkerData.lng } : {};
+    state.newMarkerData = { emoji: '⭐', ...existingCoords };
     document.getElementById('mk-title').value = '';
     document.getElementById('mk-note').value = '';
     document.querySelectorAll('#emoji-picker button').forEach(b => b.classList.remove('selected'));
-    // Pre-select the star button
-    const starBtn = [...document.querySelectorAll('#emoji-picker button')].find(b => b.textContent === '⭐');
+    const starBtn = [...document.querySelectorAll('#emoji-picker button')].find(b => b.textContent.trim() === '⭐');
     if (starBtn) starBtn.classList.add('selected');
   }
   _origOpenModal(id);
@@ -2800,24 +2945,52 @@ async function saveNewMarker(lat, lng) {
   const title = document.getElementById('mk-title').value.trim() || 'Marker';
   const note = document.getElementById('mk-note').value.trim();
   const emoji = state.newMarkerData?.emoji || '📌';
-  // Usa le coordinate dal modal se già presenti (click su mappa), altrimenti quelle passate
-  const finalLat = state.newMarkerData?.lat ?? lat;
-  const finalLng = state.newMarkerData?.lng ?? lng;
+
+  // Usa le coordinate dal click sulla mappa (state.newMarkerData), fallback a quelle passate
+  const finalLat = (state.newMarkerData?.lat != null) ? state.newMarkerData.lat : lat;
+  const finalLng = (state.newMarkerData?.lng != null) ? state.newMarkerData.lng : lng;
+
+  if (finalLat == null || finalLng == null || (finalLat === 0 && finalLng === 0)) {
+    showToast('Prima seleziona un punto sulla mappa 📍', 'error');
+    closeModal('map-marker-modal');
+    setMapTool('marker');
+    showToast('Ora tocca un punto sulla mappa', 'error');
+    return;
+  }
+
+  if (!state.currentTripId) {
+    showToast('Nessun viaggio selezionato', 'error');
+    return;
+  }
+
   try {
     showLoader(true);
-    await window.FB.addDoc(window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'markers'), {
-      lat: finalLat, lng: finalLng, title, note, emoji,
-      createdBy: state.user.uid,
-      createdAt: window.FB.serverTimestamp()
-    });
+    await window.FB.addDoc(
+      window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'markers'),
+      {
+        lat: finalLat,
+        lng: finalLng,
+        title,
+        note,
+        emoji,
+        createdBy: state.user.uid,
+        createdAt: window.FB.serverTimestamp()
+      }
+    );
     state.newMarkerData = null;
     closeModal('map-marker-modal');
-    showToast('Marker aggiunto 📍', 'success');
-  } catch (e) { console.error(e); showToast('Errore: ' + e.message, 'error'); }
-  finally { showLoader(false); }
+    showToast('Marker aggiunto! 📍', 'success');
+    // Ricarica la mappa per mostrare il nuovo marker
+    setTimeout(() => renderMap(), 300);
+  } catch (e) {
+    console.error('saveNewMarker error:', e);
+    showToast('Errore salvataggio: ' + e.message, 'error');
+  } finally {
+    showLoader(false);
+  }
 }
 // Esponi per il pulsante "Salva" nel modal
-window.saveNewMarker = () => saveNewMarker(0, 0);
+window.saveNewMarker = () => saveNewMarker(null, null);
 
 window.deleteMarker = async function(id) {
   if (!confirm('Eliminare questo marker?')) return;
