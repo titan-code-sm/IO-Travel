@@ -270,11 +270,17 @@ body{background:var(--bg);font-family:var(--font);color:#1a1a2e;margin:0}
     <div class="login-icon"><i class="fas fa-truck-medical"></i></div>
     <div class="login-title">Area Riservata</div>
     <div class="login-sub">Gestione Flotta 118 RSM</div>
-    <div class="input-group-login">
-      <i class="fas fa-lock"></i>
-      <input type="password" id="pwd-app-input" placeholder="Inserisci Password" onkeydown="if(event.key==='Enter')checkAppPassword()">
-    </div>
-    <button class="btn-login" onclick="checkAppPassword()">ACCEDI</button>
+    <form onsubmit="event.preventDefault(); checkAppPassword();" autocomplete="off">
+      <div class="input-group-login">
+        <i class="fas fa-lock"></i>
+        <input type="text" inputmode="numeric" pattern="[0-9]*"
+               id="pwd-app-input"
+               placeholder="Password"
+               autocomplete="off"
+               style="-webkit-text-security:disc;text-security:disc;">
+      </div>
+      <button type="submit" class="btn-login">ACCEDI</button>
+    </form>
     <div id="error-msg-login" class="error-msg-login"><i class="fas fa-exclamation-circle me-1"></i>Password errata. Riprova.</div>
   </div>
   <div style="color:rgba(255,255,255,0.4);font-size:.75rem;margin-top:30px;font-weight:600;letter-spacing:1px;">CENTRALE 118 SAN MARINO</div>
@@ -483,7 +489,7 @@ body{background:var(--bg);font-family:var(--font);color:#1a1a2e;margin:0}
         <p>Nessuna segnalazione attiva.</p>
       </div>
 
-      <div class="text-center mt-4 no-print"><p class="small text-muted">Versione 14.0 — Fix Login + Operatore Segnalazione</p></div>
+      <div class="text-center mt-4 no-print"><p class="small text-muted">Versione 14.1 — Fix Login Mobile + Operatore Segnalazione</p></div>
     </div>
   </div>
 </div>
@@ -937,7 +943,7 @@ body{background:var(--bg);font-family:var(--font);color:#1a1a2e;margin:0}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // ════════════════════════════════════════════════
-// LOGIN — Fix: usa window.addEventListener('load')
+// LOGIN — Fix: form wrapper + click/touch listeners
 // ════════════════════════════════════════════════
 const PWD_APP = "118";
 const KEY_AUTH_APP = "auth_gestionale_flotta_118";
@@ -948,15 +954,17 @@ window.addEventListener('load', () => {
     overlay.style.display = 'none';
   } else {
     overlay.style.display = 'flex';
-    setTimeout(() => {
-      const inp = document.getElementById('pwd-app-input');
-      if (inp) inp.focus();
-    }, 300);
+    const inp = document.getElementById('pwd-app-input');
+    if (inp) {
+      setTimeout(() => inp.focus(), 500);
+      inp.addEventListener('click', function(){ this.focus(); });
+      inp.addEventListener('touchstart', function(){ this.focus(); }, {passive:true});
+    }
   }
 });
 
 function checkAppPassword() {
-  const inputVal = document.getElementById('pwd-app-input').value;
+  const inputVal = document.getElementById('pwd-app-input').value.trim();
   const errorMsg = document.getElementById('error-msg-login');
   const overlay  = document.getElementById('login-overlay');
   if (inputVal === PWD_APP) {
