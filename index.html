@@ -937,6 +937,46 @@
     box-shadow: var(--shadow-sm);
   }
 
+  /* Trips grouped sections */
+  .trips-group { margin-top: 4px; }
+  .trips-group + .trips-group { margin-top: 22px; }
+  .trips-group-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 10px;
+  }
+  .trips-group-header .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .trips-group-header.live .dot { background: var(--ochre); box-shadow: 0 0 0 4px var(--ochre-soft); }
+  .trips-group-header.upcoming .dot { background: var(--moss); box-shadow: 0 0 0 4px var(--moss-soft); }
+  .trips-group-header.past .dot { background: var(--ink-faint); }
+  .trips-group-header .label {
+    font-size: 13px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--ink-muted);
+  }
+  .trips-group-header .count {
+    font-size: 12px; font-weight: 700;
+    color: var(--ink-faint);
+    background: var(--surface-2);
+    border-radius: 20px;
+    padding: 1px 8px;
+  }
+  .trips-group .trip-card + .trip-card { margin-top: 10px; }
+  .show-more-past {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    color: var(--ink-muted);
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .show-more-past:hover { color: var(--ink); }
+
   /* === EMPTY STATE === */
   .empty-state {
     text-align: center;
@@ -4333,6 +4373,98 @@ function filterTrips(filter) {
 }
 window.filterTrips = filterTrips;
 
+/* Card HTML per un singolo viaggio — usata sia dalla lista raggruppata che dalla ricerca */
+function tripCardHtml(t, now) {
+  const type = TRIP_TYPES[t.type] || TRIP_TYPES.mixed;
+  const dateRange = formatDateRange(t.startDate, t.endDate);
+  const nPpl = (t.participants || []).length;
+  let statusBadge = '';
+  if (t.startDate && t.endDate) {
+    const start = new Date(t.startDate).getTime();
+    const end = new Date(t.endDate).getTime() + 86400000;
+    if (start > now) {
+      const days = Math.ceil((start - now) / 86400000);
+      statusBadge = `<span class="tag" style="background:var(--moss-soft); color:var(--moss)">🕐 tra ${days}g</span>`;
+    } else if (end > now) {
+      statusBadge = `<span class="tag" style="background:var(--ochre-soft); color:var(--ochre)">🎉 in corso</span>`;
+    } else {
+      statusBadge = `<span class="tag">✓ concluso</span>`;
+    }
+  }
+  return `
+    <div class="trip-card" onclick="openTrip('${t.id}')">
+      <div class="trip-icon ${type.cls}">${type.emoji}</div>
+      <div class="trip-info">
+        <div class="trip-name">${escapeHtml(t.name)}</div>
+        <div class="trip-meta">
+          ${escapeHtml(t.destination || '—')} · ${dateRange}
+        </div>
+        <div class="trip-tags">
+          ${statusBadge}
+          <span class="tag">${nPpl} 👥</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+const PAST_TRIPS_COLLAPSE_AT = 6;
+
+/* Costruisce l'HTML della lista viaggi. Se grouped=true divide in sezioni
+   In corso / Prossimi / Passati con header, altrimenti mostra una lista piatta
+   (usato ad es. quando è attivo un filtro specifico o una ricerca testuale). */
+function renderTripsListHtml(trips, now, grouped) {
+  if (!grouped) {
+    return trips.map(t => tripCardHtml(t, now)).join('');
+  }
+
+  const live = [];
+  const upcoming = [];
+  const past = [];
+  trips.forEach(t => {
+    const start = t.startDate ? new Date(t.startDate).getTime() : null;
+    const end = t.endDate ? new Date(t.endDate).getTime() + 86400000 : null;
+    if (start && end && start <= now && end > now) live.push(t);
+    else if (start && start > now) upcoming.push(t);
+    else if (end && end <= now) past.push(t);
+    else upcoming.push(t); // senza date certe, lo mettiamo tra i prossimi
+  });
+  upcoming.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+  past.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
+
+  let html = '';
+  if (live.length) {
+    html += `
+      <div class="trips-group">
+        <div class="trips-group-header live"><span class="dot"></span><span class="label">In corso</span><span class="count">${live.length}</span></div>
+        ${live.map(t => tripCardHtml(t, now)).join('')}
+      </div>`;
+  }
+  if (upcoming.length) {
+    html += `
+      <div class="trips-group">
+        <div class="trips-group-header upcoming"><span class="dot"></span><span class="label">Prossimi</span><span class="count">${upcoming.length}</span></div>
+        ${upcoming.map(t => tripCardHtml(t, now)).join('')}
+      </div>`;
+  }
+  if (past.length) {
+    const showAll = !!state.showAllPastTrips;
+    const visible = showAll ? past : past.slice(0, PAST_TRIPS_COLLAPSE_AT);
+    html += `
+      <div class="trips-group">
+        <div class="trips-group-header past"><span class="dot"></span><span class="label">Passati</span><span class="count">${past.length}</span></div>
+        ${visible.map(t => tripCardHtml(t, now)).join('')}
+        ${(!showAll && past.length > PAST_TRIPS_COLLAPSE_AT) ? `<div class="show-more-past" onclick="toggleAllPastTrips()">Mostra tutti i passati (${past.length})</div>` : ''}
+      </div>`;
+  }
+  return html;
+}
+
+function toggleAllPastTrips() {
+  state.showAllPastTrips = !state.showAllPastTrips;
+  renderTripsList(state.tripFilter || 'all');
+}
+window.toggleAllPastTrips = toggleAllPastTrips;
+
 function renderTripsList(filter) {
   const list = document.getElementById('trips-list');
   if (!list) return;
@@ -4359,39 +4491,9 @@ function renderTripsList(filter) {
     return;
   }
 
-  list.innerHTML = trips.map(t => {
-    const type = TRIP_TYPES[t.type] || TRIP_TYPES.mixed;
-    const dateRange = formatDateRange(t.startDate, t.endDate);
-    const nPpl = (t.participants || []).length;
-    // Status badge
-    let statusBadge = '';
-    if (t.startDate && t.endDate) {
-      const start = new Date(t.startDate).getTime();
-      const end = new Date(t.endDate).getTime() + 86400000;
-      if (start > now) {
-        const days = Math.ceil((start - now) / 86400000);
-        statusBadge = `<span class="tag" style="background:var(--moss-soft); color:var(--moss)">🕐 tra ${days}g</span>`;
-      } else if (end > now) {
-        statusBadge = `<span class="tag" style="background:var(--ochre-soft); color:var(--ochre)">🎉 in corso</span>`;
-      } else {
-        statusBadge = `<span class="tag">✓ concluso</span>`;
-      }
-    }
-    return `
-      <div class="trip-card" onclick="openTrip('${t.id}')">
-        <div class="trip-icon ${type.cls}">${type.emoji}</div>
-        <div class="trip-info">
-          <div class="trip-name">${escapeHtml(t.name)}</div>
-          <div class="trip-meta">
-            ${escapeHtml(t.destination || '—')} · ${dateRange}
-          </div>
-          <div class="trip-tags">
-            ${statusBadge}
-            <span class="tag">${nPpl} 👥</span>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
+  // Il raggruppamento per sezioni ha senso solo quando non è già applicato un filtro specifico
+  const grouped = (filter === 'all' || !filter);
+  list.innerHTML = renderTripsListHtml(trips, now, grouped);
 }
 
 function renderCountdown() {
@@ -7602,7 +7704,6 @@ window.renderAffiliateLinks = renderAffiliateLinks;
 function searchTrips(query) {
   const q = (query || '').trim().toLowerCase();
   state.tripSearchQuery = q;
-  // Reuse filterTrips + apply text filter
   const list = document.getElementById('trips-list');
   if (!list) return;
   const now = Date.now();
@@ -7624,33 +7725,10 @@ function searchTrips(query) {
     list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>Nessun viaggio trovato</h3><p>Prova con un'altra parola</p></div>`;
     return;
   }
-  list.innerHTML = trips.map(t => {
-    const type = TRIP_TYPES[t.type] || TRIP_TYPES.mixed;
-    const dateRange = formatDateRange(t.startDate, t.endDate);
-    const nPpl = (t.participants || []).length;
-    let statusBadge = '';
-    if (t.startDate && t.endDate) {
-      const start = new Date(t.startDate).getTime();
-      const end = new Date(t.endDate).getTime() + 86400000;
-      if (start > now) {
-        const days = Math.ceil((start - now) / 86400000);
-        statusBadge = `<span class="tag" style="background:var(--moss-soft); color:var(--moss)">🕐 tra ${days}g</span>`;
-      } else if (end > now) {
-        statusBadge = `<span class="tag" style="background:var(--ochre-soft); color:var(--ochre)">🎉 in corso</span>`;
-      } else {
-        statusBadge = `<span class="tag">✓ concluso</span>`;
-      }
-    }
-    return `
-      <div class="trip-card" onclick="openTrip('${t.id}')">
-        <div class="trip-icon ${type.cls}">${type.emoji}</div>
-        <div class="trip-info">
-          <div class="trip-name">${escapeHtml(t.name)}</div>
-          <div class="trip-meta">${escapeHtml(t.destination || '—')} · ${dateRange}</div>
-          <div class="trip-tags">${statusBadge}<span class="tag">${nPpl} 👥</span></div>
-        </div>
-      </div>`;
-  }).join('');
+  // Durante una ricerca attiva mostriamo una lista piatta di risultati (niente sezioni);
+  // se il campo di ricerca è vuoto, torniamo al raggruppamento normale.
+  const grouped = !q && (filter === 'all' || !filter);
+  list.innerHTML = renderTripsListHtml(trips, now, grouped);
 }
 window.searchTrips = searchTrips;
 
