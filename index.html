@@ -13,9 +13,9 @@
 
 <title>Wildr · Travel Companion</title>
 
-<link rel="manifest" href="manifest.json" />
-<link rel="apple-touch-icon" href="icon-152.png" />
-<link rel="icon" type="image/png" sizes="32x32" href="icon-96.png" />
+<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Wildr%22%2C%22short_name%22%3A%22Wildr%22%2C%22description%22%3A%22Wildr%20%E2%80%94%20la%20tua%20bussola%20per%20ogni%20avventura.%22%2C%22start_url%22%3A%22.%22%2C%22scope%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22portrait%22%2C%22background_color%22%3A%22%23f6efe2%22%2C%22theme_color%22%3A%22%23c2410c%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D%2527http%253A%252F%252Fwww.w3.org%252F2000%252Fsvg%2527%2520viewBox%253D%25270%25200%2520100%2520100%2527%253E%253Cdefs%253E%253ClinearGradient%2520id%253D%2527g%2527%2520x1%253D%25270%2527%2520y1%253D%25270%2527%2520x2%253D%2527100%2527%2520y2%253D%2527100%2527%253E%253Cstop%2520offset%253D%25270%2525%2527%2520stop-color%253D%2527%2523c2410c%2527%252F%253E%253Cstop%2520offset%253D%2527100%2525%2527%2520stop-color%253D%2527%2523f5b04a%2527%252F%253E%253C%252FlinearGradient%253E%253C%252Fdefs%253E%253Crect%2520width%253D%2527100%2527%2520height%253D%2527100%2527%2520rx%253D%252722%2527%2520fill%253D%2527url(%2523g)%2527%252F%253E%253Ctext%2520x%253D%252750%2527%2520y%253D%252766%2527%2520font-size%253D%252754%2527%2520text-anchor%253D%2527middle%2527%253E%25F0%259F%25A7%25AD%253C%252Ftext%253E%253C%252Fsvg%253E%22%2C%22sizes%22%3A%22any%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D" />
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='100' y2='100'%3E%3Cstop offset='0%25' stop-color='%23c2410c'/%3E%3Cstop offset='100%25' stop-color='%23f5b04a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23g)'/%3E%3Ctext x='50' y='66' font-size='54' text-anchor='middle'%3E%F0%9F%A7%AD%3C/text%3E%3C/svg%3E" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='100' y2='100'%3E%3Cstop offset='0%25' stop-color='%23c2410c'/%3E%3Cstop offset='100%25' stop-color='%23f5b04a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23g)'/%3E%3Ctext x='50' y='66' font-size='54' text-anchor='middle'%3E%F0%9F%A7%AD%3C/text%3E%3C/svg%3E" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -531,18 +531,78 @@
   }
 
   /* === BOTTOM NAV === */
+  /* === BOTTOM NAV (collassabile con freccia) === */
+  .bottom-nav-wrapper {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    display: none;
+    pointer-events: none; /* clicks pass through to content unless on nav/toggle */
+  }
+  .bottom-nav-wrapper.active { display: block; }
+
   .bottom-nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--surface);
+    background: rgba(255, 255, 255, 0.92);
     border-top: 1px solid var(--border);
     display: flex; justify-content: space-around;
     padding: 8px 0 calc(8px + var(--safe-bottom));
-    z-index: 100;
     box-shadow: 0 -10px 30px rgba(74, 49, 34, 0.08);
     backdrop-filter: blur(16px);
-    background: rgba(255, 255, 255, 0.92);
+    pointer-events: auto;
+    overflow: hidden;
+    max-height: 130px;
+    opacity: 1;
+    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s, padding 0.35s cubic-bezier(0.4,0,0.2,1);
   }
   [data-theme="dark"] .bottom-nav { background: rgba(46, 36, 24, 0.92); }
+
+  /* Toggle freccia — sopra la nav quando aperta, in basso quando collassata */
+  .bottom-nav-toggle {
+    position: absolute;
+    bottom: 100%; /* subito sopra la nav */
+    right: 26px;
+    width: 46px; height: 18px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-faint);
+    box-shadow: 0 -4px 12px rgba(74, 49, 34, 0.06);
+    pointer-events: auto;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s;
+  }
+  [data-theme="dark"] .bottom-nav-toggle { background: rgba(46, 36, 24, 0.92); }
+  .bottom-nav-toggle:hover { color: var(--ochre); }
+  .bottom-nav-toggle:active { transform: scale(0.94); }
+  .bnt-arrow {
+    display: inline-block;
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    line-height: 1;
+  }
+
+  /* Collassata */
+  .bottom-nav-wrapper.collapsed .bottom-nav {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0.2;
+  }
+  .bottom-nav-wrapper.collapsed .bnt-arrow {
+    transform: rotate(180deg);
+  }
+  .bottom-nav-wrapper.collapsed .bottom-nav-toggle {
+    background: var(--ochre);
+    color: #fff;
+    border-color: var(--ochre);
+    box-shadow: 0 -4px 14px rgba(194, 65, 12, 0.35);
+    /* Un pelo più basso perché ora si vede meglio */
+    bottom: var(--safe-bottom);
+    border-radius: 12px 12px 0 0;
+  }
+
   .nav-btn {
     flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
     padding: 8px 4px;
@@ -937,46 +997,6 @@
     box-shadow: var(--shadow-sm);
   }
 
-  /* Trips grouped sections */
-  .trips-group { margin-top: 4px; }
-  .trips-group + .trips-group { margin-top: 22px; }
-  .trips-group-header {
-    display: flex; align-items: center; gap: 8px;
-    margin-bottom: 10px;
-  }
-  .trips-group-header .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .trips-group-header.live .dot { background: var(--ochre); box-shadow: 0 0 0 4px var(--ochre-soft); }
-  .trips-group-header.upcoming .dot { background: var(--moss); box-shadow: 0 0 0 4px var(--moss-soft); }
-  .trips-group-header.past .dot { background: var(--ink-faint); }
-  .trips-group-header .label {
-    font-size: 13px; font-weight: 800;
-    text-transform: uppercase; letter-spacing: 0.06em;
-    color: var(--ink-muted);
-  }
-  .trips-group-header .count {
-    font-size: 12px; font-weight: 700;
-    color: var(--ink-faint);
-    background: var(--surface-2);
-    border-radius: 20px;
-    padding: 1px 8px;
-  }
-  .trips-group .trip-card + .trip-card { margin-top: 10px; }
-  .show-more-past {
-    width: 100%;
-    text-align: center;
-    padding: 12px;
-    margin-top: 10px;
-    border-radius: var(--radius);
-    background: var(--surface-2);
-    color: var(--ink-muted);
-    font-weight: 700;
-    font-size: 13px;
-  }
-  .show-more-past:hover { color: var(--ink); }
-
   /* === EMPTY STATE === */
   .empty-state {
     text-align: center;
@@ -1155,6 +1175,48 @@
     background: var(--border);
     border-radius: 2px;
     margin: -14px auto 18px;
+  }
+
+  /* === STAGE KIND TABS (principale / secondaria / alternativa) === */
+  .ns-kind-tabs {
+    display: flex;
+    gap: 6px;
+    background: var(--surface-2);
+    padding: 4px;
+    border-radius: var(--radius-sm);
+  }
+  .ns-kind-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 4px;
+    background: transparent;
+    border: 1.5px solid transparent;
+    border-radius: 9px;
+    font-weight: 700;
+    font-size: 11px;
+    color: var(--ink-muted);
+    transition: all 0.15s;
+  }
+  .ns-kind-icon { font-size: 19px; }
+  .ns-kind-tab.active {
+    background: var(--surface);
+    box-shadow: var(--shadow-sm);
+  }
+  .ns-kind-tab.active#ns-kind-stage {
+    border-color: var(--ochre);
+    color: var(--ochre-dark);
+  }
+  .ns-kind-tab.active#ns-kind-waypoint {
+    border-color: var(--river);
+    color: var(--river);
+  }
+  .ns-kind-tab.active#ns-kind-alternative {
+    border-color: var(--sun);
+    color: #92650f;
   }
 
   /* === TYPE GRID for new trip === */
@@ -1782,12 +1844,35 @@
     border-color: var(--ochre);
     color: var(--ochre-dark);
   }
+  .map-tool-style {
+    background: var(--surface-2);
+  }
+  .map-tool-style.active {
+    background: var(--moss-soft);
+    border-color: var(--moss);
+    color: var(--moss-dark);
+  }
   .map-tool-hint {
     font-size: 12px;
     color: var(--ink-muted);
     margin-bottom: 10px;
     min-height: 18px;
     font-style: italic;
+  }
+
+  /* Etichetta tempo/distanza sul segmento della mappa */
+  .seg-time-label {
+    background: #c2410c;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    border: 1.5px solid rgba(255,255,255,0.6);
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
   }
 
   .emoji-picker {
@@ -2013,6 +2098,15 @@
   }
   .photo-tile:hover .photo-del,
   .photo-tile.show-del .photo-del { opacity: 1; }
+  .photo-broken-icon {
+    width: 100%; height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    opacity: 0.35;
+    background: var(--surface-2);
+  }
 
   .lightbox {
     position: fixed; inset: 0;
@@ -2681,11 +2775,528 @@
   .affiliate-card .af-label { font-size: 12px; font-weight: 800; letter-spacing: -0.01em; }
   .affiliate-card .af-sub { font-size: 10px; color: var(--ink-muted); }
 
-  /* === RESPONSIVE === */
+  /* === ITINERARY NODES (con connettore verticale) === */
+  .origin-prompt {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--moss-soft) 0%, var(--surface) 60%);
+    border: 2px dashed var(--moss);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.15s, background 0.15s;
+    overflow: hidden;
+  }
+  .origin-prompt::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(91, 111, 58, 0.20), transparent 70%);
+    pointer-events: none;
+  }
+  .origin-prompt:hover {
+    background: linear-gradient(135deg, var(--moss-soft) 0%, var(--moss-soft) 100%);
+    box-shadow: 0 6px 18px rgba(91, 111, 58, 0.18);
+  }
+  .origin-prompt:active { transform: scale(0.99); }
+  .origin-prompt-icon {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: var(--moss);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(91, 111, 58, 0.35);
+    animation: originPulse 2s ease-in-out infinite;
+    z-index: 1;
+  }
+  @keyframes originPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+  .origin-prompt-body { flex: 1; min-width: 0; z-index: 1; }
+  .origin-prompt-eyebrow {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 12px;
+    color: var(--moss-dark);
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .origin-prompt-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    margin-bottom: 4px;
+    line-height: 1.15;
+  }
+  .origin-prompt-sub {
+    font-size: 12px;
+    color: var(--ink-2);
+    line-height: 1.45;
+  }
+  .origin-prompt-arrow {
+    font-size: 28px;
+    color: var(--moss);
+    flex-shrink: 0;
+    font-weight: 300;
+    z-index: 1;
+  }
+
+  /* === ITINERARY NODES (con connettore verticale) === */
+  .itin-node {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    padding: 14px 14px 14px 4px;
+    margin-bottom: 8px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.15s, box-shadow 0.15s;
+    align-items: flex-start;
+  }
+  .itin-node:active { transform: scale(0.98); }
+  .itin-node:hover {
+    border-color: var(--ochre);
+    box-shadow: var(--shadow);
+  }
+  .itin-node.itin-origin {
+    border-color: var(--moss);
+    border-left-width: 4px;
+    background: linear-gradient(135deg, var(--moss-soft) 0%, var(--surface) 45%);
+  }
+  .itin-node.itin-origin:hover { border-color: var(--moss-dark); }
+  .itin-node.itin-last {
+    border-left-width: 4px;
+    border-left-color: var(--ochre);
+  }
+  /* Vertical connector between nodes */
+  .itin-connector {
+    position: absolute;
+    top: -12px;
+    left: 27px; /* aligns with badge center */
+    width: 2px;
+    height: 12px;
+    background: repeating-linear-gradient(to bottom, var(--ink-faint) 0, var(--ink-faint) 3px, transparent 3px, transparent 6px);
+    z-index: 0;
+  }
+  .itin-badge {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: var(--grad-sunset);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 17px;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-warm);
+    margin-left: 6px;
+    margin-top: 2px;
+    z-index: 1;
+    border: 2px solid var(--surface);
+  }
+  .itin-badge-origin {
+    background: var(--moss);
+    box-shadow: 0 4px 12px rgba(91,111,58,0.35);
+    font-size: 20px;
+  }
+  .itin-body {
+    flex: 1;
+    min-width: 0;
+  }
+  .itin-eyebrow {
+    font-size: 10px;
+    color: var(--ink-muted);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 3px;
+  }
+  .itin-title {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    margin-bottom: 6px;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+  .itin-meta-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .itin-meta {
+    font-size: 11px;
+    color: var(--ink-muted);
+    background: var(--surface-2);
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-weight: 700;
+  }
+  .itin-meta-coord {
+    background: var(--moss-soft);
+    color: var(--moss-dark);
+  }
+  .itin-meta-warn {
+    background: rgba(217, 119, 6, 0.15);
+    color: var(--warning);
+  }
+  .itin-note {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.4;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+    font-style: italic;
+  }
+  .itin-arrow {
+    font-size: 24px;
+    color: var(--ink-faint);
+    align-self: center;
+    margin-right: 8px;
+    flex-shrink: 0;
+    font-weight: 300;
+  }
+  .itin-side {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 6px;
+    align-self: center;
+    flex-shrink: 0;
+  }
+  .itin-reorder {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .itin-reorder-btn {
+    width: 22px; height: 17px;
+    border-radius: 5px;
+    background: var(--surface-2);
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    transition: all 0.15s;
+    line-height: 1;
+  }
+  .itin-reorder-btn:hover:not(:disabled) {
+    background: var(--ochre-soft);
+    color: var(--ochre-dark);
+  }
+  .itin-reorder-btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+  .itin-quick-btn {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+  .itin-quick-btn:hover {
+    background: var(--ochre-soft);
+    color: var(--ochre-dark);
+    border-color: var(--ochre);
+  }
+
+  /* Tappa intermedia (waypoint) — stile compatto colore fiume */
+  .itin-node.itin-waypoint {
+    background: var(--river-soft);
+    border-color: var(--river);
+    padding-top: 11px;
+    padding-bottom: 11px;
+  }
+  .itin-node.itin-waypoint:hover { border-color: var(--river); box-shadow: 0 4px 14px rgba(45,106,126,0.18); }
+  .itin-badge-waypoint {
+    width: 36px; height: 36px;
+    background: var(--river);
+    font-size: 16px;
+    box-shadow: 0 4px 10px rgba(45,106,126,0.35);
+  }
+  .itin-eyebrow-waypoint { color: var(--river); }
+  .itin-meta-river {
+    background: rgba(45,106,126,0.15);
+    color: var(--river);
+  }
+  .itin-meta-drive {
+    background: var(--surface);
+    color: var(--ink-2);
+    border: 1px solid var(--border);
+  }
+
+  /* === TAPPE ALTERNATIVE (affiancate al genitore) === */
+  .itin-alt-row {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    padding: 4px 4px 14px 46px;
+    margin-top: -4px;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .itin-alt-row::-webkit-scrollbar { height: 5px; }
+  .itin-alt-row-last { margin-bottom: 2px; }
+  .itin-alt-connector {
+    position: absolute;
+    top: -8px;
+    left: 27px;
+    width: 2px;
+    height: 12px;
+    background: repeating-linear-gradient(to bottom, var(--sun) 0, var(--sun) 3px, transparent 3px, transparent 6px);
+  }
+  .itin-alt-card {
+    flex-shrink: 0;
+    width: 138px;
+    background: var(--surface);
+    border: 1.5px dashed #d9a441;
+    border-radius: 14px;
+    padding: 10px 26px 9px 10px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .itin-alt-card:hover {
+    border-color: var(--sun);
+    box-shadow: 0 6px 14px rgba(245, 176, 74, 0.25);
+    transform: translateY(-2px);
+  }
+  .itin-alt-badge {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--sun);
+    color: #6b4423;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+  .itin-alt-name {
+    font-weight: 700;
+    font-size: 12.5px;
+    line-height: 1.25;
+    margin-bottom: 4px;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .itin-alt-meta {
+    font-size: 10px;
+    color: var(--ink-muted);
+    font-weight: 700;
+  }
+  .itin-alt-warn { color: var(--warning); }
+  .itin-alt-edit {
+    position: absolute;
+    top: 6px; right: 6px;
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    opacity: 0.65;
+    transition: all 0.15s;
+  }
+  .itin-alt-edit:hover { opacity: 1; background: var(--ochre-soft); }
+  .itin-alt-add {
+    flex-shrink: 0;
+    width: 52px;
+    border-radius: 14px;
+    border: 2px dashed var(--border-strong);
+    background: transparent;
+    color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 300;
+    transition: all 0.15s;
+  }
+  .itin-alt-add:hover {
+    border-color: var(--sun);
+    color: #92650f;
+    background: rgba(245, 176, 74, 0.10);
+  }
+
+  .itin-add-btn {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 2px dashed var(--border-strong);
+    border-radius: var(--radius);
+    color: var(--ochre);
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-top: 4px;
+  }
+  .itin-add-btn:hover {
+    background: var(--ochre-soft);
+    border-color: var(--ochre);
+    border-style: solid;
+  }
+
+  /* === QUICK ITIN (in tab overview — elenco compatto guida) === */
+  .quick-itin {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    padding: 14px 14px 8px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .quick-itin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .quick-itin-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .quick-itin-header .link {
+    color: var(--ochre);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .quick-itin-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.12s;
+    border-radius: 8px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+  .quick-itin-row:last-child { border-bottom: none; }
+  .quick-itin-row:hover { background: var(--surface-2); }
+  .quick-itin-row:active { transform: scale(0.99); }
+  .quick-itin-badge {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--grad-sunset);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 14px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(194,65,12,0.25);
+  }
+  .quick-itin-badge.origin { background: var(--moss); font-size: 16px; }
+  .quick-itin-badge.waypoint { background: var(--river); font-size: 15px; }
+  .quick-itin-info { flex: 1; min-width: 0; }
+  .quick-itin-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .quick-itin-sub {
+    font-size: 11px;
+    color: var(--ink-muted);
+    margin-top: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .quick-itin-arrow {
+    font-size: 20px;
+    color: var(--ink-faint);
+    flex-shrink: 0;
+    font-weight: 300;
+  }
+
+  /* === DESKTOP RESPONSIVE === */
   @media (min-width: 768px) {
-    .home-section { max-width: 720px; margin: 0 auto; }
+    body {
+      background-image:
+        radial-gradient(circle at 20% 0%, rgba(245, 176, 74, 0.10) 0%, transparent 50%),
+        radial-gradient(circle at 80% 100%, rgba(91, 111, 58, 0.08) 0%, transparent 50%);
+    }
+    .home-section { max-width: 780px; margin: 0 auto; }
     .detail-header { padding-left: 32px; padding-right: 32px; }
-    .tab-content { max-width: 720px; margin: 0 auto; }
+    .tab-content { max-width: 780px; margin: 0 auto; }
+    .tab-bar { justify-content: center; max-width: 900px; margin: 0 auto; }
+    .hero-header, .header { padding-left: 32px; padding-right: 32px; }
+    .hero-row, .header > * { max-width: 780px; margin-left: auto; margin-right: auto; }
+    .header { display: flex; }
+    .bottom-nav-wrapper.active {
+      max-width: 640px;
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+    }
+    .bottom-nav {
+      border-radius: 20px 20px 0 0;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+    }
+    .bottom-nav-toggle {
+      right: 22px;
+    }
+    .fab { right: max(22px, calc(50vw - 400px)); }
+    .modal { max-width: 560px; border-radius: 24px; margin-bottom: 30px; }
+    .modal-overlay { align-items: center; }
+    .modal-full { max-height: 90vh; height: 90vh; border-radius: 24px; margin-bottom: 0; }
+    .chat-container { max-width: 780px; margin: 0 auto; }
+  }
+  @media (min-width: 1200px) {
+    .home-section { max-width: 900px; }
+    .tab-content { max-width: 900px; }
+    .fab { right: max(22px, calc(50vw - 470px)); }
   }
 
   /* === MISC === */
@@ -3128,6 +3739,8 @@
           </div>
         </div>
 
+        <div id="quick-itin-container"></div>
+
         <div class="section-header"><h2>Descrizione</h2></div>
         <div class="note-card">
           <div class="note-body" id="trip-description">Nessuna descrizione.</div>
@@ -3153,7 +3766,7 @@
       <div id="tab-stages" class="tab-content">
         <div class="section-header">
           <h2>Itinerario</h2>
-          <button class="btn btn-sm btn-ochre" onclick="openModal('new-stage-modal')">+ Tappa</button>
+          <button class="btn btn-sm btn-ochre" onclick="openNewStageModal()">+ Tappa</button>
         </div>
         <div id="stages-list"></div>
       </div>
@@ -3165,6 +3778,15 @@
           <button class="map-tool-btn" id="tool-marker" onclick="setMapTool('marker')">📍 <span>Marker</span></button>
           <button class="map-tool-btn" onclick="document.getElementById('gpx-file-input').click()">📂 <span>GPX</span></button>
           <input type="file" id="gpx-file-input" accept=".gpx" style="display:none" onchange="handleGpxImport(event)" />
+          <!-- Separatore -->
+          <div style="width:1px; background:var(--border); align-self:stretch; margin:0 4px"></div>
+          <!-- Toggle stile percorso -->
+          <button class="map-tool-btn map-tool-style" id="route-style-road" onclick="setRouteStyle('road')">🛣️ <span>Strade</span></button>
+          <button class="map-tool-btn map-tool-style" id="route-style-fly" onclick="setRouteStyle('fly')">✈️ <span>Volo</span></button>
+          <!-- Separatore -->
+          <div style="width:1px; background:var(--border); align-self:stretch; margin:0 4px"></div>
+          <!-- Toggle tempi di guida -->
+          <button class="map-tool-btn map-tool-style active" id="toggle-seg-times" onclick="toggleSegmentTimes()">⏱️ <span>Tempi</span></button>
         </div>
         <div id="map-tool-hint" class="map-tool-hint"></div>
         <div class="map-container">
@@ -3262,33 +3884,38 @@
     </div>
   </div>
 
-  <!-- Bottom nav -->
-  <nav class="bottom-nav" id="bottom-nav" style="display:none">
-    <button class="nav-btn active" data-page="home" onclick="showPage('home')">
-      <span class="nav-btn-icon">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-      </span>
-      Home
+  <!-- Bottom nav (collassabile) -->
+  <div class="bottom-nav-wrapper" id="bottom-nav-wrapper">
+    <button class="bottom-nav-toggle" onclick="toggleBottomNav()" aria-label="Mostra/nascondi barra di navigazione" title="Mostra/nascondi barra">
+      <svg class="bnt-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <button class="nav-btn" data-page="calendar" onclick="showPage('calendar')">
-      <span class="nav-btn-icon">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-      </span>
-      Agenda
-    </button>
-    <button class="nav-btn" data-page="notes" onclick="showPage('notes')">
-      <span class="nav-btn-icon">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-      </span>
-      Diario
-    </button>
-    <button class="nav-btn" data-page="profile" onclick="showPage('profile')">
-      <span class="nav-btn-icon">
-        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-      </span>
-      Profilo
-    </button>
-  </nav>
+    <nav class="bottom-nav" id="bottom-nav">
+      <button class="nav-btn active" data-page="home" onclick="showPage('home')">
+        <span class="nav-btn-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        </span>
+        Home
+      </button>
+      <button class="nav-btn" data-page="calendar" onclick="showPage('calendar')">
+        <span class="nav-btn-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        </span>
+        Agenda
+      </button>
+      <button class="nav-btn" data-page="notes" onclick="showPage('notes')">
+        <span class="nav-btn-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        </span>
+        Diario
+      </button>
+      <button class="nav-btn" data-page="profile" onclick="showPage('profile')">
+        <span class="nav-btn-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+        </span>
+        Profilo
+      </button>
+    </nav>
+  </div>
 
 </div>
 
@@ -3321,7 +3948,7 @@
     </div>
     <div class="field">
       <label>Punto di partenza</label>
-      <input id="nt-origin" type="text" placeholder="Es. San Marino, Repubblica" />
+      <input id="nt-origin" type="text" placeholder="Città o indirizzo di partenza" />
     </div>
     <div class="field">
       <label>Destinazione principale</label>
@@ -3397,21 +4024,49 @@
   </div>
 </div>
 
-<!-- New stage -->
+<!-- New stage / Edit stage -->
 <div id="new-stage-modal" class="modal-overlay">
   <div class="modal modal-full">
     <div class="modal-header">
-      <h2>📍 Nuova tappa</h2>
-      <button class="modal-close" onclick="closeModal('new-stage-modal')">×</button>
+      <h2 id="ns-modal-title">📍 Nuova tappa</h2>
+      <button class="modal-close" onclick="closeStageModal()">×</button>
     </div>
-    <div class="field"><label>Nome tappa</label><input id="ns-title" type="text" placeholder="Es. Reine, Lofoten" /></div>
+    <div class="field">
+      <label>Tipo</label>
+      <div class="ns-kind-tabs">
+        <button type="button" class="ns-kind-tab active" id="ns-kind-stage" onclick="selectStageKind('stage')">
+          <span class="ns-kind-icon">📍</span>
+          <span>Principale</span>
+        </button>
+        <button type="button" class="ns-kind-tab" id="ns-kind-waypoint" onclick="selectStageKind('waypoint')">
+          <span class="ns-kind-icon">📌</span>
+          <span>Secondaria</span>
+        </button>
+        <button type="button" class="ns-kind-tab" id="ns-kind-alternative" onclick="selectStageKind('alternative')">
+          <span class="ns-kind-icon">🔀</span>
+          <span>Alternativa</span>
+        </button>
+      </div>
+      <div id="ns-kind-hint" style="font-size:11px; color:var(--ink-muted); margin-top:6px; line-height:1.4">
+        Tappa principale: fa parte del percorso ed è numerata nell'itinerario.
+      </div>
+    </div>
+    <div class="field" id="ns-parent-field" style="display:none">
+      <label>Alternativa a</label>
+      <select id="ns-parent-stage"></select>
+    </div>
+    <div class="field"><label>Nome tappa</label><input id="ns-title" type="text" placeholder="Nome del luogo" /></div>
     <div class="field">
       <label>Cerca luogo o coordinate (lat, lng)</label>
-      <input id="ns-search" type="text" placeholder="Es. Colosseo Roma · 41.8902, 12.4924" />
+      <input id="ns-search" type="text" placeholder="Cerca un indirizzo o incolla coordinate" />
       <div style="display:flex; gap:8px; margin-top:8px">
         <button class="btn btn-secondary btn-sm" onclick="searchLocation()" style="flex:1">🔍 Cerca</button>
+        <button class="btn btn-sm" onclick="openMapPicker()" style="flex:1; background:var(--moss); color:#fff">🗺️ Sulla mappa</button>
       </div>
       <div id="stage-search-results" class="search-results" style="display:none"></div>
+      <div style="font-size:12px; color:var(--ink-muted); margin-top:8px; line-height:1.5">
+        💡 <strong>Non la trovi?</strong> Tocca <strong>"Sulla mappa"</strong> e seleziona il punto esatto.
+      </div>
     </div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
       <div class="field"><label>Data arrivo</label><input id="ns-date" type="date" /></div>
@@ -3421,7 +4076,43 @@
     <div style="background:var(--surface-2); padding:12px 14px; border-radius:12px; font-size:13px; margin-bottom:16px; border:1.5px solid var(--border)">
       <strong>Coordinate:</strong> <span id="ns-coords" class="mono">Nessuna</span>
     </div>
-    <button class="btn btn-ochre" onclick="createStage()">Salva tappa</button>
+    <button class="btn btn-ochre" id="ns-save-btn" onclick="saveStage()">Salva tappa</button>
+  </div>
+</div>
+
+<!-- Map picker (per selezionare tappa cliccando sulla mappa) -->
+<div id="map-picker-modal" class="modal-overlay">
+  <div class="modal modal-full" style="padding:0; display:flex; flex-direction:column">
+    <div style="padding:calc(var(--safe-top) + 14px) 18px 12px; display:flex; align-items:center; justify-content:space-between; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0">
+      <div>
+        <div id="map-picker-title" style="font-family:'Fraunces',serif; font-size:20px; font-weight:800; letter-spacing:-0.02em">🗺️ Seleziona sulla mappa</div>
+        <div id="map-picker-subtitle" style="font-size:12px; color:var(--ink-muted); margin-top:2px">Tocca il punto esatto della tappa</div>
+      </div>
+      <button class="modal-close" onclick="closeMapPicker()">×</button>
+    </div>
+    <div id="map-picker-container" style="flex:1; position:relative; background:var(--surface-2)">
+      <div id="map-picker" style="width:100%; height:100%"></div>
+      <div id="map-picker-hint" style="position:absolute; top:14px; left:50%; transform:translateX(-50%); background:rgba(42,26,14,0.9); color:#fff; padding:10px 16px; border-radius:20px; font-size:13px; font-weight:600; pointer-events:none; box-shadow:0 4px 14px rgba(0,0,0,0.25); z-index:1000">
+        👆 Tocca la mappa per posizionare la tappa
+      </div>
+    </div>
+    <div style="padding:14px 18px calc(14px + var(--safe-bottom)); background:var(--surface); border-top:1px solid var(--border); flex-shrink:0">
+      <div id="map-picker-coords" style="background:var(--surface-2); padding:10px 14px; border-radius:10px; font-size:13px; margin-bottom:10px; text-align:center; border:1.5px solid var(--border)">
+        <span style="color:var(--ink-muted)">Nessun punto selezionato</span>
+      </div>
+      <div style="display:flex; gap:10px">
+        <button class="btn btn-secondary" onclick="closeMapPicker()" style="flex:1">Annulla</button>
+        <button class="btn btn-ochre" id="map-picker-confirm" onclick="confirmMapPicker()" style="flex:2" disabled>✓ Usa questa posizione</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stage detail modal (visualizzazione singola tappa) -->
+<div id="stage-detail-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="stage-detail-content"></div>
   </div>
 </div>
 
@@ -3507,7 +4198,7 @@
       <button class="modal-close" onclick="closeModal('edit-profile-modal')">×</button>
     </div>
     <div class="field"><label>Nome</label><input id="ep-name" type="text" /></div>
-    <div class="field"><label>Città / Paese</label><input id="ep-location" type="text" placeholder="Es. San Marino" /></div>
+    <div class="field"><label>Città / Paese</label><input id="ep-location" type="text" placeholder="Città o paese" /></div>
     <div class="field"><label>Bio</label><textarea id="ep-bio" rows="3" placeholder="Raccontati in poche parole…" maxlength="200"></textarea></div>
     <button class="btn btn-ochre" onclick="saveProfile()">Salva</button>
   </div>
@@ -3522,7 +4213,7 @@
       <button class="modal-close" onclick="closeModal('edit-trip-modal')">×</button>
     </div>
     <div class="field"><label>Nome</label><input id="et-name" type="text" /></div>
-    <div class="field"><label>Punto di partenza</label><input id="et-origin" type="text" placeholder="Es. San Marino" /></div>
+    <div class="field"><label>Punto di partenza</label><input id="et-origin" type="text" placeholder="Città o paese" /></div>
     <div class="field"><label>Destinazione</label><input id="et-destination" type="text" /></div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
       <div class="field"><label>Inizio</label><input id="et-start" type="date" /></div>
@@ -4170,7 +4861,9 @@ async function loadUserProfile() {
 function enterApp() {
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('main-screen').classList.add('active');
-  document.getElementById('bottom-nav').style.display = 'flex';
+  const wrap = document.getElementById('bottom-nav-wrapper');
+  if (wrap) wrap.classList.add('active');
+  initBottomNavState();
   updateAvatars();
   setupRealtimeListeners();
   if (typeof window.setupV5UserListeners === 'function') window.setupV5UserListeners();
@@ -4181,13 +4874,32 @@ function enterApp() {
 function exitApp() {
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('main-screen').classList.remove('active');
-  document.getElementById('bottom-nav').style.display = 'none';
+  const wrap = document.getElementById('bottom-nav-wrapper');
+  if (wrap) wrap.classList.remove('active');
   document.getElementById('login-email').value = '';
   document.getElementById('login-password').value = '';
   document.getElementById('register-name').value = '';
   document.getElementById('register-email').value = '';
   document.getElementById('register-password').value = '';
 }
+
+/* Collapsible bottom nav */
+function toggleBottomNav() {
+  const wrap = document.getElementById('bottom-nav-wrapper');
+  if (!wrap) return;
+  const collapsed = wrap.classList.toggle('collapsed');
+  try { localStorage.setItem('wildr_nav_collapsed', collapsed ? '1' : '0'); } catch (_) {}
+}
+window.toggleBottomNav = toggleBottomNav;
+
+function initBottomNavState() {
+  try {
+    const wrap = document.getElementById('bottom-nav-wrapper');
+    if (!wrap) return;
+    if (localStorage.getItem('wildr_nav_collapsed') === '1') wrap.classList.add('collapsed');
+  } catch (_) {}
+}
+window.initBottomNavState = initBottomNavState;
 
 function updateAvatars() {
   const name = state.profile?.name || state.user?.displayName || 'U';
@@ -4196,7 +4908,7 @@ function updateAvatars() {
   document.querySelectorAll('#user-avatar, #user-avatar-cal, #user-avatar-notes, #profile-avatar-big').forEach(el => {
     if (!el) return;
     if (photoUrl) {
-      el.innerHTML = `<img src="${photoUrl}" alt="" />`;
+      el.innerHTML = `<img src="${photoUrl}" alt="" onerror="this.parentElement.textContent='${initials}'" />`;
     } else {
       el.textContent = initials;
     }
@@ -4373,98 +5085,6 @@ function filterTrips(filter) {
 }
 window.filterTrips = filterTrips;
 
-/* Card HTML per un singolo viaggio — usata sia dalla lista raggruppata che dalla ricerca */
-function tripCardHtml(t, now) {
-  const type = TRIP_TYPES[t.type] || TRIP_TYPES.mixed;
-  const dateRange = formatDateRange(t.startDate, t.endDate);
-  const nPpl = (t.participants || []).length;
-  let statusBadge = '';
-  if (t.startDate && t.endDate) {
-    const start = new Date(t.startDate).getTime();
-    const end = new Date(t.endDate).getTime() + 86400000;
-    if (start > now) {
-      const days = Math.ceil((start - now) / 86400000);
-      statusBadge = `<span class="tag" style="background:var(--moss-soft); color:var(--moss)">🕐 tra ${days}g</span>`;
-    } else if (end > now) {
-      statusBadge = `<span class="tag" style="background:var(--ochre-soft); color:var(--ochre)">🎉 in corso</span>`;
-    } else {
-      statusBadge = `<span class="tag">✓ concluso</span>`;
-    }
-  }
-  return `
-    <div class="trip-card" onclick="openTrip('${t.id}')">
-      <div class="trip-icon ${type.cls}">${type.emoji}</div>
-      <div class="trip-info">
-        <div class="trip-name">${escapeHtml(t.name)}</div>
-        <div class="trip-meta">
-          ${escapeHtml(t.destination || '—')} · ${dateRange}
-        </div>
-        <div class="trip-tags">
-          ${statusBadge}
-          <span class="tag">${nPpl} 👥</span>
-        </div>
-      </div>
-    </div>`;
-}
-
-const PAST_TRIPS_COLLAPSE_AT = 6;
-
-/* Costruisce l'HTML della lista viaggi. Se grouped=true divide in sezioni
-   In corso / Prossimi / Passati con header, altrimenti mostra una lista piatta
-   (usato ad es. quando è attivo un filtro specifico o una ricerca testuale). */
-function renderTripsListHtml(trips, now, grouped) {
-  if (!grouped) {
-    return trips.map(t => tripCardHtml(t, now)).join('');
-  }
-
-  const live = [];
-  const upcoming = [];
-  const past = [];
-  trips.forEach(t => {
-    const start = t.startDate ? new Date(t.startDate).getTime() : null;
-    const end = t.endDate ? new Date(t.endDate).getTime() + 86400000 : null;
-    if (start && end && start <= now && end > now) live.push(t);
-    else if (start && start > now) upcoming.push(t);
-    else if (end && end <= now) past.push(t);
-    else upcoming.push(t); // senza date certe, lo mettiamo tra i prossimi
-  });
-  upcoming.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-  past.sort((a, b) => new Date(b.endDate) - new Date(a.endDate));
-
-  let html = '';
-  if (live.length) {
-    html += `
-      <div class="trips-group">
-        <div class="trips-group-header live"><span class="dot"></span><span class="label">In corso</span><span class="count">${live.length}</span></div>
-        ${live.map(t => tripCardHtml(t, now)).join('')}
-      </div>`;
-  }
-  if (upcoming.length) {
-    html += `
-      <div class="trips-group">
-        <div class="trips-group-header upcoming"><span class="dot"></span><span class="label">Prossimi</span><span class="count">${upcoming.length}</span></div>
-        ${upcoming.map(t => tripCardHtml(t, now)).join('')}
-      </div>`;
-  }
-  if (past.length) {
-    const showAll = !!state.showAllPastTrips;
-    const visible = showAll ? past : past.slice(0, PAST_TRIPS_COLLAPSE_AT);
-    html += `
-      <div class="trips-group">
-        <div class="trips-group-header past"><span class="dot"></span><span class="label">Passati</span><span class="count">${past.length}</span></div>
-        ${visible.map(t => tripCardHtml(t, now)).join('')}
-        ${(!showAll && past.length > PAST_TRIPS_COLLAPSE_AT) ? `<div class="show-more-past" onclick="toggleAllPastTrips()">Mostra tutti i passati (${past.length})</div>` : ''}
-      </div>`;
-  }
-  return html;
-}
-
-function toggleAllPastTrips() {
-  state.showAllPastTrips = !state.showAllPastTrips;
-  renderTripsList(state.tripFilter || 'all');
-}
-window.toggleAllPastTrips = toggleAllPastTrips;
-
 function renderTripsList(filter) {
   const list = document.getElementById('trips-list');
   if (!list) return;
@@ -4491,9 +5111,39 @@ function renderTripsList(filter) {
     return;
   }
 
-  // Il raggruppamento per sezioni ha senso solo quando non è già applicato un filtro specifico
-  const grouped = (filter === 'all' || !filter);
-  list.innerHTML = renderTripsListHtml(trips, now, grouped);
+  list.innerHTML = trips.map(t => {
+    const type = TRIP_TYPES[t.type] || TRIP_TYPES.mixed;
+    const dateRange = formatDateRange(t.startDate, t.endDate);
+    const nPpl = (t.participants || []).length;
+    // Status badge
+    let statusBadge = '';
+    if (t.startDate && t.endDate) {
+      const start = new Date(t.startDate).getTime();
+      const end = new Date(t.endDate).getTime() + 86400000;
+      if (start > now) {
+        const days = Math.ceil((start - now) / 86400000);
+        statusBadge = `<span class="tag" style="background:var(--moss-soft); color:var(--moss)">🕐 tra ${days}g</span>`;
+      } else if (end > now) {
+        statusBadge = `<span class="tag" style="background:var(--ochre-soft); color:var(--ochre)">🎉 in corso</span>`;
+      } else {
+        statusBadge = `<span class="tag">✓ concluso</span>`;
+      }
+    }
+    return `
+      <div class="trip-card" onclick="openTrip('${t.id}')">
+        <div class="trip-icon ${type.cls}">${type.emoji}</div>
+        <div class="trip-info">
+          <div class="trip-name">${escapeHtml(t.name)}</div>
+          <div class="trip-meta">
+            ${escapeHtml(t.destination || '—')} · ${dateRange}
+          </div>
+          <div class="trip-tags">
+            ${statusBadge}
+            <span class="tag">${nPpl} 👥</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 function renderCountdown() {
@@ -4580,6 +5230,7 @@ function prepareTripModal() {
   state.selectedTripType = null;
   document.querySelectorAll('#nt-types .type-option').forEach(el => el.classList.remove('selected'));
   document.getElementById('nt-name').value = '';
+  document.getElementById('nt-origin').value = '';
   document.getElementById('nt-destination').value = '';
   document.getElementById('nt-start').value = '';
   document.getElementById('nt-end').value = '';
@@ -4597,6 +5248,7 @@ window.selectType = selectType;
 
 async function createTrip() {
   const name = document.getElementById('nt-name').value.trim();
+  const origin = document.getElementById('nt-origin').value.trim();
   const destination = document.getElementById('nt-destination').value.trim();
   const start = document.getElementById('nt-start').value;
   const end = document.getElementById('nt-end').value;
@@ -4617,7 +5269,8 @@ async function createTrip() {
     showLoader(true);
     const code = generateInviteCode();
     const uid = state.user.uid;
-    const tripRef = await window.FB.addDoc(window.FB.collection(window.FB.db, 'trips'), {
+
+    const tripData = {
       name, destination, type, startDate: start, endDate: end,
       description, transport,
       budget: 0,
@@ -4633,7 +5286,19 @@ async function createTrip() {
       }],
       inviteCode: code,
       createdAt: window.FB.serverTimestamp()
-    });
+    };
+
+    // Partenza: salva testo + geocodifica coordinate (best-effort, non blocca la creazione)
+    if (origin) {
+      tripData.origin = origin;
+      const geo = await geocodeAddress(origin);
+      if (geo) {
+        tripData.originLat = geo.lat;
+        tripData.originLng = geo.lng;
+      }
+    }
+
+    const tripRef = await window.FB.addDoc(window.FB.collection(window.FB.db, 'trips'), tripData);
 
     // Register invite code (helps with uniqueness + lookup)
     await window.FB.setDoc(window.FB.doc(window.FB.db, 'invites', code), {
@@ -4931,6 +5596,17 @@ function renderTripDetail() {
   document.getElementById('trip-description').textContent = t.description || 'Nessuna descrizione.';
   document.getElementById('trip-transport').textContent = t.transport || 'Nessuna info inserita.';
 
+  // Box "Partenza da" — visibile solo se impostata
+  const originBox = document.getElementById('trip-origin-box');
+  if (originBox) {
+    if (t.origin) {
+      originBox.style.display = 'flex';
+      document.getElementById('trip-info-origin').textContent = t.origin;
+    } else {
+      originBox.style.display = 'none';
+    }
+  }
+
   // Aggiorna label tab Extra con quella specifica del tipo
   const extraCfg = TRIP_EXTRA[t.type] || TRIP_EXTRA.mixed;
   const extraTabBtn = document.getElementById('tab-btn-extra');
@@ -4956,6 +5632,8 @@ function renderTripDetail() {
 
   // invite code
   document.getElementById('invite-code-display').textContent = t.inviteCode || '——————';
+  // quick itinerary (per uso alla guida)
+  renderQuickItin();
   // budget card
   if (typeof renderBudgetCard === 'function') renderBudgetCard();
   // affiliate links
@@ -4963,6 +5641,64 @@ function renderTripDetail() {
   // participants list
   renderParticipants();
 }
+
+function renderQuickItin() {
+  const container = document.getElementById('quick-itin-container');
+  if (!container) return;
+  const t = state.currentTrip;
+  const stages = state.currentStages || [];
+  const origin = t?.origin || '';
+
+  if (!origin && !stages.length) {
+    container.innerHTML = '';
+    return;
+  }
+
+  let rows = '';
+  if (origin) {
+    rows += `
+      <div class="quick-itin-row" onclick="showOriginInfo()">
+        <div class="quick-itin-badge origin">🏠</div>
+        <div class="quick-itin-info">
+          <div class="quick-itin-name">${escapeHtml(origin)}</div>
+          <div class="quick-itin-sub">Partenza${t.startDate ? ' · ' + formatDate(t.startDate) : ''}</div>
+        </div>
+        <div class="quick-itin-arrow">›</div>
+      </div>
+    `;
+  }
+  let stageCounter = 0;
+  stages.filter(s => s.kind !== 'alternative').forEach((s) => {
+    const isWaypoint = s.kind === 'waypoint';
+    if (!isWaypoint) stageCounter++;
+    const meta = [
+      s.date ? formatDate(s.date) : null,
+      s.days ? s.days + ' gg' : null,
+      s.lat != null ? '📍 GPS' : null
+    ].filter(Boolean).join(' · ');
+    rows += `
+      <div class="quick-itin-row" onclick="openStageDetail('${s.id}')">
+        <div class="quick-itin-badge${isWaypoint ? ' waypoint' : ''}">${isWaypoint ? '📌' : stageCounter}</div>
+        <div class="quick-itin-info">
+          <div class="quick-itin-name">${escapeHtml(s.title || 'Senza nome')}</div>
+          <div class="quick-itin-sub">${meta || 'Nessun dettaglio'}</div>
+        </div>
+        <div class="quick-itin-arrow">›</div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = `
+    <div class="quick-itin">
+      <div class="quick-itin-header">
+        <h3>🛣️ Itinerario</h3>
+        <button class="link" onclick="switchTab('stages')">Apri completo →</button>
+      </div>
+      ${rows}
+    </div>
+  `;
+}
+window.renderQuickItin = renderQuickItin;
 
 function switchTab(tab) {
   state.currentTab = tab;
@@ -5300,68 +6036,613 @@ async function saveChecklistItem(sectionIdx, itemIdx, checked) {
 window.saveChecklistItem = saveChecklistItem;
 function renderStages() {
   const list = document.getElementById('stages-list');
-  if (!state.currentStages.length) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📍</div><h3>Nessuna tappa</h3><p>Aggiungi la prima tappa del tuo itinerario</p></div>`;
+  const trip = state.currentTrip;
+  const allStages = state.currentStages || [];
+  const origin = trip?.origin || '';
+
+  // Separa la sequenza principale (stage/waypoint) dalle alternative,
+  // raggruppando queste ultime per tappa genitore
+  const mainStages = allStages.filter(s => s.kind !== 'alternative');
+  const altsByParent = {};
+  allStages.filter(s => s.kind === 'alternative').forEach(a => {
+    const pid = a.parentId || '__orphan__';
+    if (!altsByParent[pid]) altsByParent[pid] = [];
+    altsByParent[pid].push(a);
+  });
+
+  let html = '';
+
+  // ── 1. PARTENZA — prompt in cima se manca ──
+  if (!origin) {
+    html += `
+      <div class="origin-prompt" onclick="openOriginPrompt()">
+        <div class="origin-prompt-icon">🏠</div>
+        <div class="origin-prompt-body">
+          <div class="origin-prompt-eyebrow">Prima cosa</div>
+          <div class="origin-prompt-title">Da dove parti?</div>
+          <div class="origin-prompt-sub">Imposta il punto di partenza del viaggio — sarà il punto zero del tuo itinerario.</div>
+        </div>
+        <div class="origin-prompt-arrow">›</div>
+      </div>
+    `;
+  } else {
+    // Origin già impostata — mostra nodo partenza
+    html += `
+      <div class="itin-node itin-origin" onclick="showOriginInfo()">
+        <div class="itin-badge itin-badge-origin">🏠</div>
+        <div class="itin-body">
+          <div class="itin-eyebrow">Partenza</div>
+          <div class="itin-title">${escapeHtml(origin)}</div>
+          <div class="itin-meta-row" id="itin-origin-meta">
+            ${trip.startDate ? `<span class="itin-meta">📅 ${formatDate(trip.startDate)}</span>` : ''}
+          </div>
+        </div>
+        <div class="itin-side">
+          <button class="itin-quick-btn" title="Modifica partenza" onclick="event.stopPropagation(); openOriginPrompt()">✏️</button>
+          <div class="itin-arrow">›</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── 2. Tappe principali/secondarie, con alternative affiancate ──
+  if (!mainStages.length) {
+    html += `
+      <div class="empty-state" style="padding: 34px 20px">
+        <div class="empty-state-icon">📍</div>
+        <h3>${origin ? 'Aggiungi la prima tappa' : 'Poi le tappe'}</h3>
+        <p>${origin ? 'Aggiungi la prima tappa del tuo itinerario. Puoi cercarla per nome, inserire le coordinate o toccarla direttamente sulla mappa.' : 'Dopo aver impostato la partenza, aggiungi qui le tappe del viaggio.'}</p>
+        <button class="btn btn-ochre btn-sm" onclick="openNewStageModal()" style="width:auto; margin: 0 auto">+ Aggiungi prima tappa</button>
+      </div>`;
+    list.innerHTML = html;
     return;
   }
-  list.innerHTML = state.currentStages.map((s, i) => `
-    <div class="stage-item">
-      <div class="stage-num">${i + 1}</div>
-      <div class="stage-info">
-        <div class="stage-title">${escapeHtml(s.title)}</div>
-        <div class="stage-meta">${s.date ? formatDate(s.date) : ''} ${s.days ? ' • ' + s.days + ' gg' : ''}</div>
-        ${s.notes ? `<div class="stage-meta" style="margin-top:4px">${escapeHtml(s.notes)}</div>` : ''}
-        ${s.lat != null ? `<div class="stage-meta" style="margin-top:4px; color:var(--ochre)">📍 ${s.lat.toFixed(4)}, ${s.lng.toFixed(4)}</div>` : ''}
-      </div>
-      <div class="stage-actions">
-        <button onclick="deleteStage('${s.id}')" title="Elimina">🗑️</button>
-      </div>
-    </div>
-  `).join('');
+
+  let stageCounter = 0;
+  mainStages.forEach((s, i) => {
+    const isWaypoint = s.kind === 'waypoint';
+    if (!isWaypoint) stageCounter++;
+    const isLast = i === mainStages.length - 1;
+    const hasCoords = s.lat != null && s.lng != null;
+    const canMoveUp = i > 0;
+    const canMoveDown = i < mainStages.length - 1;
+    const alts = altsByParent[s.id] || [];
+
+    if (isWaypoint) {
+      // Nodo tappa secondaria — stile compatto, colore fiume
+      html += `
+        <div class="itin-node itin-waypoint" onclick="openStageDetail('${s.id}')">
+          <div class="itin-connector"></div>
+          <div class="itin-badge itin-badge-waypoint">📌</div>
+          <div class="itin-body">
+            <div class="itin-eyebrow itin-eyebrow-waypoint">Tappa secondaria</div>
+            <div class="itin-title">${escapeHtml(s.title || 'Senza nome')}</div>
+            <div class="itin-meta-row" id="itin-seg-${s.id}">
+              ${s.date ? `<span class="itin-meta">📅 ${formatDate(s.date)}</span>` : ''}
+              ${hasCoords ? `<span class="itin-meta itin-meta-river">📍 GPS</span>` : `<span class="itin-meta itin-meta-warn">⚠️ senza coord.</span>`}
+            </div>
+          </div>
+          <div class="itin-side">
+            <div class="itin-reorder">
+              <button class="itin-reorder-btn" title="Sposta su" ${canMoveUp ? '' : 'disabled'} onclick="event.stopPropagation(); moveStage('${s.id}','up')">▲</button>
+              <button class="itin-reorder-btn" title="Sposta giù" ${canMoveDown ? '' : 'disabled'} onclick="event.stopPropagation(); moveStage('${s.id}','down')">▼</button>
+            </div>
+            <button class="itin-quick-btn" title="Modifica" onclick="event.stopPropagation(); openEditStage('${s.id}')">✏️</button>
+          </div>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="itin-node ${isLast && !alts.length ? 'itin-last' : ''}" onclick="openStageDetail('${s.id}')">
+          <div class="itin-connector"></div>
+          <div class="itin-badge">${stageCounter}</div>
+          <div class="itin-body">
+            <div class="itin-eyebrow">Tappa ${stageCounter}${isLast ? ' · finale' : ''}</div>
+            <div class="itin-title">${escapeHtml(s.title || 'Senza nome')}</div>
+            <div class="itin-meta-row" id="itin-seg-${s.id}">
+              ${s.date ? `<span class="itin-meta">📅 ${formatDate(s.date)}</span>` : ''}
+              ${s.days ? `<span class="itin-meta">⏱️ ${s.days} gg</span>` : ''}
+              ${hasCoords ? `<span class="itin-meta itin-meta-coord">📍 GPS</span>` : `<span class="itin-meta itin-meta-warn">⚠️ senza coord.</span>`}
+            </div>
+            ${s.notes ? `<div class="itin-note">${escapeHtml(s.notes.length > 90 ? s.notes.slice(0,90)+'…' : s.notes)}</div>` : ''}
+          </div>
+          <div class="itin-side">
+            <div class="itin-reorder">
+              <button class="itin-reorder-btn" title="Sposta su" ${canMoveUp ? '' : 'disabled'} onclick="event.stopPropagation(); moveStage('${s.id}','up')">▲</button>
+              <button class="itin-reorder-btn" title="Sposta giù" ${canMoveDown ? '' : 'disabled'} onclick="event.stopPropagation(); moveStage('${s.id}','down')">▼</button>
+            </div>
+            <button class="itin-quick-btn" title="Modifica" onclick="event.stopPropagation(); openEditStage('${s.id}')">✏️</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // ── Alternative affiancate — una riga scrollabile subito sotto la tappa genitore ──
+    if (alts.length) {
+      html += `
+        <div class="itin-alt-row ${isLast ? 'itin-alt-row-last' : ''}">
+          <div class="itin-alt-connector"></div>
+          ${alts.map(a => {
+            const altHasCoords = a.lat != null && a.lng != null;
+            return `
+              <div class="itin-alt-card" onclick="openStageDetail('${a.id}')">
+                <div class="itin-alt-badge">🔀</div>
+                <div class="itin-alt-name">${escapeHtml(a.title || 'Senza nome')}</div>
+                ${a.date ? `<div class="itin-alt-meta">📅 ${formatDate(a.date)}</div>` : ''}
+                ${!altHasCoords ? `<div class="itin-alt-meta itin-alt-warn">⚠️ senza coord.</div>` : ''}
+                <button class="itin-alt-edit" title="Modifica" onclick="event.stopPropagation(); openEditStage('${a.id}')">✏️</button>
+              </div>
+            `;
+          }).join('')}
+          <button class="itin-alt-add" onclick="openNewStageModal('alternative','${s.id}')" title="Aggiungi alternativa">
+            <span>+</span>
+          </button>
+        </div>
+      `;
+    }
+  });
+
+  html += `
+    <button class="itin-add-btn" onclick="openNewStageModal()">
+      <span style="font-size:22px">+</span>
+      <span>Aggiungi tappa</span>
+    </button>
+  `;
+
+  list.innerHTML = html;
+
+  // Calcola e mostra distanza/tempo per ogni segmento (asincrono, con cache)
+  computeItinerarySegments();
 }
 
-async function createStage() {
+/* ============================================
+   SEGMENTI ITINERARIO — distanza/tempo tra punti consecutivi
+   ============================================ */
+if (!state.segmentInfoCache) state.segmentInfoCache = {};
+
+function buildOrderedRoutePoints() {
+  // Ritorna array ordinato di punti con coordinate: partenza (se presente) + tappe/secondarie
+  // Le tappe ALTERNATIVE sono escluse: non fanno parte del percorso sequenziale.
+  const trip = state.currentTrip;
+  const points = [];
+  if (trip?.originLat != null && trip?.originLng != null) {
+    points.push({ id: '__origin__', lat: trip.originLat, lng: trip.originLng, kind: 'origin', title: trip.origin || 'Partenza' });
+  }
+  (state.currentStages || []).forEach(s => {
+    if (s.kind === 'alternative') return; // non instradata
+    if (s.lat != null && s.lng != null) {
+      points.push({ id: s.id, lat: s.lat, lng: s.lng, kind: s.kind === 'waypoint' ? 'waypoint' : 'stage', title: s.title });
+    }
+  });
+  return points;
+}
+
+function formatDrivingDuration(seconds) {
+  const min = Math.round(seconds / 60);
+  if (min < 60) return `${min} min`;
+  const h = Math.floor(min / 60), m = min % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+async function computeItinerarySegments() {
+  const points = buildOrderedRoutePoints();
+  if (points.length < 2) return;
+  const type = state.currentTrip?.type || 'car';
+  const profile = (type === 'walk') ? 'foot' : (type === 'bike') ? 'bike' : 'driving';
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i], b = points[i + 1];
+    const cacheKey = `${profile}:${a.lat.toFixed(4)},${a.lng.toFixed(4)}|${b.lat.toFixed(4)},${b.lng.toFixed(4)}`;
+    const targetEl = document.getElementById('itin-seg-' + b.id);
+    if (!targetEl) continue; // il nodo potrebbe non essere renderizzato (tab diversa)
+
+    if (state.segmentInfoCache[cacheKey]) {
+      injectSegmentChip(targetEl, state.segmentInfoCache[cacheKey]);
+      continue;
+    }
+    try {
+      const url = `https://router.project-osrm.org/route/v1/${profile}/${a.lng},${a.lat};${b.lng},${b.lat}?overview=false`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.routes && data.routes[0]) {
+        const info = {
+          distanceKm: (data.routes[0].distance / 1000).toFixed(0),
+          durationTxt: formatDrivingDuration(data.routes[0].duration)
+        };
+        state.segmentInfoCache[cacheKey] = info;
+        injectSegmentChip(targetEl, info);
+      }
+    } catch (e) { /* offline o rate-limit — ignora silenziosamente */ }
+  }
+}
+window.computeItinerarySegments = computeItinerarySegments;
+
+function injectSegmentChip(targetEl, info) {
+  if (!targetEl || targetEl.querySelector('.itin-meta-drive')) return; // già presente
+  const chip = document.createElement('span');
+  chip.className = 'itin-meta itin-meta-drive';
+  chip.innerHTML = `🚗 ${info.durationTxt} · ${info.distanceKm} km`;
+  targetEl.appendChild(chip);
+}
+
+/* Modal veloce per impostare la partenza (luogo + giorno) */
+function openOriginPrompt() {
+  const trip = state.currentTrip;
+  if (!trip) return;
+  const container = document.getElementById('stage-detail-content');
+  if (!container) return;
+  state.originPickerCoords = null; // reset selezione manuale precedente
+  container.innerHTML = `
+    <div style="text-align:center; padding:8px 0 18px; position:relative">
+      <div style="width:64px; height:64px; border-radius:50%; background:var(--moss); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:32px; margin-bottom:10px; box-shadow:0 6px 18px rgba(91,111,58,0.4)">🏠</div>
+      <div style="font-family:'Fraunces',serif; font-style:italic; font-size:12px; color:var(--ink-muted); margin-bottom:2px; letter-spacing:0.05em">Prima cosa</div>
+      <h2 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.02em; padding:0 30px">Da dove parti?</h2>
+      <button class="modal-close" style="position:absolute; top:0; right:0" onclick="closeModal('stage-detail-modal')">×</button>
+    </div>
+    <p style="text-align:center; color:var(--ink-muted); font-size:13px; margin:0 0 18px; line-height:1.5">
+      Città o indirizzo di partenza. Sarà il punto zero dell'itinerario — calcoleremo il tragitto verso la prima tappa.
+    </p>
+    <div class="field">
+      <label>Punto di partenza</label>
+      <input id="quick-origin-input" type="text" placeholder="Città o indirizzo di partenza" value="${escapeHtml(trip.origin || '')}" />
+      <div style="margin-top:8px">
+        <button class="btn btn-sm" onclick="openMapPicker('origin')" style="width:100%; background:var(--moss); color:#fff">🗺️ Sulla mappa</button>
+      </div>
+      <div style="font-size:11px; color:var(--ink-muted); margin-top:6px; line-height:1.4">
+        💡 Se la ricerca automatica non trova l'indirizzo, usa "Sulla mappa" per selezionare il punto esatto.
+      </div>
+    </div>
+    <div class="field">
+      <label>Giorno di partenza</label>
+      <input id="quick-origin-date" type="date" value="${trip.startDate || ''}" />
+    </div>
+    <div id="quick-origin-status" style="font-size:12px; color:var(--ink-muted); margin-bottom:12px; min-height:16px; text-align:center"></div>
+    <button class="btn btn-ochre" id="quick-origin-save-btn" onclick="saveQuickOrigin()">Salva partenza</button>
+  `;
+  openModal('stage-detail-modal');
+  setTimeout(() => {
+    const input = document.getElementById('quick-origin-input');
+    if (input) {
+      input.focus();
+      input.addEventListener('keypress', (e) => { if (e.key === 'Enter') saveQuickOrigin(); });
+    }
+  }, 200);
+}
+window.openOriginPrompt = openOriginPrompt;
+
+/* Geocoding helper (Nominatim) — ritorna {lat, lng, display_name} o null.
+   Include un retry per resilienza contro il rate-limit del server pubblico. */
+async function geocodeAddress(query, _retry) {
+  if (!query || !query.trim()) return null;
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+    const res = await fetch(url, { headers: { 'Accept-Language': 'it' } });
+    const data = await res.json();
+    if (data && data[0]) {
+      return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), display_name: data[0].display_name };
+    }
+    // Nessun risultato — un solo retry dopo breve pausa (il server pubblico a volte è rate-limited)
+    if (!_retry) {
+      await new Promise(r => setTimeout(r, 700));
+      return geocodeAddress(query, true);
+    }
+  } catch (e) {
+    console.warn('geocode error', e);
+    if (!_retry) {
+      await new Promise(r => setTimeout(r, 700));
+      return geocodeAddress(query, true);
+    }
+  }
+  return null;
+}
+
+async function saveQuickOrigin() {
+  const input = document.getElementById('quick-origin-input');
+  const dateInput = document.getElementById('quick-origin-date');
+  const statusEl = document.getElementById('quick-origin-status');
+  const saveBtn = document.getElementById('quick-origin-save-btn');
+  if (!input) return;
+  const val = input.value.trim();
+  const dateVal = dateInput ? dateInput.value : '';
+  if (!val) return showToast('Inserisci un punto di partenza', 'error');
+  try {
+    if (saveBtn) saveBtn.disabled = true;
+    showLoader(true);
+
+    const data = { origin: val };
+    if (dateVal) data.startDate = dateVal;
+
+    if (state.originPickerCoords) {
+      // Coordinate scelte manualmente sulla mappa — priorità, nessun geocoding necessario
+      data.originLat = state.originPickerCoords.lat;
+      data.originLng = state.originPickerCoords.lng;
+      if (statusEl) statusEl.textContent = '✅ Posizione dalla mappa';
+    } else {
+      if (statusEl) statusEl.textContent = '📍 Cerco le coordinate…';
+      const geo = await geocodeAddress(val);
+      if (geo) {
+        data.originLat = geo.lat;
+        data.originLng = geo.lng;
+        if (statusEl) statusEl.textContent = '✅ Posizione trovata';
+      } else if (statusEl) {
+        statusEl.textContent = '⚠️ Posizione non trovata — usa "Sulla mappa" per impostarla manualmente';
+      }
+    }
+
+    await window.FB.updateDoc(
+      window.FB.doc(window.FB.db, 'trips', state.currentTripId),
+      data
+    );
+    if (state.currentTrip) Object.assign(state.currentTrip, data);
+    state.originPickerCoords = null;
+    closeModal('stage-detail-modal');
+    showToast('Partenza impostata 🏠', 'success');
+  } catch (e) { console.error(e); showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); if (saveBtn) saveBtn.disabled = false; }
+}
+window.saveQuickOrigin = saveQuickOrigin;
+
+function showOriginInfo() {
+  const trip = state.currentTrip;
+  if (!trip?.origin) return;
+  const container = document.getElementById('stage-detail-content');
+  const hasCoords = trip.originLat != null && trip.originLng != null;
+  container.innerHTML = `
+    <div style="text-align:center; padding:8px 0 18px; position:relative">
+      <div style="width:64px; height:64px; border-radius:50%; background:var(--moss); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:32px; margin-bottom:10px; box-shadow:0 6px 18px rgba(91,111,58,0.4)">
+        🏠
+      </div>
+      <div style="font-family:'Fraunces',serif; font-style:italic; font-size:12px; color:var(--ink-muted); margin-bottom:2px; letter-spacing:0.05em">Punto di partenza</div>
+      <h2 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.02em; padding:0 30px">${escapeHtml(trip.origin)}</h2>
+      <button class="modal-close" style="position:absolute; top:0; right:0" onclick="closeModal('stage-detail-modal')">×</button>
+    </div>
+    ${trip.startDate ? `
+      <div class="info-box" style="text-align:center; margin-bottom:14px">
+        <div class="lbl">Giorno di partenza</div>
+        <div class="val" style="font-size:18px">📅 ${formatDate(trip.startDate)}</div>
+      </div>` : ''}
+    ${hasCoords ? `
+      <div class="info-box" style="text-align:center; margin-bottom:14px">
+        <div class="lbl">Coordinate</div>
+        <div class="val mono" style="font-size:14px">${trip.originLat.toFixed(5)}, ${trip.originLng.toFixed(5)}</div>
+      </div>` : `
+      <div style="background:rgba(217,119,6,0.1); border-left:4px solid var(--warning); padding:12px 14px; border-radius:10px; margin-bottom:14px; text-align:center; font-size:13px; color:var(--ink-2)">
+        ⚠️ Coordinate non trovate — il tragitto verso la prima tappa non può essere calcolato.<br>
+        <button class="btn btn-sm" style="margin-top:8px; background:var(--moss); color:#fff; width:auto" onclick="fixOriginOnMap()">🗺️ Imposta sulla mappa</button>
+      </div>`}
+    <button class="btn btn-secondary" onclick="openOriginPrompt()">✏️ Modifica partenza</button>
+  `;
+  openModal('stage-detail-modal');
+}
+window.showOriginInfo = showOriginInfo;
+
+/* Scorciatoia: apre direttamente il map picker per correggere le coordinate mancanti della partenza.
+   confirmMapPicker() rileva automaticamente il contesto e salva subito su Firestore. */
+function fixOriginOnMap() {
+  state.originPickerCoords = null;
+  openMapPicker('origin');
+}
+window.fixOriginOnMap = fixOriginOnMap;
+
+function selectStageKind(kind) {
+  state.newStageKind = kind;
+  document.getElementById('ns-kind-stage')?.classList.toggle('active', kind === 'stage');
+  document.getElementById('ns-kind-waypoint')?.classList.toggle('active', kind === 'waypoint');
+  document.getElementById('ns-kind-alternative')?.classList.toggle('active', kind === 'alternative');
+
+  const hintEl = document.getElementById('ns-kind-hint');
+  const parentField = document.getElementById('ns-parent-field');
+  if (kind === 'waypoint') {
+    if (hintEl) hintEl.textContent = 'Tappa secondaria: sosta lungo il percorso, inclusa nel tragitto ma senza numero principale.';
+    if (parentField) parentField.style.display = 'none';
+  } else if (kind === 'alternative') {
+    if (hintEl) hintEl.textContent = 'Tappa alternativa: un\'opzione in più per una tappa già esistente — appare affiancata ad essa, non nel percorso.';
+    if (parentField) parentField.style.display = 'block';
+    populateAlternativeParentSelect();
+  } else {
+    if (hintEl) hintEl.textContent = 'Tappa principale: fa parte del percorso ed è numerata nell\'itinerario.';
+    if (parentField) parentField.style.display = 'none';
+  }
+}
+window.selectStageKind = selectStageKind;
+
+/* Popola il menu a tendina "Alternativa a" con le tappe principali/secondarie esistenti
+   (esclude l'eventuale tappa in modifica per evitare auto-riferimenti) */
+function populateAlternativeParentSelect() {
+  const sel = document.getElementById('ns-parent-stage');
+  if (!sel) return;
+  const candidates = (state.currentStages || []).filter(s =>
+    s.kind !== 'alternative' && s.id !== state.editingStageId
+  );
+  if (!candidates.length) {
+    sel.innerHTML = '<option value="">Nessuna tappa disponibile — creane una prima</option>';
+    return;
+  }
+  const prevValue = sel.value;
+  sel.innerHTML = candidates.map(s =>
+    `<option value="${s.id}">${s.kind === 'waypoint' ? '📌' : '📍'} ${escapeHtml(s.title || 'Senza nome')}</option>`
+  ).join('');
+  // Ripristina la selezione precedente se ancora valida, altrimenti usa il valore già salvato in edit
+  if (prevValue && candidates.some(c => c.id === prevValue)) sel.value = prevValue;
+}
+window.populateAlternativeParentSelect = populateAlternativeParentSelect;
+
+async function saveStage() {
   const title = document.getElementById('ns-title').value.trim();
   const date = document.getElementById('ns-date').value;
   const days = parseInt(document.getElementById('ns-days').value) || 1;
   const notes = document.getElementById('ns-notes').value.trim();
   if (!title) return showToast('Inserisci un nome', 'error');
+
+  const kind = ['waypoint', 'alternative'].includes(state.newStageKind) ? state.newStageKind : 'stage';
+
+  let parentId = null;
+  if (kind === 'alternative') {
+    const parentSel = document.getElementById('ns-parent-stage');
+    parentId = parentSel ? parentSel.value : '';
+    if (!parentId) return showToast('Scegli a quale tappa è alternativa', 'error');
+  }
+
   try {
     showLoader(true);
-    const data = {
-      title, date, days, notes,
-      order: state.currentStages.length,
-      createdAt: window.FB.serverTimestamp(),
-      createdBy: state.user.uid
-    };
+    const isEdit = !!state.editingStageId;
+    const data = { title, date, days, notes, kind };
+    data.parentId = kind === 'alternative' ? parentId : null;
     if (state.newStageData) {
       data.lat = state.newStageData.lat;
       data.lng = state.newStageData.lng;
       data.address = state.newStageData.address || '';
     }
-    await window.FB.addDoc(window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'stages'), data);
-    closeModal('new-stage-modal');
-    document.getElementById('ns-title').value = '';
-    document.getElementById('ns-search').value = '';
-    document.getElementById('ns-date').value = '';
-    document.getElementById('ns-notes').value = '';
-    document.getElementById('ns-coords').textContent = 'Nessuna';
-    document.getElementById('stage-search-results').style.display = 'none';
-    state.newStageData = null;
-    showToast('Tappa aggiunta! 📍', 'success');
+    if (isEdit) {
+      // UPDATE existing
+      await window.FB.updateDoc(
+        window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'stages', state.editingStageId),
+        data
+      );
+      showToast('Tappa aggiornata ✏️', 'success');
+    } else {
+      // CREATE new
+      data.order = state.currentStages.length;
+      data.createdAt = window.FB.serverTimestamp();
+      data.createdBy = state.user.uid;
+      await window.FB.addDoc(window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'stages'), data);
+      const msg = kind === 'waypoint' ? 'Tappa secondaria aggiunta! 📌'
+                : kind === 'alternative' ? 'Alternativa aggiunta! 🔀'
+                : 'Tappa aggiunta! 📍';
+      showToast(msg, 'success');
+    }
+    closeStageModal();
   } catch (e) { console.error(e); showToast('Errore: ' + e.message, 'error'); }
   finally { showLoader(false); }
 }
+window.saveStage = saveStage;
+
+// Legacy alias — some old code still calls createStage
+async function createStage() { return saveStage(); }
 window.createStage = createStage;
 
+function openEditStage(stageId) {
+  const s = state.currentStages.find(x => x.id === stageId);
+  if (!s) return;
+  state.editingStageId = stageId;
+  // Precompila form
+  document.getElementById('ns-title').value = s.title || '';
+  document.getElementById('ns-search').value = '';
+  document.getElementById('ns-date').value = s.date || '';
+  document.getElementById('ns-days').value = s.days || 1;
+  document.getElementById('ns-notes').value = s.notes || '';
+  const kind = ['waypoint', 'alternative'].includes(s.kind) ? s.kind : 'stage';
+  selectStageKind(kind);
+  if (kind === 'alternative') {
+    // populateAlternativeParentSelect già chiamato da selectStageKind; imposta il valore salvato
+    setTimeout(() => {
+      const sel = document.getElementById('ns-parent-stage');
+      if (sel && s.parentId) sel.value = s.parentId;
+    }, 0);
+  }
+  const coordsEl = document.getElementById('ns-coords');
+  if (s.lat != null && s.lng != null) {
+    coordsEl.textContent = `${s.lat.toFixed(5)}, ${s.lng.toFixed(5)}`;
+    state.newStageData = { lat: s.lat, lng: s.lng, address: s.address || '' };
+  } else {
+    coordsEl.textContent = 'Nessuna';
+    state.newStageData = null;
+  }
+  document.getElementById('stage-search-results').style.display = 'none';
+  // Cambia titolo modal + pulsante
+  document.getElementById('ns-modal-title').innerHTML = '✏️ Modifica tappa';
+  document.getElementById('ns-save-btn').textContent = 'Salva modifiche';
+  openModal('new-stage-modal');
+}
+window.openEditStage = openEditStage;
+
+function closeStageModal() {
+  closeModal('new-stage-modal');
+  // Reset per la prossima apertura
+  state.editingStageId = null;
+  state.newStageData = null;
+  document.getElementById('ns-title').value = '';
+  document.getElementById('ns-search').value = '';
+  document.getElementById('ns-date').value = '';
+  document.getElementById('ns-days').value = 1;
+  document.getElementById('ns-notes').value = '';
+  document.getElementById('ns-coords').textContent = 'Nessuna';
+  document.getElementById('stage-search-results').style.display = 'none';
+  document.getElementById('ns-modal-title').innerHTML = '📍 Nuova tappa';
+  document.getElementById('ns-save-btn').textContent = 'Salva tappa';
+  selectStageKind('stage');
+}
+window.closeStageModal = closeStageModal;
+
+function openNewStageModal(presetKind, presetParentId) {
+  // Assicura stato pulito (non in edit mode)
+  state.editingStageId = null;
+  document.getElementById('ns-modal-title').innerHTML = '📍 Nuova tappa';
+  document.getElementById('ns-save-btn').textContent = 'Salva tappa';
+  selectStageKind(presetKind === 'alternative' || presetKind === 'waypoint' ? presetKind : 'stage');
+  if (presetKind === 'alternative' && presetParentId) {
+    setTimeout(() => {
+      const sel = document.getElementById('ns-parent-stage');
+      if (sel) sel.value = presetParentId;
+    }, 0);
+  }
+  openModal('new-stage-modal');
+}
+window.openNewStageModal = openNewStageModal;
+
 async function deleteStage(id) {
-  if (!confirm('Eliminare questa tappa?')) return;
+  const children = (state.currentStages || []).filter(x => x.kind === 'alternative' && x.parentId === id);
+  const confirmMsg = children.length
+    ? `Eliminare questa tappa e le sue ${children.length} alternative collegate?`
+    : 'Eliminare questa tappa?';
+  if (!confirm(confirmMsg)) return;
   try {
-    await window.FB.deleteDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'stages', id));
+    if (children.length) {
+      const batch = window.FB.writeBatch(window.FB.db);
+      batch.delete(window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'stages', id));
+      children.forEach(c => batch.delete(window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'stages', c.id)));
+      await batch.commit();
+    } else {
+      await window.FB.deleteDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'stages', id));
+    }
     showToast('Tappa eliminata');
   } catch (e) { showToast('Errore: ' + e.message, 'error'); }
 }
 window.deleteStage = deleteStage;
+
+/* Riordina una tappa su/giù nell'elenco — aggiorna 'order' su Firestore,
+   la mappa e la lista si aggiornano da sole tramite il listener realtime */
+async function moveStage(id, direction) {
+  // Il riordino su/giù si applica solo a tappe principali/secondarie —
+  // le alternative restano agganciate al loro genitore (parentId) e non hanno posizione propria in sequenza
+  const mainStages = (state.currentStages || []).filter(s => s.kind !== 'alternative');
+  const idx = mainStages.findIndex(s => s.id === id);
+  if (idx === -1) return;
+  const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+  if (targetIdx < 0 || targetIdx >= mainStages.length) return; // già ai bordi
+
+  const a = mainStages[idx];
+  const b = mainStages[targetIdx];
+
+  try {
+    // Scambia i valori 'order' tra le due tappe coinvolte
+    const orderA = a.order != null ? a.order : idx;
+    const orderB = b.order != null ? b.order : targetIdx;
+    const batch = window.FB.writeBatch(window.FB.db);
+    batch.update(window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'stages', a.id), { order: orderB });
+    batch.update(window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'stages', b.id), { order: orderA });
+    await batch.commit();
+    // Aggiornamento ottimistico locale (il listener onSnapshot confermerà a breve)
+    a.order = orderB; b.order = orderA;
+    state.currentStages.sort((x, y) => (x.order ?? 0) - (y.order ?? 0));
+    renderStages();
+    if (state.currentTab === 'map') renderMap();
+  } catch (e) {
+    console.error(e);
+    showToast('Errore riordino: ' + e.message, 'error');
+  }
+}
+window.moveStage = moveStage;
 
 /* Location search via Nominatim (OpenStreetMap) */
 async function searchLocation() {
@@ -5428,12 +6709,15 @@ const mapState = {
   drawPolyline: null, // L.Polyline temporanea mentre si disegna
   drawDots: [],       // cerchietti di anteprima punti
   savedRoutes: [],    // L.Polyline salvate
-  allMarkerLayers: [] // tutti i marker layer per pulizia
+  allMarkerLayers: [], // tutti i marker layer per pulizia
+  showSegTimes: undefined,     // toggle etichette tempo/distanza per segmento (init da localStorage al primo renderMap)
+  segmentLabelMarkers: []      // riferimenti alle etichette per poterle nascondere/mostrare
 };
 
 function setMapTool(tool) {
   mapState.tool = tool;
-  document.querySelectorAll('.map-tool-btn').forEach(b => b.classList.remove('active'));
+  // Rimuovi active solo dai bottoni strumento (non da quelli stile percorso)
+  document.querySelectorAll('.map-tool-btn:not(.map-tool-style)').forEach(b => b.classList.remove('active'));
   document.getElementById('tool-' + tool)?.classList.add('active');
 
   const hint = document.getElementById('map-tool-hint');
@@ -5452,6 +6736,8 @@ function setMapTool(tool) {
     if (hint) hint.textContent = '➕ Tocca la mappa dove vuoi aggiungere una nuova tappa';
     map.getContainer().style.cursor = 'crosshair';
   }
+  // Riapplica stato attivo del toggle stile percorso
+  updateRouteStyleToggle();
 }
 window.setMapTool = setMapTool;
 
@@ -5516,6 +6802,230 @@ function _curvedPath(stages) {
   return full;
 }
 
+/* ============================================
+   ROUTE STYLE — strade (OSRM) vs volo (curva)
+   ============================================ */
+function setRouteStyle(style) {
+  if (!state.currentTripId) return;
+  const prev = state.currentTrip?.routeStyle || 'road';
+  if (prev === style) return;
+  state.currentTrip.routeStyle = style;
+  updateRouteStyleToggle();
+  // Ridisegna la mappa se attualmente aperta
+  if (state.currentTab === 'map') renderMap();
+  // Persist su Firestore (fire-and-forget)
+  window.FB.updateDoc(
+    window.FB.doc(window.FB.db, 'trips', state.currentTripId),
+    { routeStyle: style }
+  ).then(() => {
+    const label = style === 'road' ? '🛣️ Percorso su strade' : '✈️ Percorso volo';
+    showToast(label, 'success');
+  }).catch(err => console.warn('routeStyle save error', err));
+}
+window.setRouteStyle = setRouteStyle;
+
+function updateRouteStyleToggle() {
+  const style = state.currentTrip?.routeStyle || 'road';
+  const roadBtn = document.getElementById('route-style-road');
+  const flyBtn = document.getElementById('route-style-fly');
+  if (roadBtn) roadBtn.classList.toggle('active', style === 'road');
+  if (flyBtn) flyBtn.classList.toggle('active', style === 'fly');
+}
+window.updateRouteStyleToggle = updateRouteStyleToggle;
+
+/* Percorso "volo": curva Bezier + aereo animato — colore diverso per segmenti con tappa intermedia */
+function drawFlyRoute(points) {
+  mapState.segmentLabelMarkers = mapState.segmentLabelMarkers || [];
+  let fullPath = [];
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i], b = points[i + 1];
+    const isWaypointSeg = a.kind === 'waypoint' || b.kind === 'waypoint';
+    const color = isWaypointSeg ? '#2d6a7e' : '#e8763a';
+    const ratio = (i % 2 === 0) ? 0.18 : -0.18;
+    const ctrl = _curveControlPoint([a.lat, a.lng], [b.lat, b.lng], ratio);
+    const seg = _bezierPoints([a.lat, a.lng], ctrl, [b.lat, b.lng], 30);
+
+    L.polyline(seg, { color, weight: 10, opacity: 0.18, lineCap: 'round', lineJoin: 'round' }).addTo(state.mapInstance);
+    L.polyline(seg, { color, weight: 4, opacity: 0.9, lineCap: 'round', lineJoin: 'round', dashArray: '8, 8' }).addTo(state.mapInstance);
+
+    // Tempo stimato (linea d'aria non ha durata di guida reale, mostriamo solo distanza approx)
+    if (mapState.showSegTimes) {
+      const distKm = a === b ? 0 : haversineKm(a.lat, a.lng, b.lat, b.lng);
+      const mid = seg[Math.floor(seg.length / 2)];
+      const label = L.marker(mid, {
+        icon: L.divIcon({
+          html: `<div class="seg-time-label" style="background:${isWaypointSeg ? '#2d6a7e' : '#c2410c'}">📏 ${distKm.toFixed(0)} km</div>`,
+          className: '', iconSize: [80, 22], iconAnchor: [40, 11]
+        }),
+        interactive: false, zIndexOffset: 500
+      }).addTo(state.mapInstance);
+      mapState.segmentLabelMarkers.push(label);
+    }
+
+    if (i > 0) seg.shift();
+    fullPath = fullPath.concat(seg);
+  }
+
+  // Linea punteggiata animata sopra l'intero percorso
+  const dashLine = L.polyline(fullPath, {
+    color: '#ffffff', weight: 3, opacity: 0.85,
+    dashArray: '2, 14', lineCap: 'round'
+  }).addTo(state.mapInstance);
+  let dashOffset = 0;
+  const animateDash = () => {
+    dashOffset -= 1;
+    try {
+      const path = dashLine.getElement();
+      if (path) path.style.strokeDashoffset = dashOffset;
+    } catch (_) {}
+    mapState.planeAnim = requestAnimationFrame(animateDash);
+  };
+  animateDash();
+
+  // Aereo animato lungo l'intero percorso
+  const planeIcon = L.divIcon({
+    html: `<div style="font-size:24px; transform-origin:center; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35))">✈️</div>`,
+    iconSize: [28, 28], iconAnchor: [14, 14], className: ''
+  });
+  const plane = L.marker(fullPath[0], { icon: planeIcon, interactive: false }).addTo(state.mapInstance);
+  mapState.planeMarker = plane;
+  let idx = 0;
+  const step = () => {
+    idx = (idx + 1) % fullPath.length;
+    plane.setLatLng(fullPath[idx]);
+    try {
+      const next = fullPath[(idx + 1) % fullPath.length];
+      const dx = next[1] - fullPath[idx][1];
+      const dy = next[0] - fullPath[idx][0];
+      const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+      const el = plane.getElement();
+      if (el) {
+        const inner = el.querySelector('div');
+        if (inner) inner.style.transform = `rotate(${-angle}deg)`;
+      }
+    } catch (_) {}
+  };
+  mapState.planeStepInterval = setInterval(step, 80);
+}
+
+// Distanza approssimata in km tra due coordinate (formula haversine)
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) ** 2 + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+/* Percorso "strade": OSRM, un fetch per ogni segmento consecutivo —
+   permette colore diverso per segmenti con tappa intermedia + etichette tempo per tratta */
+async function drawRoadRoute(points) {
+  const type = state.currentTrip?.type || 'car';
+  const profile = (type === 'walk') ? 'foot'
+                : (type === 'bike') ? 'bike'
+                : 'driving'; // camper/car/mixed/altro
+
+  mapState.segmentLabelMarkers = mapState.segmentLabelMarkers || [];
+
+  const vehicleEmoji = (type === 'walk') ? '🚶'
+                     : (type === 'bike') ? '🚴'
+                     : (type === 'camper') ? '🚐'
+                     : (type === 'boat') ? '⛵'
+                     : (type === 'sup') ? '🏄'
+                     : (type === 'flight') ? '✈️'
+                     : '🚗';
+
+  let combinedLine = [];
+
+  for (let i = 0; i < points.length - 1; i++) {
+    const a = points[i], b = points[i + 1];
+    const isWaypointSeg = a.kind === 'waypoint' || b.kind === 'waypoint';
+    const color = isWaypointSeg ? '#2d6a7e' : '#c2410c';
+
+    // Linea provvisoria mentre carica
+    const provisional = L.polyline([[a.lat, a.lng], [b.lat, b.lng]], {
+      color, weight: 3, opacity: 0.3, dashArray: '4, 6'
+    }).addTo(state.mapInstance);
+
+    const url = `https://router.project-osrm.org/route/v1/${profile}/${a.lng},${a.lat};${b.lng},${b.lat}?overview=full&geometries=geojson`;
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      try { state.mapInstance.removeLayer(provisional); } catch(_) {}
+
+      if (!data.routes || !data.routes[0]) {
+        drawStraightFallback([[a.lat, a.lng], [b.lat, b.lng]], 'Routing non disponibile', color);
+        combinedLine = combinedLine.concat([[a.lat, a.lng], [b.lat, b.lng]]);
+        continue;
+      }
+
+      const line = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+      const distanceKm = (data.routes[0].distance / 1000).toFixed(0);
+      const durationTxt = formatDrivingDuration(data.routes[0].duration);
+
+      // Alone
+      L.polyline(line, { color, weight: 10, opacity: 0.16, lineCap: 'round', lineJoin: 'round' }).addTo(state.mapInstance);
+      // Linea principale
+      const mainLine = L.polyline(line, { color, weight: 5, opacity: 0.9, lineCap: 'round', lineJoin: 'round' }).addTo(state.mapInstance);
+      mainLine.bindPopup(`<strong>${isWaypointSeg ? '📌' : '🛣️'} ${escapeHtml(a.title || '')} → ${escapeHtml(b.title || '')}</strong><br>📏 ${distanceKm} km<br>⏱️ ~${durationTxt}`);
+
+      // Etichetta tempo al centro del segmento (se toggle attivo)
+      if (mapState.showSegTimes) {
+        const mid = line[Math.floor(line.length / 2)];
+        const label = L.marker(mid, {
+          icon: L.divIcon({
+            html: `<div class="seg-time-label" style="background:${color}">🕐 ${durationTxt} · ${distanceKm}km</div>`,
+            className: '', iconSize: [110, 22], iconAnchor: [55, 11]
+          }),
+          interactive: false, zIndexOffset: 500
+        }).addTo(state.mapInstance);
+        mapState.segmentLabelMarkers.push(label);
+      }
+
+      combinedLine = combinedLine.concat(line);
+    } catch (e) {
+      console.warn('OSRM fetch error', e);
+      try { state.mapInstance.removeLayer(provisional); } catch(_) {}
+      drawStraightFallback([[a.lat, a.lng], [b.lat, b.lng]], 'Routing offline', color);
+      combinedLine = combinedLine.concat([[a.lat, a.lng], [b.lat, b.lng]]);
+    }
+  }
+
+  // Veicolo animato lungo l'intero percorso combinato
+  if (combinedLine.length) {
+    const vehicleIcon = L.divIcon({
+      html: `<div style="font-size:24px; transform-origin:center; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35))">${vehicleEmoji}</div>`,
+      iconSize: [28, 28], iconAnchor: [14, 14], className: ''
+    });
+    const vehicle = L.marker(combinedLine[0], { icon: vehicleIcon, interactive: false }).addTo(state.mapInstance);
+    mapState.planeMarker = vehicle;
+    let idx = 0;
+    const step = () => {
+      idx = (idx + 1) % combinedLine.length;
+      vehicle.setLatLng(combinedLine[idx]);
+    };
+    mapState.planeStepInterval = setInterval(step, 60);
+  }
+}
+
+function drawStraightFallback(latLngs, msg, color) {
+  L.polyline(latLngs, {
+    color: color || '#c2410c', weight: 4, opacity: 0.85,
+    dashArray: '10, 8', lineCap: 'round'
+  }).addTo(state.mapInstance).bindPopup(msg || 'Linea diretta');
+}
+
+/* Toggle visualizzazione tempi di guida per segmento sulla mappa */
+function toggleSegmentTimes() {
+  mapState.showSegTimes = !mapState.showSegTimes;
+  try { localStorage.setItem('wildr_show_seg_times', mapState.showSegTimes ? '1' : '0'); } catch (_) {}
+  document.getElementById('toggle-seg-times')?.classList.toggle('active', mapState.showSegTimes);
+  // Ridisegna la mappa per applicare (le etichette richiedono ricalcolo/ridisegno)
+  if (state.currentTab === 'map') renderMap();
+}
+window.toggleSegmentTimes = toggleSegmentTimes;
+
 function renderMap() {
   const container = document.getElementById('trip-map');
   if (!container) return;
@@ -5527,9 +7037,15 @@ function renderMap() {
   mapState.drawDots = [];
   mapState.savedRoutes = [];
   mapState.planeMarker = null;
+  mapState.segmentLabelMarkers = [];
   if (mapState.planeAnim) { cancelAnimationFrame(mapState.planeAnim); mapState.planeAnim = null; }
+  // Inizializza toggle tempi (solo la prima volta)
+  if (mapState.showSegTimes === undefined) {
+    try { mapState.showSegTimes = localStorage.getItem('wildr_show_seg_times') !== '0'; } catch (_) { mapState.showSegTimes = true; }
+  }
+  document.getElementById('toggle-seg-times')?.classList.toggle('active', mapState.showSegTimes);
 
-  document.querySelectorAll('.map-tool-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.map-tool-btn:not(.map-tool-style)').forEach(b => b.classList.remove('active'));
   document.getElementById('tool-none')?.classList.add('active');
   const hint = document.getElementById('map-tool-hint');
   if (hint) hint.textContent = '';
@@ -5539,12 +7055,23 @@ function renderMap() {
     state.mapInstance = null;
   }
 
+  const trip = state.currentTrip;
+  const hasOrigin = trip?.originLat != null && trip?.originLng != null;
+  const allStagesWithCoords = state.currentStages.filter(s => s.lat != null && s.lng != null);
+  const stagesWithCoords = allStagesWithCoords.filter(s => s.kind !== 'alternative'); // esclude le alternative dal routing
+  const altsWithCoords = allStagesWithCoords.filter(s => s.kind === 'alternative');
+
+  // Punti ordinati per il routing: partenza (se presente) + tappe/secondarie in ordine (NO alternative)
+  const routePoints = [];
+  if (hasOrigin) routePoints.push({ lat: trip.originLat, lng: trip.originLng, kind: 'origin', title: trip.origin || 'Partenza' });
+  stagesWithCoords.forEach(s => routePoints.push({ lat: s.lat, lng: s.lng, kind: s.kind === 'waypoint' ? 'waypoint' : 'stage', title: s.title }));
+
   // Centro iniziale
   let center = [41.9, 12.5];
   let zoom = 5;
-  const stagesWithCoords = state.currentStages.filter(s => s.lat != null && s.lng != null);
   const allPoints = [
-    ...stagesWithCoords.map(s => [s.lat, s.lng]),
+    ...(hasOrigin ? [[trip.originLat, trip.originLng]] : []),
+    ...allStagesWithCoords.map(s => [s.lat, s.lng]),
     ...state.currentMarkers.map(m => [m.lat, m.lng])
   ];
   if (allPoints.length) {
@@ -5555,92 +7082,64 @@ function renderMap() {
   }
 
   state.mapInstance = L.map(container, { zoomControl: true }).setView(center, zoom);
-  // Tile layer con stile più "caldo" che si adatta bene al tema viaggio
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19, attribution: '© OpenStreetMap'
   }).addTo(state.mapInstance);
 
-  // ── Curva automatica tra tappe ──
-  if (stagesWithCoords.length > 1) {
-    const curved = _curvedPath(stagesWithCoords);
+  // ── Percorso: strade (OSRM) o volo (curva) in base a routeStyle — include partenza ──
+  if (routePoints.length > 1) {
+    const routeStyle = trip?.routeStyle || 'road'; // default = strade
+    if (routeStyle === 'road') {
+      drawRoadRoute(routePoints);
+    } else {
+      drawFlyRoute(routePoints);
+    }
+  }
+  updateRouteStyleToggle();
 
-    // Alone esterno (effetto glow)
-    L.polyline(curved, {
-      color: '#d97757',
-      weight: 10,
-      opacity: 0.18,
-      lineCap: 'round',
-      lineJoin: 'round'
-    }).addTo(state.mapInstance);
-
-    // Linea principale arancio tramonto
-    const mainLine = L.polyline(curved, {
-      color: '#d97757',
-      weight: 4,
-      opacity: 0.9,
-      lineCap: 'round',
-      lineJoin: 'round'
-    }).addTo(state.mapInstance);
-
-    // Linea punteggiata animata sopra (effetto "cammino")
-    const dashLine = L.polyline(curved, {
-      color: '#ffffff',
-      weight: 3,
-      opacity: 0.85,
-      dashArray: '2, 14',
-      lineCap: 'round'
-    }).addTo(state.mapInstance);
-
-    // Animazione: sposta il dashOffset per far "muovere" i trattini
-    let dashOffset = 0;
-    const animateDash = () => {
-      dashOffset -= 1;
-      try {
-        const path = dashLine.getElement();
-        if (path) path.style.strokeDashoffset = dashOffset;
-      } catch (_) {}
-      mapState.planeAnim = requestAnimationFrame(animateDash);
-    };
-    animateDash();
-
-    // Aereo animato che percorre la traccia
-    const planeIcon = L.divIcon({
-      html: `<div style="font-size:24px; transform-origin:center; filter:drop-shadow(0 2px 4px rgba(0,0,0,0.35))">✈️</div>`,
-      iconSize: [28, 28], iconAnchor: [14, 14], className: ''
+  // ── Marker partenza 🏠 ──
+  if (hasOrigin) {
+    const homeIcon = L.divIcon({
+      html: `<div style="background:#5b6f3a;color:#fff;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 4px 12px rgba(91,111,58,0.5);border:2.5px solid #fff">🏠</div>`,
+      iconSize: [38, 38], iconAnchor: [19, 19], className: ''
     });
-    const plane = L.marker(curved[0], { icon: planeIcon, interactive: false }).addTo(state.mapInstance);
-    mapState.planeMarker = plane;
-
-    let idx = 0;
-    const step = () => {
-      idx = (idx + 1) % curved.length;
-      plane.setLatLng(curved[idx]);
-      // Rotazione dell'aereo verso il prossimo punto
-      try {
-        const next = curved[(idx + 1) % curved.length];
-        const dx = next[1] - curved[idx][1];
-        const dy = next[0] - curved[idx][0];
-        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-        const el = plane.getElement();
-        if (el) {
-          const inner = el.querySelector('div');
-          if (inner) inner.style.transform = `rotate(${-angle}deg)`;
-        }
-      } catch (_) {}
-    };
-    mapState.planeStepInterval = setInterval(step, 80);
+    L.marker([trip.originLat, trip.originLng], { icon: homeIcon }).addTo(state.mapInstance)
+      .bindPopup(`<strong>🏠 Partenza</strong><br/>${escapeHtml(trip.origin || '')}${trip.startDate ? '<br/>📅 ' + formatDate(trip.startDate) : ''}`);
   }
 
-  // ── Tappe numerate con colore palette tramonto ──
-  state.currentStages.forEach((s, i) => {
-    if (s.lat != null && s.lng != null) {
-      const icon = L.divIcon({
-        html: `<div style="background:linear-gradient(135deg,#d97757,#f4a261);color:#fff;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(217,119,87,0.5);border:2.5px solid #fff"><span style="transform:rotate(45deg)">${i + 1}</span></div>`,
-        iconSize: [36, 36], iconAnchor: [18, 36], className: ''
-      });
-      L.marker([s.lat, s.lng], { icon }).addTo(state.mapInstance)
-        .bindPopup(`<strong>${escapeHtml(s.title)}</strong>${s.date ? '<br/>📅 ' + formatDate(s.date) : ''}${s.notes ? '<br/>' + escapeHtml(s.notes) : ''}`);
+  // ── Tappe numerate (le secondarie hanno badge diverso, senza numero) ──
+  let stageCounter = 0;
+  stagesWithCoords.forEach((s) => {
+    const isWaypoint = s.kind === 'waypoint';
+    if (!isWaypoint) stageCounter++;
+    const icon = isWaypoint
+      ? L.divIcon({
+          html: `<div style="background:#2d6a7e;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 4px 10px rgba(45,106,126,0.5);border:2.5px solid #fff">📌</div>`,
+          iconSize: [30, 30], iconAnchor: [15, 15], className: ''
+        })
+      : L.divIcon({
+          html: `<div style="background:linear-gradient(135deg,#d97757,#f4a261);color:#fff;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;box-shadow:0 4px 12px rgba(217,119,87,0.5);border:2.5px solid #fff"><span style="transform:rotate(45deg)">${stageCounter}</span></div>`,
+          iconSize: [36, 36], iconAnchor: [18, 36], className: ''
+        });
+    L.marker([s.lat, s.lng], { icon }).addTo(state.mapInstance)
+      .bindPopup(`<strong>${isWaypoint ? '📌 ' : ''}${escapeHtml(s.title)}</strong>${s.date ? '<br/>📅 ' + formatDate(s.date) : ''}${s.notes ? '<br/>' + escapeHtml(s.notes) : ''}`);
+  });
+
+  // ── Tappe ALTERNATIVE — marker distinto (sole/dorato), collegate al genitore con linea tratteggiata, non instradate ──
+  altsWithCoords.forEach(a => {
+    const parent = state.currentStages.find(p => p.id === a.parentId);
+    // Linea tratteggiata sottile verso il genitore, se il genitore ha coordinate
+    if (parent && parent.lat != null && parent.lng != null) {
+      L.polyline([[parent.lat, parent.lng], [a.lat, a.lng]], {
+        color: '#f5b04a', weight: 2.5, opacity: 0.75, dashArray: '2, 8', lineCap: 'round'
+      }).addTo(state.mapInstance);
     }
+    const altIcon = L.divIcon({
+      html: `<div style="background:#f5b04a;color:#6b4423;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;box-shadow:0 4px 10px rgba(245,176,74,0.55);border:2.5px dashed #fff">🔀</div>`,
+      iconSize: [30, 30], iconAnchor: [15, 15], className: ''
+    });
+    L.marker([a.lat, a.lng], { icon: altIcon }).addTo(state.mapInstance)
+      .bindPopup(`<strong>🔀 ${escapeHtml(a.title || 'Alternativa')}</strong><br/><em style="font-size:12px">Alternativa a: ${escapeHtml(parent?.title || '—')}</em>${a.notes ? '<br/>' + escapeHtml(a.notes) : ''}`);
   });
 
   // ── Marker emoji personalizzati ──
@@ -5689,10 +7188,15 @@ function renderMap() {
     }
     if (tool === 'addstage') {
       // Aggiungi una tappa con coordinate dirette
+      state.editingStageId = null;
       state.newStageData = { lat, lng };
       document.getElementById('ns-title').value = '';
       document.getElementById('ns-date').value = '';
       document.getElementById('ns-notes').value = '';
+      document.getElementById('ns-coords').textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      document.getElementById('ns-modal-title').innerHTML = '📍 Nuova tappa';
+      document.getElementById('ns-save-btn').textContent = 'Salva tappa';
+      selectStageKind('stage');
       // Geocoding inverso per pre-compilare il nome
       fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=14`)
         .then(r => r.json())
@@ -6038,6 +7542,7 @@ function openEditTripModal() {
   const t = state.currentTrip;
   if (!t) return;
   document.getElementById('et-name').value = t.name || '';
+  document.getElementById('et-origin').value = t.origin || '';
   document.getElementById('et-destination').value = t.destination || '';
   document.getElementById('et-start').value = t.startDate || '';
   document.getElementById('et-end').value = t.endDate || '';
@@ -6052,7 +7557,8 @@ window.openEditTripModal = openEditTripModal;
 async function saveTripEdit() {
   try {
     showLoader(true);
-    await window.FB.updateDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId), {
+    const newOrigin = document.getElementById('et-origin').value.trim();
+    const data = {
       name: document.getElementById('et-name').value.trim(),
       destination: document.getElementById('et-destination').value.trim(),
       startDate: document.getElementById('et-start').value,
@@ -6060,8 +7566,19 @@ async function saveTripEdit() {
       budget: parseFloat(document.getElementById('et-budget').value) || 0,
       currency: document.getElementById('et-currency').value || '€',
       description: document.getElementById('et-description').value.trim(),
-      transport: document.getElementById('et-transport').value.trim()
-    });
+      transport: document.getElementById('et-transport').value.trim(),
+      origin: newOrigin
+    };
+    // Se la partenza è cambiata rispetto a quella salvata, ri-geocodifica
+    if (newOrigin && newOrigin !== (state.currentTrip?.origin || '')) {
+      const geo = await geocodeAddress(newOrigin);
+      if (geo) { data.originLat = geo.lat; data.originLng = geo.lng; }
+    } else if (!newOrigin) {
+      data.originLat = null;
+      data.originLng = null;
+    }
+    await window.FB.updateDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId), data);
+    if (state.currentTrip) Object.assign(state.currentTrip, data);
     closeModal('edit-trip-modal');
     showToast('Viaggio aggiornato ✨', 'success');
   } catch (e) { showToast('Errore: ' + e.message, 'error'); }
@@ -6593,7 +8110,7 @@ async function renderTripPhotos() {
     empty.style.display = 'none';
     grid.innerHTML = photos.map((p, idx) => `
       <div class="photo-tile" onclick="openLightbox(${idx})">
-        <img src="${p.thumbUrl || p.url}" alt="" loading="lazy" />
+        <img src="${p.thumbUrl || p.url}" alt="" loading="lazy" onerror="this.closest('.photo-tile').classList.add('photo-broken'); this.replaceWith(Object.assign(document.createElement('div'),{className:'photo-broken-icon',innerHTML:'🖼️'}))" />
         ${p.uploadedBy === state.user.uid ? `<button class="photo-del" onclick="event.stopPropagation(); deleteTripPhoto('${p.id}')">×</button>` : ''}
       </div>
     `).join('');
@@ -7704,6 +9221,7 @@ window.renderAffiliateLinks = renderAffiliateLinks;
 function searchTrips(query) {
   const q = (query || '').trim().toLowerCase();
   state.tripSearchQuery = q;
+  // Reuse filterTrips + apply text filter
   const list = document.getElementById('trips-list');
   if (!list) return;
   const now = Date.now();
@@ -7725,10 +9243,33 @@ function searchTrips(query) {
     list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔍</div><h3>Nessun viaggio trovato</h3><p>Prova con un'altra parola</p></div>`;
     return;
   }
-  // Durante una ricerca attiva mostriamo una lista piatta di risultati (niente sezioni);
-  // se il campo di ricerca è vuoto, torniamo al raggruppamento normale.
-  const grouped = !q && (filter === 'all' || !filter);
-  list.innerHTML = renderTripsListHtml(trips, now, grouped);
+  list.innerHTML = trips.map(t => {
+    const type = TRIP_TYPES[t.type] || TRIP_TYPES.mixed;
+    const dateRange = formatDateRange(t.startDate, t.endDate);
+    const nPpl = (t.participants || []).length;
+    let statusBadge = '';
+    if (t.startDate && t.endDate) {
+      const start = new Date(t.startDate).getTime();
+      const end = new Date(t.endDate).getTime() + 86400000;
+      if (start > now) {
+        const days = Math.ceil((start - now) / 86400000);
+        statusBadge = `<span class="tag" style="background:var(--moss-soft); color:var(--moss)">🕐 tra ${days}g</span>`;
+      } else if (end > now) {
+        statusBadge = `<span class="tag" style="background:var(--ochre-soft); color:var(--ochre)">🎉 in corso</span>`;
+      } else {
+        statusBadge = `<span class="tag">✓ concluso</span>`;
+      }
+    }
+    return `
+      <div class="trip-card" onclick="openTrip('${t.id}')">
+        <div class="trip-icon ${type.cls}">${type.emoji}</div>
+        <div class="trip-info">
+          <div class="trip-name">${escapeHtml(t.name)}</div>
+          <div class="trip-meta">${escapeHtml(t.destination || '—')} · ${dateRange}</div>
+          <div class="trip-tags">${statusBadge}<span class="tag">${nPpl} 👥</span></div>
+        </div>
+      </div>`;
+  }).join('');
 }
 window.searchTrips = searchTrips;
 
@@ -7958,150 +9499,419 @@ function copyInviteLink() {
 }
 window.copyInviteLink = copyInviteLink;
 
+/* ============================================
+   MAP PICKER — seleziona una tappa (o la partenza) cliccando sulla mappa
+   ============================================ */
+let _mapPickerInstance = null;
+let _mapPickerMarker = null;
+let _mapPickerSelected = null;
+let _mapPickerMode = 'stage'; // 'stage' | 'origin'
+
+function openMapPicker(mode) {
+  _mapPickerMode = mode === 'origin' ? 'origin' : 'stage';
+  openModal('map-picker-modal');
+  _mapPickerSelected = null;
+  const confirmBtn = document.getElementById('map-picker-confirm');
+  if (confirmBtn) confirmBtn.disabled = true;
+  const coordsEl = document.getElementById('map-picker-coords');
+  if (coordsEl) coordsEl.innerHTML = '<span style="color:var(--ink-muted)">Nessun punto selezionato</span>';
+  const titleEl = document.getElementById('map-picker-title');
+  if (titleEl) titleEl.textContent = _mapPickerMode === 'origin' ? '🗺️ Seleziona la partenza' : '🗺️ Seleziona sulla mappa';
+  const subEl = document.getElementById('map-picker-subtitle');
+  if (subEl) subEl.textContent = _mapPickerMode === 'origin' ? 'Tocca il punto esatto da cui parti' : 'Tocca il punto esatto della tappa';
+
+  // Slight delay so modal is rendered before initializing map
+  setTimeout(() => {
+    const container = document.getElementById('map-picker');
+    if (!container) return;
+
+    // Determine initial center: last stage → origin → destination geocoded → world
+    let center = [45, 12];
+    let zoom = 4;
+    const stages = state.currentStages || [];
+    const lastWithCoords = [...stages].reverse().find(s => s.lat != null && s.lng != null);
+    if (lastWithCoords) {
+      center = [lastWithCoords.lat, lastWithCoords.lng];
+      zoom = 8;
+    }
+
+    // If map already exists, remove it (modal reopen)
+    if (_mapPickerInstance) {
+      try { _mapPickerInstance.remove(); } catch(e) {}
+      _mapPickerInstance = null;
+      _mapPickerMarker = null;
+    }
+
+    _mapPickerInstance = L.map('map-picker', {
+      zoomControl: true,
+      attributionControl: false
+    }).setView(center, zoom);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(_mapPickerInstance);
+
+    // Add existing stages as faded reference markers
+    stages.forEach((s, i) => {
+      if (s.lat == null || s.lng == null) return;
+      const iconHtml = `<div style="width:32px; height:32px; border-radius:50%; background:var(--grad-sunset); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.3); opacity:0.65">${i+1}</div>`;
+      L.marker([s.lat, s.lng], {
+        icon: L.divIcon({ html: iconHtml, className: '', iconSize: [32,32], iconAnchor: [16,16] })
+      }).addTo(_mapPickerInstance).bindPopup(`Tappa ${i+1}: ${s.title||''}`);
+    });
+
+    // Origin marker if present
+    if (state.currentTrip?.originLat && state.currentTrip?.originLng) {
+      const homeIcon = `<div style="width:36px; height:36px; border-radius:50%; background:var(--moss); color:#fff; display:flex; align-items:center; justify-content:center; font-size:18px; border:2px solid #fff; box-shadow:0 2px 8px rgba(0,0,0,0.3); opacity:0.65">🏠</div>`;
+      L.marker([state.currentTrip.originLat, state.currentTrip.originLng], {
+        icon: L.divIcon({ html: homeIcon, className: '', iconSize: [36,36], iconAnchor: [18,18] })
+      }).addTo(_mapPickerInstance).bindPopup('Partenza');
+    }
+
+    // Click handler
+    _mapPickerInstance.on('click', async (e) => {
+      const { lat, lng } = e.latlng;
+      _mapPickerSelected = { lat, lng };
+
+      // Update marker
+      if (_mapPickerMarker) {
+        _mapPickerMarker.setLatLng([lat, lng]);
+      } else {
+        const iconHtml = `<div style="width:44px; height:44px; border-radius:50%; background:var(--ochre); color:#fff; display:flex; align-items:center; justify-content:center; font-size:22px; border:3px solid #fff; box-shadow:0 4px 14px rgba(0,0,0,0.4); animation: pulse 1.5s infinite">📍</div>`;
+        _mapPickerMarker = L.marker([lat, lng], {
+          icon: L.divIcon({ html: iconHtml, className: '', iconSize: [44,44], iconAnchor: [22,22] }),
+          zIndexOffset: 1000
+        }).addTo(_mapPickerInstance);
+      }
+
+      // Update UI
+      const coordsEl = document.getElementById('map-picker-coords');
+      if (coordsEl) coordsEl.innerHTML = `<strong>📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}</strong><br><span style="font-size:11px; color:var(--ink-muted)">Recupero indirizzo…</span>`;
+      const confirmBtn = document.getElementById('map-picker-confirm');
+      if (confirmBtn) confirmBtn.disabled = false;
+
+      // Reverse geocode for address
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=it&zoom=14`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.display_name) {
+            _mapPickerSelected.address = data.display_name;
+            _mapPickerSelected.name = data.name || data.display_name.split(',')[0];
+            const coordsEl2 = document.getElementById('map-picker-coords');
+            if (coordsEl2) coordsEl2.innerHTML = `<strong>📍 ${data.display_name.split(',').slice(0,2).join(',')}</strong><br><span style="font-size:11px; color:var(--ink-muted); font-family:'JetBrains Mono',monospace">${lat.toFixed(5)}, ${lng.toFixed(5)}</span>`;
+          }
+        }
+      } catch (e) { /* offline or blocked — that's ok, we already have coords */ }
+    });
+
+    // Fix map sizing after modal transition
+    setTimeout(() => { if (_mapPickerInstance) _mapPickerInstance.invalidateSize(); }, 100);
+    setTimeout(() => { if (_mapPickerInstance) _mapPickerInstance.invalidateSize(); }, 400);
+  }, 100);
+}
+window.openMapPicker = openMapPicker;
+
+function closeMapPicker() {
+  closeModal('map-picker-modal');
+  // Keep the map instance alive so reopening is faster; just clear marker
+}
+window.closeMapPicker = closeMapPicker;
+
+async function confirmMapPicker() {
+  if (!_mapPickerSelected) { showToast('Tocca prima un punto sulla mappa', 'error'); return; }
+  const { lat, lng, address, name } = _mapPickerSelected;
+
+  if (_mapPickerMode === 'origin') {
+    const originInput = document.getElementById('quick-origin-input');
+    if (originInput) {
+      // Siamo nel prompt completo "Da dove parti?" — memorizza le coordinate,
+      // l'utente conferma con "Salva partenza"
+      state.originPickerCoords = { lat, lng };
+      if (!originInput.value.trim() && (name || address)) {
+        originInput.value = name || (address ? address.split(',').slice(0,2).join(',') : '');
+      }
+      const statusEl = document.getElementById('quick-origin-status');
+      if (statusEl) statusEl.innerHTML = `✅ Posizione impostata dalla mappa (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+      closeMapPicker();
+      showToast('✅ Posizione selezionata', 'success');
+    } else {
+      // Correzione rapida (es. da "Imposta sulla mappa" quando mancano le coordinate) —
+      // salva subito su Firestore senza richiedere altri passaggi
+      closeMapPicker();
+      try {
+        showLoader(true);
+        await window.FB.updateDoc(
+          window.FB.doc(window.FB.db, 'trips', state.currentTripId),
+          { originLat: lat, originLng: lng }
+        );
+        if (state.currentTrip) { state.currentTrip.originLat = lat; state.currentTrip.originLng = lng; }
+        showToast('Coordinate partenza aggiornate 🏠', 'success');
+        if (document.getElementById('stage-detail-modal')?.classList.contains('active')) showOriginInfo();
+      } catch (e) {
+        console.error(e);
+        showToast('Errore: ' + e.message, 'error');
+      } finally {
+        showLoader(false);
+      }
+    }
+    return;
+  }
+
+  // Modalità 'stage' (default)
+  state.newStageData = { lat, lng, address: address || `${lat.toFixed(5)}, ${lng.toFixed(5)}` };
+  const coordsEl = document.getElementById('ns-coords');
+  if (coordsEl) coordsEl.textContent = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+  // Auto-fill name if empty
+  const titleEl = document.getElementById('ns-title');
+  if (titleEl && !titleEl.value.trim() && name) titleEl.value = name;
+  // Hide search results
+  const resultsEl = document.getElementById('stage-search-results');
+  if (resultsEl) resultsEl.style.display = 'none';
+  closeMapPicker();
+  showToast('✅ Posizione selezionata', 'success');
+}
+window.confirmMapPicker = confirmMapPicker;
+
+/* ============================================
+   STAGE DETAIL MODAL — vedi i dati di una tappa
+   ============================================ */
+function openStageDetail(stageId) {
+  const allStages = state.currentStages || [];
+  const s = allStages.find(x => x.id === stageId);
+  if (!s) return;
+  const container = document.getElementById('stage-detail-content');
+  if (!container) return;
+  const hasCoords = s.lat != null && s.lng != null;
+  const trip = state.currentTrip;
+
+  // ═══════════════════════════════════════════
+  // TAPPA ALTERNATIVA — vista dedicata, senza numerazione in sequenza
+  // ═══════════════════════════════════════════
+  if (s.kind === 'alternative') {
+    const parent = allStages.find(p => p.id === s.parentId);
+    const siblings = allStages.filter(x => x.kind === 'alternative' && x.parentId === s.parentId && x.id !== s.id);
+
+    container.innerHTML = `
+      <div style="text-align:center; padding:8px 0 18px; position:relative">
+        <div style="width:64px; height:64px; border-radius:50%; background:var(--sun); color:#6b4423; display:inline-flex; align-items:center; justify-content:center; font-size:28px; margin-bottom:10px; box-shadow:0 6px 18px rgba(245,176,74,0.4)">
+          🔀
+        </div>
+        <div style="font-family:'Fraunces',serif; font-style:italic; font-size:12px; color:var(--ink-muted); margin-bottom:2px; letter-spacing:0.05em">Tappa alternativa</div>
+        <h2 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.02em; padding:0 30px">${escapeHtml(s.title || 'Alternativa senza nome')}</h2>
+        <button class="modal-close" style="position:absolute; top:0; right:0" onclick="closeModal('stage-detail-modal')">×</button>
+      </div>
+
+      ${parent ? `
+        <div style="background:rgba(245,176,74,0.12); border-left:4px solid var(--sun); padding:12px 14px; border-radius:10px; margin-bottom:14px; cursor:pointer" onclick="openStageDetail('${parent.id}')">
+          <div style="font-size:10px; color:#92650f; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px">Alternativa a</div>
+          <div style="font-size:14px; font-weight:700; color:var(--ink)">${parent.kind === 'waypoint' ? '📌' : '📍'} ${escapeHtml(parent.title || '—')} <span style="color:var(--ink-faint); font-weight:400">›</span></div>
+        </div>` : `
+        <div style="background:var(--surface-2); padding:12px 14px; border-radius:10px; margin-bottom:14px; text-align:center; font-size:12px; color:var(--ink-muted)">
+          ⚠️ Tappa collegata non trovata (forse eliminata)
+        </div>`}
+
+      ${s.address ? `
+        <div style="background:var(--surface); border:1.5px solid var(--border); padding:12px 14px; border-radius:10px; margin-bottom:14px">
+          <div style="font-size:10px; color:var(--ink-muted); font-weight:800; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px">Indirizzo</div>
+          <div style="font-size:13px; line-height:1.4; color:var(--ink)">${escapeHtml(s.address)}</div>
+        </div>` : ''}
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px">
+        <div class="info-box">
+          <div class="lbl">Data</div>
+          <div class="val" style="font-size:15px">${s.date ? formatDate(s.date) : '—'}</div>
+        </div>
+        <div class="info-box">
+          <div class="lbl">Coordinate</div>
+          <div class="val mono" style="font-size:12px">${hasCoords ? `${s.lat.toFixed(4)}, ${s.lng.toFixed(4)}` : '—'}</div>
+        </div>
+      </div>
+
+      ${s.notes ? `
+        <div style="margin-bottom:14px">
+          <div style="font-size:10px; color:var(--ink-muted); font-weight:800; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px">Note</div>
+          <div style="background:var(--surface); border:1.5px solid var(--border); padding:12px 14px; border-radius:10px; font-size:14px; line-height:1.55; white-space:pre-wrap">${escapeHtml(s.notes)}</div>
+        </div>` : ''}
+
+      ${hasCoords ? `
+        <button class="btn btn-secondary" style="margin-bottom:14px" onclick="openInMaps(${s.lat}, ${s.lng}, ${JSON.stringify(s.title||'')})">📍 Apri in Maps</button>
+      ` : ''}
+
+      ${siblings.length ? `
+        <div style="margin-bottom:14px">
+          <div style="font-size:10px; color:var(--ink-muted); font-weight:800; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px">Altre alternative per questa tappa</div>
+          <div style="display:flex; gap:8px; overflow-x:auto">
+            ${siblings.map(sib => `<button class="btn btn-sm btn-secondary" style="flex-shrink:0; width:auto" onclick="openStageDetail('${sib.id}')">🔀 ${escapeHtml((sib.title||'').slice(0,16))}</button>`).join('')}
+          </div>
+        </div>` : ''}
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px">
+        <button class="btn btn-secondary" onclick="closeModal('stage-detail-modal'); openEditStage('${s.id}')">✏️ Modifica</button>
+        <button class="btn btn-danger" onclick="deleteStage('${s.id}'); closeModal('stage-detail-modal')">🗑️ Elimina</button>
+      </div>
+    `;
+    openModal('stage-detail-modal');
+    return;
+  }
+
+  // ═══════════════════════════════════════════
+  // TAPPA PRINCIPALE / SECONDARIA — numerazione nella sequenza (esclude le alternative)
+  // ═══════════════════════════════════════════
+  const mainStages = allStages.filter(x => x.kind !== 'alternative');
+  const idx = mainStages.findIndex(x => x.id === stageId);
+  const total = mainStages.length;
+  const stageNum = idx + 1;
+
+  const prev = idx > 0 ? mainStages[idx - 1] : null;
+  const next = idx < total - 1 ? mainStages[idx + 1] : null;
+  const alts = allStages.filter(x => x.kind === 'alternative' && x.parentId === s.id);
+
+  // Compute FROM (previous stage OR trip origin) for directions
+  let fromDesc = null;      // string label ("da …")
+  let fromParam = null;     // string to pass to Maps (address or "lat,lng")
+  if (prev && prev.lat != null && prev.lng != null) {
+    fromDesc = `Tappa ${idx} · ${prev.title}`;
+    fromParam = `${prev.lat},${prev.lng}`;
+  } else if (idx === 0 && trip?.origin) {
+    fromDesc = `Partenza · ${trip.origin}`;
+    fromParam = trip.origin; // Maps accetta indirizzo testuale
+  }
+
+  container.innerHTML = `
+    <div style="text-align:center; padding:8px 0 18px; position:relative">
+      <div style="width:64px; height:64px; border-radius:50%; background:var(--grad-sunset); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-weight:800; font-size:28px; margin-bottom:10px; box-shadow:var(--shadow-warm)">
+        ${stageNum}
+      </div>
+      <div style="font-family:'Fraunces',serif; font-style:italic; font-size:12px; color:var(--ink-muted); margin-bottom:2px; letter-spacing:0.05em">Tappa ${stageNum} di ${total}${s.kind === 'waypoint' ? ' · secondaria' : ''}</div>
+      <h2 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.02em; padding:0 30px">${escapeHtml(s.title || 'Tappa senza nome')}</h2>
+      <button class="modal-close" style="position:absolute; top:0; right:0" onclick="closeModal('stage-detail-modal')">×</button>
+    </div>
+
+    ${s.address ? `
+      <div style="background:var(--moss-soft); border-left:4px solid var(--moss); padding:12px 14px; border-radius:10px; margin-bottom:14px">
+        <div style="font-size:10px; color:var(--moss-dark); font-weight:800; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px">Indirizzo</div>
+        <div style="font-size:13px; line-height:1.4; color:var(--ink)">${escapeHtml(s.address)}</div>
+      </div>` : ''}
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px">
+      <div class="info-box">
+        <div class="lbl">Data arrivo</div>
+        <div class="val" style="font-size:15px">${s.date ? formatDate(s.date) : '—'}</div>
+      </div>
+      <div class="info-box">
+        <div class="lbl">Durata</div>
+        <div class="val" style="font-size:15px">${s.days ? s.days + ' giorno' + (s.days > 1 ? 'i' : '') : '—'}</div>
+      </div>
+    </div>
+
+    ${hasCoords ? `
+      <div style="background:var(--ochre-soft); border-left:4px solid var(--ochre); padding:12px 14px; border-radius:10px; margin-bottom:14px">
+        <div style="font-size:10px; color:var(--ochre-dark); font-weight:800; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px">Coordinate</div>
+        <div class="mono" style="font-size:13px; font-weight:700">${s.lat.toFixed(5)}, ${s.lng.toFixed(5)}</div>
+      </div>` : `
+      <div style="background:var(--surface-2); padding:12px 14px; border-radius:10px; margin-bottom:14px; text-align:center; font-size:13px; color:var(--ink-muted)">
+        ⚠️ Coordinate non impostate — modifica la tappa per aggiungerle
+      </div>`}
+
+    ${s.notes ? `
+      <div style="margin-bottom:14px">
+        <div style="font-size:10px; color:var(--ink-muted); font-weight:800; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px">Note</div>
+        <div style="background:var(--surface); border:1.5px solid var(--border); padding:12px 14px; border-radius:10px; font-size:14px; line-height:1.55; white-space:pre-wrap">${escapeHtml(s.notes)}</div>
+      </div>` : ''}
+
+    <!-- === NAVIGA con Maps === -->
+    ${hasCoords ? `
+      <div style="background:var(--surface); border:1.5px solid var(--ochre); border-radius:14px; padding:14px; margin-bottom:14px; box-shadow:var(--shadow-warm)">
+        <div style="font-size:10px; color:var(--ochre-dark); font-weight:800; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px">🧭 Naviga con Maps</div>
+        ${fromParam ? `
+          <div style="font-size:12px; color:var(--ink-muted); margin-bottom:10px; line-height:1.45">
+            Da <strong>${escapeHtml(fromDesc)}</strong><br>a <strong>${escapeHtml(s.title || '')}</strong>
+          </div>
+          <button class="btn btn-ochre" onclick="openMapsDirections(${JSON.stringify(fromParam)}, ${s.lat}, ${s.lng}, ${JSON.stringify(s.title||'')})">
+            🚗 Avvia navigazione (da → a)
+          </button>` : `
+          <div style="font-size:12px; color:var(--ink-muted); margin-bottom:10px">Solo destinazione — la tappa precedente non ha coordinate.</div>
+          <button class="btn btn-ochre" onclick="openInMaps(${s.lat}, ${s.lng}, ${JSON.stringify(s.title||'')})">
+            📍 Apri destinazione in Maps
+          </button>`}
+      </div>` : ''}
+
+    <!-- Alternative collegate a questa tappa -->
+    ${alts.length ? `
+      <div style="margin-bottom:14px">
+        <div style="font-size:10px; color:#92650f; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px">🔀 Alternative per questa tappa</div>
+        <div style="display:flex; gap:8px; overflow-x:auto">
+          ${alts.map(a => `<button class="btn btn-sm" style="flex-shrink:0; width:auto; background:rgba(245,176,74,0.15); color:#92650f; border:1.5px dashed #d9a441" onclick="openStageDetail('${a.id}')">🔀 ${escapeHtml((a.title||'').slice(0,16))}</button>`).join('')}
+          <button class="btn btn-sm btn-secondary" style="flex-shrink:0; width:auto" onclick="closeModal('stage-detail-modal'); openNewStageModal('alternative','${s.id}')">+ Aggiungi</button>
+        </div>
+      </div>` : `
+      <button class="btn btn-secondary" style="margin-bottom:14px; border-style:dashed" onclick="closeModal('stage-detail-modal'); openNewStageModal('alternative','${s.id}')">🔀 Aggiungi tappa alternativa</button>
+    `}
+
+    <!-- Naviga tra tappe -->
+    ${(prev || next) ? `
+      <div style="display:flex; gap:8px; margin-bottom:14px">
+        ${prev ? `<button class="btn btn-secondary btn-sm" style="flex:1; padding:10px" onclick="openStageDetail('${prev.id}')">‹ ${escapeHtml((prev.title||'').slice(0, 18))}</button>` : '<div style="flex:1"></div>'}
+        ${next ? `<button class="btn btn-secondary btn-sm" style="flex:1; padding:10px" onclick="openStageDetail('${next.id}')">${escapeHtml((next.title||'').slice(0, 18))} ›</button>` : '<div style="flex:1"></div>'}
+      </div>` : ''}
+
+    <!-- Azioni modifica/elimina -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px">
+      <button class="btn btn-secondary" onclick="closeModal('stage-detail-modal'); openEditStage('${s.id}')">✏️ Modifica</button>
+      <button class="btn btn-danger" onclick="deleteStage('${s.id}'); closeModal('stage-detail-modal')">🗑️ Elimina</button>
+    </div>
+  `;
+
+  openModal('stage-detail-modal');
+}
+window.openStageDetail = openStageDetail;
+
+function openInMaps(lat, lng, label) {
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const q = encodeURIComponent(label || `${lat},${lng}`);
+  const url = isIOS
+    ? `maps://maps.apple.com/?ll=${lat},${lng}&q=${q}`
+    : `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+  window.open(url, '_blank');
+}
+window.openInMaps = openInMaps;
+
+// Apre Maps con navigazione da un punto (indirizzo testuale o "lat,lng") verso destinazione
+function openMapsDirections(fromParam, toLat, toLng, toLabel) {
+  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const from = encodeURIComponent(fromParam);
+  const to = `${toLat},${toLng}`;
+  const url = isIOS
+    ? `maps://maps.apple.com/?saddr=${from}&daddr=${to}&dirflg=d`
+    : `https://www.google.com/maps/dir/?api=1&origin=${from}&destination=${to}&travelmode=driving`;
+  window.open(url, '_blank');
+}
+window.openMapsDirections = openMapsDirections;
+
 </script>
 
-<!-- ================================================================= -->
-<!-- PWA INSTALL BANNER (Android / Desktop)                           -->
-<!-- ================================================================= -->
-<div id="pwa-banner">
-  <div class="pwa-banner-inner">
-    <div class="pwa-banner-icon">✈️</div>
-    <div class="pwa-banner-text">
-      <strong>Installa Wildr</strong>
-      <span>Accesso rapido dal tuo schermo home</span>
-    </div>
-  </div>
-  <div class="pwa-banner-actions">
-    <button class="pwa-btn-install" id="pwa-install-btn">⬇️ Installa ora</button>
-    <button class="pwa-btn-dismiss" id="pwa-dismiss-btn">Non ora</button>
-  </div>
-</div>
+<!-- PWA install UI rimossa — installazione via menu del browser -->
 
-<!-- ================================================================= -->
-<!-- iOS INSTALL INSTRUCTIONS MODAL                                    -->
-<!-- ================================================================= -->
-<div id="ios-install-modal">
-  <div class="ios-card">
-    <h3>📲 Aggiungi alla schermata Home</h3>
-    <p>Segui questi semplici passi per installare Wildr su iPhone o iPad</p>
-
-    <div class="ios-step">
-      <div class="num">1</div>
-      <div class="desc">
-        Tocca il pulsante <strong>Condividi</strong>
-        <span class="icon">⬆️</span>
-        nella barra in basso di Safari
-      </div>
-    </div>
-    <div class="ios-step">
-      <div class="num">2</div>
-      <div class="desc">
-        Scorri e seleziona <strong>"Aggiungi a schermata Home"</strong>
-        <span class="icon">➕</span>
-      </div>
-    </div>
-    <div class="ios-step">
-      <div class="num">3</div>
-      <div class="desc">
-        Tocca <strong>"Aggiungi"</strong> in alto a destra — l'app apparirà subito nella tua schermata Home!
-      </div>
-    </div>
-
-    <button class="btn btn-primary" style="margin-top:16px" onclick="closeIosModal()">Ho capito ✓</button>
-  </div>
-</div>
-
-<!-- ================================================================= -->
-<!-- SERVICE WORKER + PWA LOGIC                                        -->
-<!-- ================================================================= -->
+<!-- Service Worker registration — verifica prima che il file esista per evitare errori 404 in console.
+     Se in futuro viene aggiunto un vero sw.js al repository, verrà registrato automaticamente. -->
 <script>
-(function() {
-  // ── 1. Registra Service Worker ───────────────────────────────────
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js', { scope: './' })
-        .then(reg => console.log('SW registrato:', reg.scope))
-        .catch(err => console.warn('SW non registrato:', err));
-    });
-  }
-
-  // ── 2. Rileva piattaforma ────────────────────────────────────────
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const isInStandaloneMode = (
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.navigator.standalone === true
-  );
-
-  // Se già installata, non mostrare nulla
-  if (isInStandaloneMode) return;
-
-  // ── 3. Controlla se già dismissato di recente ─────────────────────
-  const DISMISSED_KEY = 'pwa_dismissed_at';
-  const SNOOZE_DAYS = 3; // rimostra dopo N giorni
-  function wasDismissedRecently() {
-    const ts = localStorage.getItem(DISMISSED_KEY);
-    if (!ts) return false;
-    const elapsed = Date.now() - parseInt(ts);
-    return elapsed < SNOOZE_DAYS * 86400000;
-  }
-
-  // ── 4. Logica Android / Desktop ─────────────────────────────────
-  let deferredPrompt = null;
-  const banner = document.getElementById('pwa-banner');
-  const installBtn = document.getElementById('pwa-install-btn');
-  const dismissBtn = document.getElementById('pwa-dismiss-btn');
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (!wasDismissedRecently()) {
-      // Mostra il banner con un piccolo ritardo
-      setTimeout(() => banner.classList.add('show'), 1500);
-    }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    fetch('./sw.js', { method: 'HEAD' })
+      .then(res => {
+        if (res.ok) {
+          navigator.serviceWorker.register('./sw.js', { scope: './' })
+            .then(reg => console.log('SW registrato:', reg.scope))
+            .catch(err => console.warn('SW non registrato:', err));
+        }
+        // Se sw.js non esiste (404), non tentiamo la registrazione — nessun errore in console.
+      })
+      .catch(() => { /* offline o rete non disponibile — salta silenziosamente */ });
   });
-
-  installBtn && installBtn.addEventListener('click', async () => {
-    banner.classList.remove('show');
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      console.log('PWA install outcome:', outcome);
-      deferredPrompt = null;
-    }
-  });
-
-  dismissBtn && dismissBtn.addEventListener('click', () => {
-    banner.classList.remove('show');
-    localStorage.setItem(DISMISSED_KEY, Date.now().toString());
-  });
-
-  // Nasconde il banner se l'app viene installata
-  window.addEventListener('appinstalled', () => {
-    banner.classList.remove('show');
-    deferredPrompt = null;
-    // Piccola animazione di conferma
-    const toast = document.getElementById('toast');
-    if (toast) {
-      toast.className = 'toast success show';
-      toast.textContent = '🎉 Wildr installata!';
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-  });
-
-  // ── 5. Logica iOS ────────────────────────────────────────────────
-  if (isIOS && !wasDismissedRecently()) {
-    setTimeout(() => {
-      const modal = document.getElementById('ios-install-modal');
-      if (modal) modal.classList.add('show');
-    }, 2000);
-  }
-
-  window.closeIosModal = function() {
-    const modal = document.getElementById('ios-install-modal');
-    if (modal) modal.classList.remove('show');
-    localStorage.setItem(DISMISSED_KEY, Date.now().toString());
-  };
-
-})();
+}
+// Silently capture beforeinstallprompt so the browser doesn't show its default banner constantly
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); window._deferredInstallPrompt = e; });
 </script>
 </body></html>
