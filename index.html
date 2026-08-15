@@ -618,6 +618,22 @@
     transition: transform 0.2s;
   }
   .nav-btn-icon svg { width: 24px; height: 24px; stroke-width: 2; }
+  .nav-btn-icon { position: relative; }
+  .nav-badge {
+    position: absolute;
+    top: -4px; right: -8px;
+    background: var(--danger);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    min-width: 15px; height: 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    border: 1.5px solid var(--surface);
+  }
   .nav-btn.active { color: var(--ochre); }
   .nav-btn.active .nav-btn-icon { transform: translateY(-2px); }
   .nav-btn.active::before {
@@ -1820,6 +1836,15 @@
     box-shadow: var(--shadow-sm);
     border: 1.5px solid var(--border);
   }
+  .stage-mini-map {
+    height: 170px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface-2);
+    box-shadow: var(--shadow-sm);
+    border: 1.5px solid var(--border);
+  }
+  .stage-mini-map .leaflet-control-zoom { transform: scale(0.85); transform-origin: top left; }
   .map-toolbar {
     display: flex;
     gap: 6px;
@@ -1955,6 +1980,181 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 700;
+  }
+
+  /* === FRIENDS PAGE (stile social) === */
+  .friends-stories-row {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 4px 0 18px;
+    margin-bottom: 4px;
+  }
+  .friends-stories-row::-webkit-scrollbar { display: none; }
+  .friend-story {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    width: 64px;
+    cursor: pointer;
+  }
+  .friend-story-avatar {
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    background: var(--grad-sunset);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 20px;
+    overflow: hidden;
+    border: 2.5px solid var(--ochre);
+    box-shadow: var(--shadow-sm);
+  }
+  .friend-story-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .friend-story-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-2);
+    text-align: center;
+    max-width: 64px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dm-thread-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .dm-thread-row:hover { border-color: var(--ochre); }
+  .dm-thread-row.unread { border-color: var(--ochre); background: var(--ochre-soft); }
+  .dm-thread-info { flex: 1; min-width: 0; }
+  .dm-thread-name { font-weight: 700; font-size: 14px; }
+  .dm-thread-preview {
+    font-size: 12px;
+    color: var(--ink-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+  .dm-thread-row.unread .dm-thread-preview { color: var(--ink-2); font-weight: 600; }
+  .dm-thread-time {
+    font-size: 10px;
+    color: var(--ink-faint);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .dm-thread-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--ochre);
+    flex-shrink: 0;
+  }
+
+  .friend-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    border: 1.5px solid var(--border);
+  }
+  .friend-row-info { flex: 1; min-width: 0; cursor: pointer; }
+  .friend-row-name { font-weight: 700; font-size: 14px; }
+  .friend-row-sub { font-size: 11px; color: var(--ink-muted); margin-top: 2px; }
+  .friend-row-chat-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--ochre-soft);
+    color: var(--ochre-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .friend-row-chat-btn:hover { background: var(--ochre); color: #fff; }
+
+  /* === ACTIVITY FEED (novità stile social) === */
+  .activity-day-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    margin: 14px 0 8px;
+  }
+  .activity-day-label:first-child { margin-top: 0; }
+  .activity-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--surface);
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.1s;
+    position: relative;
+  }
+  .activity-card:hover { border-color: var(--ochre); }
+  .activity-card:active { transform: scale(0.99); }
+  .activity-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--grad-sunset);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .activity-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .activity-icon-badge {
+    position: absolute;
+    left: 34px; top: 32px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    box-shadow: var(--shadow-sm);
+  }
+  .activity-body { flex: 1; min-width: 0; }
+  .activity-text {
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--ink-2);
+  }
+  .activity-text strong { color: var(--ink); font-weight: 700; }
+  .activity-time {
+    font-size: 11px;
+    color: var(--ink-faint);
+    font-weight: 600;
+    margin-top: 3px;
   }
 
   /* === INVITE CODE === */
@@ -2132,6 +2332,63 @@
     background: rgba(255,255,255,0.15);
     color: white;
     font-size: 20px;
+    z-index: 2;
+  }
+  .lightbox-topbar {
+    position: absolute;
+    top: calc(var(--safe-top) + 16px);
+    left: 16px;
+    right: 68px;
+    display: flex;
+    z-index: 2;
+  }
+  .lightbox-details-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    padding: 9px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  #lightbox-details-arrow { display: inline-block; transition: transform 0.25s; font-size: 14px; }
+  .lightbox-details-panel {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    background: rgba(20, 14, 8, 0.96);
+    backdrop-filter: blur(20px);
+    padding: calc(var(--safe-top) + 20px) 20px 20px;
+    border-radius: 0 0 24px 24px;
+    transform: translateY(-100%);
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    z-index: 3;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  }
+  .lightbox-details-panel.show { transform: translateY(0); }
+  .lightbox-details-handle {
+    width: 40px; height: 4px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+  .lightbox-details-panel textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid;
+    border-radius: 10px;
+    font-size: 14px;
+    resize: vertical;
+    font-family: inherit;
+  }
+  .lightbox-details-panel .field label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: block;
+    margin-bottom: 6px;
   }
   .lightbox-info {
     color: white;
@@ -2852,6 +3109,72 @@
     z-index: 1;
   }
 
+  /* === CHECK-IN / CHECK-OUT (biglietto verticale) === */
+  .itin-stay-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .itin-stay-box {
+    width: 58px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-sm);
+  }
+  .itin-stay-box .half {
+    flex: 1;
+    padding: 4px 2px 3px;
+    text-align: center;
+    line-height: 1.1;
+  }
+  .itin-stay-box .half.in {
+    background: var(--moss-soft);
+    border-bottom: 1px dashed var(--border-strong);
+  }
+  .itin-stay-box .half.out {
+    background: var(--ochre-soft);
+  }
+  .itin-stay-box .lbl {
+    font-size: 6.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    opacity: 0.8;
+  }
+  .itin-stay-box .half.in .lbl { color: var(--moss-dark); }
+  .itin-stay-box .half.out .lbl { color: var(--ochre-dark); }
+  .itin-stay-box .day {
+    font-size: 15px;
+    font-weight: 800;
+    font-family: 'Fraunces', serif;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+  }
+  .itin-stay-box .mon {
+    font-size: 7.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--ink-muted);
+  }
+  .itin-stay-nights {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .itin-stay-nights strong {
+    color: var(--ink);
+    font-family: 'Fraunces', serif;
+    font-size: 13px;
+  }
+
   /* === ITINERARY NODES (con connettore verticale) === */
   .itin-node {
     position: relative;
@@ -3424,7 +3747,7 @@
           <span class="home-search-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </span>
-          <input id="home-search-input" type="text" placeholder="Cerca tra i tuoi viaggi…" oninput="searchTrips(this.value)" />
+          <input id="home-search-input" type="text" placeholder="Cerca tra i tuoi viaggi…" oninput="debouncedSearchTrips(this.value)" />
         </div>
 
         <div class="quick-actions">
@@ -3604,9 +3927,81 @@
       </div>
     </div>
 
+    <!-- FRIENDS (stile social, feed di amici + messaggi) -->
+    <div id="page-friends" class="page" style="display:none">
+      <header class="hero-header">
+        <div class="hero-row">
+          <div>
+            <div class="hero-eyebrow">La tua rete</div>
+            <h1 class="hero-title">Amici</h1>
+          </div>
+          <div class="avatar" onclick="showPage('profile')">
+            <span id="friends-my-avatar-fallback">?</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="home-section">
+        <div id="notif-permission-banner" style="display:none"></div>
+
+        <!-- Storie amici (scroll orizzontale, stile social) -->
+        <div id="friends-stories-row" class="friends-stories-row"></div>
+
+        <div class="section-header">
+          <h2>🏠 Novità</h2>
+        </div>
+        <div id="activity-feed-list"></div>
+        <div id="activity-feed-empty" class="empty-state" style="display:none; padding:24px 20px">
+          <div class="empty-state-icon">🏠</div>
+          <h3>Nessuna novità</h3>
+          <p>Quando i tuoi amici creano viaggi, aggiungono tappe o caricano foto, lo vedrai apparire qui.</p>
+        </div>
+
+        <div class="section-header">
+          <h2>💬 Messaggi</h2>
+        </div>
+        <div id="dm-threads-list"></div>
+        <div id="dm-threads-empty" class="empty-state" style="display:none; padding:24px 20px">
+          <div class="empty-state-icon">💬</div>
+          <h3>Nessun messaggio</h3>
+          <p>Scrivi ai tuoi amici qui sotto per iniziare una conversazione.</p>
+        </div>
+
+        <div class="section-header">
+          <h2>👥 I tuoi amici</h2>
+        </div>
+        <div id="friends-list"></div>
+        <div id="friends-empty" class="empty-state" style="padding:24px 20px">
+          <div class="empty-state-icon">👥</div>
+          <h3>Nessun amico ancora</h3>
+          <p>Segui altri viaggiatori dai profili condivisi nei tuoi viaggi per vederli qui.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIRECT CHAT (1:1 con un amico) -->
+    <div id="page-dmchat" class="page" style="display:none">
+      <header class="header">
+        <button class="btn btn-sm" onclick="closeDirectChat()" style="width:auto; background:transparent; padding:6px 10px">‹ Indietro</button>
+        <div class="header-title-block" style="text-align:center; flex:1; display:flex; align-items:center; justify-content:center; gap:10px">
+          <div class="avatar" id="dm-header-avatar" style="width:34px; height:34px; font-size:13px">?</div>
+          <h1 style="font-size:18px" id="dm-header-name">—</h1>
+        </div>
+        <div style="width:34px"></div>
+      </header>
+      <div class="chat-container">
+        <div class="chat-messages" id="dm-messages"></div>
+        <div class="chat-input">
+          <input id="dm-input-field" type="text" placeholder="Scrivi un messaggio…" onkeypress="if(event.key==='Enter') sendDirectMessageUI()" />
+          <button onclick="sendDirectMessageUI()">➤</button>
+        </div>
+      </div>
+    </div>
+
     <!-- TRAVEL MAP -->
     <div id="page-travelmap" class="page" style="display:none">
       <header class="hero-header">
+      
         <div class="hero-row">
           <button class="detail-back" onclick="showPage('profile')">‹ Indietro</button>
           <div class="hero-title" style="font-size:22px">🗺️ Il mio mondo</div>
@@ -3686,10 +4081,11 @@
           </div>
         </div>
 
-        <div id="up-action-buttons" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px">
+        <div id="up-action-buttons" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px">
           <button class="btn btn-ochre" id="up-follow-btn" onclick="toggleFollow()">➕ Segui</button>
-          <button class="btn btn-secondary" onclick="mentionInCurrentChat()">💬 Menziona</button>
+          <button class="btn btn-secondary" onclick="openDirectChat(state.viewingProfileUid)">💬 Messaggia</button>
         </div>
+        <button class="btn btn-secondary" style="margin-bottom:18px" onclick="mentionInCurrentChat()">@ Menziona nella chat viaggio</button>
 
         <div class="section-header"><h2>Viaggi in comune</h2></div>
         <div id="up-shared-trips"></div>
@@ -3756,7 +4152,7 @@
 
         <button class="btn btn-secondary" style="margin-top:22px" onclick="openEditTripModal()">✏️ Modifica viaggio</button>
         <button class="btn btn-secondary" style="margin-top:10px" onclick="exportTripPDF()">📄 Esporta itinerario PDF</button>
-        <button class="btn btn-danger" style="margin-top:10px" onclick="deleteCurrentTrip()">🗑️ Elimina viaggio</button>
+        <div id="trip-danger-zone" style="margin-top:10px"></div>
       </div>
 
       <div id="tab-extra" class="tab-content">
@@ -3766,7 +4162,10 @@
       <div id="tab-stages" class="tab-content">
         <div class="section-header">
           <h2>Itinerario</h2>
-          <button class="btn btn-sm btn-ochre" onclick="openNewStageModal()">+ Tappa</button>
+          <div style="display:flex; gap:6px">
+            <button class="btn btn-sm btn-secondary" onclick="openAiImportModal()" title="Importa da un itinerario creato da una AI">🤖 Importa</button>
+            <button class="btn btn-sm btn-ochre" onclick="openNewStageModal()">+ Tappa</button>
+          </div>
         </div>
         <div id="stages-list"></div>
       </div>
@@ -3907,6 +4306,13 @@
           <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
         </span>
         Diario
+      </button>
+      <button class="nav-btn" data-page="friends" onclick="showPage('friends')">
+        <span class="nav-btn-icon">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 100-8 4 4 0 000 8zm6 0a4 4 0 10-2.3-7.26"/></svg>
+          <span id="friends-unread-badge" class="nav-badge" style="display:none">0</span>
+        </span>
+        Amici
       </button>
       <button class="nav-btn" data-page="profile" onclick="showPage('profile')">
         <span class="nav-btn-icon">
@@ -4113,6 +4519,58 @@
   <div class="modal">
     <div class="modal-handle"></div>
     <div id="stage-detail-content"></div>
+  </div>
+</div>
+
+<!-- Import itinerario da AI -->
+<div id="ai-import-modal" class="modal-overlay">
+  <div class="modal modal-full" style="padding:0; display:flex; flex-direction:column">
+    <div style="padding:calc(var(--safe-top) + 14px) 18px 12px; display:flex; align-items:center; justify-content:space-between; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0">
+      <div>
+        <div style="font-family:'Fraunces',serif; font-size:20px; font-weight:800; letter-spacing:-0.02em">🤖 Importa da AI</div>
+        <div id="ai-import-subtitle" style="font-size:12px; color:var(--ink-muted); margin-top:2px">Incolla il piano generato da un assistente AI</div>
+      </div>
+      <button class="modal-close" onclick="closeAiImportModal()">×</button>
+    </div>
+
+    <div style="flex:1; overflow-y:auto; padding:18px">
+
+      <!-- VISTA 1: input -->
+      <div id="ai-import-input-view">
+        <div class="card" style="border-left:4px solid var(--moss); margin-bottom:16px; font-size:13px; line-height:1.55; color:var(--ink-2)">
+          Chiedi a una AI (ChatGPT, Claude, Gemini…) di pianificare il tuo viaggio, poi copia qui la sua risposta.
+          Per un risultato affidabile, usa il prompt qui sotto: chiede alla AI di rispondere in un formato che Wildr sa leggere automaticamente.
+        </div>
+
+        <button class="btn btn-secondary" style="margin-bottom:16px" onclick="copyAiPrompt()">📋 Copia prompt pronto per la AI</button>
+
+        <div class="field">
+          <label>Incolla qui la risposta della AI</label>
+          <textarea id="ai-import-textarea" rows="10" placeholder="Incolla qui il testo o il JSON generato dalla AI…" style="font-family:'JetBrains Mono', monospace; font-size:12.5px"></textarea>
+        </div>
+
+        <div style="font-size:11px; color:var(--ink-muted); margin-bottom:16px; line-height:1.5">
+          💡 Funziona sia con JSON strutturato (consigliato, usa il prompt sopra) sia con un semplice elenco testuale di tappe — Wildr proverà a interpretarlo comunque.
+        </div>
+
+        <div id="ai-import-error" class="error-msg" style="display:none"></div>
+
+        <button class="btn btn-ochre" onclick="parseAiItinerary()">🔍 Analizza piano</button>
+      </div>
+
+      <!-- VISTA 2: anteprima + conferma -->
+      <div id="ai-import-preview-view" style="display:none">
+        <div class="card" style="border-left:4px solid var(--ochre); margin-bottom:16px; font-size:13px; color:var(--ink-2)">
+          Controlla il piano prima di crearlo. Le tappe senza coordinate verranno geocodificate automaticamente — se qualcuna non viene trovata potrai comunque completarla a mano in seguito.
+        </div>
+        <div id="ai-import-preview-list"></div>
+        <div style="display:flex; gap:10px; margin-top:16px">
+          <button class="btn btn-secondary" style="flex:1" onclick="backToAiImportInput()">‹ Indietro</button>
+          <button class="btn btn-ochre" id="ai-import-confirm-btn" style="flex:2" onclick="confirmAiImport()">✅ Conferma e crea tappe</button>
+        </div>
+      </div>
+
+    </div>
   </div>
 </div>
 
@@ -4356,7 +4814,23 @@
 
 <!-- Lightbox -->
 <div id="lightbox" class="lightbox">
-  <button class="lightbox-close" onclick="closeLightbox()">×</button>
+  <div class="lightbox-topbar">
+    <button class="lightbox-close" onclick="closeLightbox()">×</button>
+    <button class="lightbox-details-toggle" onclick="toggleLightboxDetails()">
+      <span id="lightbox-details-arrow">⌄</span> Dettagli
+    </button>
+  </div>
+  <div id="lightbox-details-panel" class="lightbox-details-panel">
+    <div class="lightbox-details-handle"></div>
+    <div class="field" style="margin-bottom:10px">
+      <label style="color:rgba(255,255,255,0.65)">Didascalia</label>
+      <textarea id="lightbox-caption-input" rows="2" placeholder="Aggiungi una didascalia…" style="background:rgba(255,255,255,0.08); color:#fff; border-color:rgba(255,255,255,0.25)"></textarea>
+    </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px">
+      <span id="lightbox-meta-info" style="font-size:12px; color:rgba(255,255,255,0.6); line-height:1.4"></span>
+      <button class="btn btn-sm btn-ochre" style="width:auto; flex-shrink:0" onclick="saveLightboxCaption()">Salva</button>
+    </div>
+  </div>
   <button class="lightbox-nav lightbox-prev" onclick="lightboxNav(-1)">‹</button>
   <img id="lightbox-img" src="" alt="" />
   <div class="lightbox-info" id="lightbox-info"></div>
@@ -4441,7 +4915,12 @@ const state = {
   packingItems: [],
   following: [], // uid segutii
   followers: [],
-  viewingProfileUid: null
+  viewingProfileUid: null,
+  dmThreads: [],           // inbox messaggi diretti (users/{uid}/dmThreads)
+  currentDmChatId: null,
+  currentDmOtherUid: null,
+  currentDmMessages: [],
+  _dmThreadsInitialized: false
 };
 
 const TRIP_TYPES = {
@@ -5190,7 +5669,7 @@ function countdownHtml(targetDate) {
 function showPage(page) {
   state.currentPage = page;
 
-  ['home', 'calendar', 'notes', 'profile', 'wishlist', 'userprofile', 'travelmap', 'wrapped', 'trip'].forEach(p => {
+  ['home', 'calendar', 'notes', 'profile', 'wishlist', 'userprofile', 'travelmap', 'wrapped', 'trip', 'friends', 'dmchat'].forEach(p => {
     const el = document.getElementById('page-' + p);
     if (el) el.style.display = 'none';
   });
@@ -5212,6 +5691,11 @@ function showPage(page) {
       state.mapInstance = null;
     }
   }
+  // When leaving a direct chat, detach its message listener
+  if (page !== 'dmchat' && state._dmMessagesListener) {
+    state._dmMessagesListener();
+    state._dmMessagesListener = null;
+  }
 
   if (page === 'home') renderHome();
   if (page === 'calendar') renderCalendar();
@@ -5220,6 +5704,7 @@ function showPage(page) {
   if (page === 'wishlist') renderWishlist();
   if (page === 'travelmap') setTimeout(renderTravelMap, 100);
   if (page === 'wrapped') renderWrapped();
+  if (page === 'friends') renderFriendsPage();
 }
 window.showPage = showPage;
 
@@ -5309,6 +5794,7 @@ async function createTrip() {
 
     closeModal('new-trip-modal');
     showToast('Viaggio creato! ✨', 'success');
+    logActivity('trip_created', { text: 'ha creato una nuova avventura', tripId: tripRef.id, tripName: name, emoji: '⛺' });
     setTimeout(() => openTrip(tripRef.id), 300);
   } catch (e) {
     console.error(e);
@@ -5459,6 +5945,12 @@ async function joinByCode(code) {
     );
 
     showToast('Benvenuto nel viaggio! 🎉', 'success');
+    logActivity('trip_joined', {
+      text: 'si è unito al viaggio',
+      tripId,
+      tripName: tripData?.name || null,
+      emoji: '🎉'
+    });
     setTimeout(() => openTrip(tripId), 500);
 
   } catch (e) {
@@ -5533,6 +6025,7 @@ async function openTrip(tripId) {
   switchTab('overview');
   renderTripDetail();
   attachTripListeners(tripId);
+  setupTabSwipe();
 }
 window.openTrip = openTrip;
 
@@ -5634,6 +6127,7 @@ function renderTripDetail() {
   document.getElementById('invite-code-display').textContent = t.inviteCode || '——————';
   // quick itinerary (per uso alla guida)
   renderQuickItin();
+  renderTripDangerZone();
   // budget card
   if (typeof renderBudgetCard === 'function') renderBudgetCard();
   // affiliate links
@@ -5716,8 +6210,55 @@ function switchTab(tab) {
   if (tab === 'expenses') renderExpenses();
   if (tab === 'chat') { renderChat(); setTimeout(() => { const m = document.getElementById('chat-messages'); if (m) m.scrollTop = m.scrollHeight; }, 100); }
   if (tab === 'people') renderParticipants();
+
+  const activeBtn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+  if (activeBtn) activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
 }
 window.switchTab = switchTab;
+
+/* ============================================
+   SWIPE ORIZZONTALE TRA TAB (Info, Tappe, Mappa, ...)
+   Disattivo dentro mappa/chat per non interferire col loro pan/scroll.
+   ============================================ */
+const TAB_ORDER = ['overview', 'stages', 'map', 'expenses', 'packing', 'chat', 'photos', 'weather', 'extra', 'people'];
+
+function setupTabSwipe() {
+  const page = document.getElementById('page-trip');
+  if (!page || page._swipeBound) return;
+  page._swipeBound = true;
+
+  let startX = null, startY = null, tracking = false;
+  const THRESHOLD = 60;
+  const MAX_VERTICAL = 70;
+
+  page.addEventListener('touchstart', (e) => {
+    const activeTab = state.currentTab;
+    if (activeTab === 'map' || activeTab === 'chat') { tracking = false; return; }
+    if (e.touches.length !== 1) { tracking = false; return; }
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    tracking = true;
+  }, { passive: true });
+
+  page.addEventListener('touchend', (e) => {
+    if (!tracking || startX == null) return;
+    tracking = false;
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    const dx = endX - startX;
+    const dy = endY - startY;
+    if (Math.abs(dy) > MAX_VERTICAL) return;
+    if (Math.abs(dx) < THRESHOLD) return;
+
+    const idx = TAB_ORDER.indexOf(state.currentTab);
+    if (idx === -1) return;
+    if (dx < 0 && idx < TAB_ORDER.length - 1) {
+      switchTab(TAB_ORDER[idx + 1]);
+    } else if (dx > 0 && idx > 0) {
+      switchTab(TAB_ORDER[idx - 1]);
+    }
+  }, { passive: true });
+}
 
 /* =================================================================
    EXTRA TAB — sezioni dinamiche per tipo di viaggio
@@ -6117,8 +6658,9 @@ function renderStages() {
           <div class="itin-body">
             <div class="itin-eyebrow itin-eyebrow-waypoint">Tappa secondaria</div>
             <div class="itin-title">${escapeHtml(s.title || 'Senza nome')}</div>
+            ${(s.date && s.days) ? stageStayBoxHtml(s) : ''}
             <div class="itin-meta-row" id="itin-seg-${s.id}">
-              ${s.date ? `<span class="itin-meta">📅 ${formatDate(s.date)}</span>` : ''}
+              ${(!s.date || !s.days) && s.date ? `<span class="itin-meta">📅 ${formatDate(s.date)}</span>` : ''}
               ${hasCoords ? `<span class="itin-meta itin-meta-river">📍 GPS</span>` : `<span class="itin-meta itin-meta-warn">⚠️ senza coord.</span>`}
             </div>
           </div>
@@ -6139,9 +6681,10 @@ function renderStages() {
           <div class="itin-body">
             <div class="itin-eyebrow">Tappa ${stageCounter}${isLast ? ' · finale' : ''}</div>
             <div class="itin-title">${escapeHtml(s.title || 'Senza nome')}</div>
+            ${(s.date && s.days) ? stageStayBoxHtml(s) : ''}
             <div class="itin-meta-row" id="itin-seg-${s.id}">
-              ${s.date ? `<span class="itin-meta">📅 ${formatDate(s.date)}</span>` : ''}
-              ${s.days ? `<span class="itin-meta">⏱️ ${s.days} gg</span>` : ''}
+              ${(!s.date || !s.days) && s.date ? `<span class="itin-meta">📅 ${formatDate(s.date)}</span>` : ''}
+              ${(!s.date || !s.days) && s.days ? `<span class="itin-meta">⏱️ ${s.days} gg</span>` : ''}
               ${hasCoords ? `<span class="itin-meta itin-meta-coord">📍 GPS</span>` : `<span class="itin-meta itin-meta-warn">⚠️ senza coord.</span>`}
             </div>
             ${s.notes ? `<div class="itin-note">${escapeHtml(s.notes.length > 90 ? s.notes.slice(0,90)+'…' : s.notes)}</div>` : ''}
@@ -6336,6 +6879,220 @@ async function geocodeAddress(query, _retry) {
   return null;
 }
 
+/* =================================================================
+   IMPORT ITINERARIO DA AI — incolli il piano generato da ChatGPT/Claude/Gemini,
+   Wildr lo interpreta, mostra un'anteprima e chiede conferma prima di creare le tappe.
+   Supporta JSON strutturato (consigliato, tramite il prompt fornito) e un fallback
+   euristico per semplici elenchi testuali.
+   ================================================================= */
+function openAiImportModal() {
+  const ta = document.getElementById('ai-import-textarea');
+  if (ta) ta.value = '';
+  const err = document.getElementById('ai-import-error');
+  if (err) err.style.display = 'none';
+  document.getElementById('ai-import-input-view').style.display = 'block';
+  document.getElementById('ai-import-preview-view').style.display = 'none';
+  state.aiImportParsed = null;
+  openModal('ai-import-modal');
+}
+window.openAiImportModal = openAiImportModal;
+
+function closeAiImportModal() {
+  closeModal('ai-import-modal');
+}
+window.closeAiImportModal = closeAiImportModal;
+
+function backToAiImportInput() {
+  document.getElementById('ai-import-input-view').style.display = 'block';
+  document.getElementById('ai-import-preview-view').style.display = 'none';
+}
+window.backToAiImportInput = backToAiImportInput;
+
+function copyAiPrompt() {
+  const prompt = 'Crea un itinerario di viaggio dettagliato e rispondimi ESCLUSIVAMENTE con un blocco di codice JSON in questo identico formato, senza testo aggiuntivo prima o dopo il blocco:\n\n' +
+'```json\n' +
+'{\n' +
+'  "origin": "città di partenza",\n' +
+'  "startDate": "YYYY-MM-DD",\n' +
+'  "stages": [\n' +
+'    { "title": "Nome della tappa", "date": "YYYY-MM-DD", "days": 2, "notes": "cosa fare, consigli pratici" }\n' +
+'  ]\n' +
+'}\n' +
+'```\n\n' +
+'Il mio viaggio: [descrivi qui destinazione, durata totale, interessi, budget indicativo]';
+  copyToClipboard(prompt, 'Prompt copiato — incollalo nella chat con la tua AI 📋');
+}
+window.copyAiPrompt = copyAiPrompt;
+
+/* Estrae il contenuto da un blocco ```json ... ``` (o ``` ... ```) se presente, altrimenti ritorna il testo intero */
+function _extractJsonBlock(text) {
+  const fenceMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  return (fenceMatch ? fenceMatch[1] : text).trim();
+}
+
+/* Parser di fallback per elenchi testuali semplici (non JSON) — euristico, non garantito */
+function parseAiPlainText(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const lineRe = /^(?:giorno\s*\d+|tappa\s*\d+|\d+[.):]|[-*•])\s*[:\-]?\s*(.+)$/i;
+  const stages = [];
+  lines.forEach(line => {
+    // Salta righe che sembrano titoli generici troppo corti o intestazioni tipo "Itinerario:"
+    const m = line.match(lineRe);
+    let content = m ? m[1] : null;
+    if (!content) return;
+    let days = 1;
+    const daysMatch = content.match(/\((\d+)\s*(?:giorni?|nott[ei])\)/i);
+    if (daysMatch) { days = parseInt(daysMatch[1]) || 1; content = content.replace(daysMatch[0], '').trim(); }
+    let title = content, notes = '';
+    const sep = content.match(/^(.{2,60}?)\s*[:\-–]\s*(.+)$/);
+    if (sep) { title = sep[1].trim(); notes = sep[2].trim(); }
+    title = title.replace(/[.,;]+$/, '').trim();
+    if (title && title.length <= 80) stages.push({ title, date: '', days, notes });
+  });
+  return stages.length ? { origin: '', startDate: '', stages } : null;
+}
+
+function parseAiItinerary() {
+  const textarea = document.getElementById('ai-import-textarea');
+  const errorEl = document.getElementById('ai-import-error');
+  errorEl.style.display = 'none';
+  const raw = (textarea.value || '').trim();
+  if (!raw) {
+    errorEl.textContent = 'Incolla prima il testo generato dalla AI.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  let parsed = null;
+
+  // 1. Prova come JSON (formato consigliato, tramite il prompt fornito)
+  try {
+    const jsonStr = _extractJsonBlock(raw);
+    const obj = JSON.parse(jsonStr);
+    const rawStages = Array.isArray(obj?.stages) ? obj.stages
+                     : Array.isArray(obj?.tappe) ? obj.tappe
+                     : Array.isArray(obj) ? obj
+                     : null;
+    if (rawStages) {
+      parsed = {
+        origin: (obj.origin || obj.partenza || obj.startingPoint || '').toString().trim(),
+        startDate: (obj.startDate || obj.dataPartenza || '').toString().trim(),
+        stages: rawStages.map(s => ({
+          title: (s.title || s.nome || s.name || '').toString().trim(),
+          date: (s.date || s.data || '').toString().trim(),
+          days: parseInt(s.days || s.giorni) || 1,
+          notes: (s.notes || s.note || s.description || '').toString().trim()
+        })).filter(s => s.title)
+      };
+    }
+  } catch (e) { /* non è JSON valido — proviamo il parser testuale */ }
+
+  // 2. Fallback: elenco testuale semplice
+  if (!parsed) parsed = parseAiPlainText(raw);
+
+  if (!parsed || !parsed.stages.length) {
+    errorEl.textContent = 'Non sono riuscito a interpretare il testo. Usa il prompt suggerito sopra per un formato più affidabile.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  state.aiImportParsed = parsed;
+  renderAiImportPreview(parsed);
+  document.getElementById('ai-import-input-view').style.display = 'none';
+  document.getElementById('ai-import-preview-view').style.display = 'block';
+}
+window.parseAiItinerary = parseAiItinerary;
+
+function renderAiImportPreview(parsed) {
+  const container = document.getElementById('ai-import-preview-list');
+  if (!container) return;
+  let html = '';
+  if (parsed.origin) {
+    html += `
+      <div class="card" style="border-left:4px solid var(--moss); margin-bottom:10px">
+        <div style="font-size:10px; color:var(--moss-dark); font-weight:800; text-transform:uppercase; letter-spacing:0.08em">🏠 Partenza</div>
+        <div style="font-weight:700; margin-top:4px">${escapeHtml(parsed.origin)}${parsed.startDate ? ' · ' + formatDate(parsed.startDate) : ''}</div>
+      </div>
+    `;
+  }
+  html += `<div style="font-size:12px; color:var(--ink-muted); font-weight:700; margin-bottom:10px">${pluralizeIt(parsed.stages.length, 'tappa trovata', 'tappe trovate')}</div>`;
+  parsed.stages.forEach((s, i) => {
+    html += `
+      <div class="card" style="margin-bottom:8px; display:flex; gap:12px; align-items:flex-start">
+        <div style="width:28px; height:28px; border-radius:50%; background:var(--grad-sunset); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; flex-shrink:0">${i + 1}</div>
+        <div style="flex:1; min-width:0">
+          <div style="font-weight:700; font-size:14px">${escapeHtml(s.title)}</div>
+          <div style="font-size:11px; color:var(--ink-muted); margin-top:2px">
+            ${s.date ? formatDate(s.date) : 'Data da impostare'} · ${pluralizeIt(s.days, 'giorno', 'giorni')}
+          </div>
+          ${s.notes ? `<div style="font-size:12px; color:var(--ink-2); margin-top:4px; line-height:1.4">${escapeHtml(s.notes)}</div>` : ''}
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+}
+
+async function confirmAiImport() {
+  const parsed = state.aiImportParsed;
+  if (!parsed || !state.currentTripId) return;
+  const confirmBtn = document.getElementById('ai-import-confirm-btn');
+  try {
+    confirmBtn.disabled = true;
+    confirmBtn.textContent = 'Creazione in corso…';
+    showLoader(true);
+
+    // Se la AI ha indicato una partenza e il viaggio non ne ha ancora una, la impostiamo
+    if (parsed.origin && !state.currentTrip?.origin) {
+      const originData = { origin: parsed.origin };
+      const geo = await geocodeAddress(parsed.origin);
+      if (geo) { originData.originLat = geo.lat; originData.originLng = geo.lng; }
+      if (parsed.startDate && !state.currentTrip?.startDate) originData.startDate = parsed.startDate;
+      await window.FB.updateDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId), originData);
+      if (state.currentTrip) Object.assign(state.currentTrip, originData);
+    }
+
+    const baseOrder = state.currentStages.length;
+    const batch = window.FB.writeBatch(window.FB.db);
+    const stagesCol = window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'stages');
+
+    for (let i = 0; i < parsed.stages.length; i++) {
+      const s = parsed.stages[i];
+      confirmBtn.textContent = `Localizzo tappa ${i + 1}/${parsed.stages.length}…`;
+      const data = {
+        title: s.title, date: s.date || '', days: s.days || 1, notes: s.notes || '',
+        kind: 'stage', parentId: null, order: baseOrder + i,
+        createdAt: window.FB.serverTimestamp(), createdBy: state.user.uid
+      };
+      // Geocoding sequenziale (best-effort) — combina col nome del viaggio per aiutare la disambiguazione
+      const query = state.currentTrip?.destination ? `${s.title}, ${state.currentTrip.destination}` : s.title;
+      const geo = await geocodeAddress(query);
+      if (geo) { data.lat = geo.lat; data.lng = geo.lng; }
+      const ref = window.FB.doc(stagesCol);
+      batch.set(ref, data);
+    }
+    await batch.commit();
+
+    logActivity('stage_added', {
+      text: `ha importato ${pluralizeIt(parsed.stages.length, 'tappa', 'tappe')} con l'AI in`,
+      tripId: state.currentTripId,
+      tripName: state.currentTrip?.name,
+      emoji: '🤖'
+    });
+
+    closeAiImportModal();
+    showToast(`${pluralizeIt(parsed.stages.length, 'tappa creata', 'tappe create')}! 🤖✨`, 'success');
+  } catch (e) {
+    console.error(e);
+    showToast('Errore: ' + e.message, 'error');
+  } finally {
+    showLoader(false);
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = '✅ Conferma e crea tappe';
+  }
+}
+window.confirmAiImport = confirmAiImport;
+
 async function saveQuickOrigin() {
   const input = document.getElementById('quick-origin-input');
   const dateInput = document.getElementById('quick-origin-date');
@@ -6510,6 +7267,14 @@ async function saveStage() {
                 : kind === 'alternative' ? 'Alternativa aggiunta! 🔀'
                 : 'Tappa aggiunta! 📍';
       showToast(msg, 'success');
+      if (kind === 'stage') {
+        logActivity('stage_added', {
+          text: `ha aggiunto la tappa "${title}" a`,
+          tripId: state.currentTripId,
+          tripName: state.currentTrip?.name,
+          emoji: '📍'
+        });
+      }
     }
     closeStageModal();
   } catch (e) { console.error(e); showToast('Errore: ' + e.message, 'error'); }
@@ -7361,8 +8126,8 @@ function renderExpenses() {
   if (!t) return;
   const cur = t.currency || '€';
   const total = state.currentExpenses.reduce((s, e) => s + (e.amount || 0), 0);
-  document.getElementById('total-expenses').textContent = cur + total.toFixed(2);
-  document.getElementById('balance-sub').textContent = `${state.currentExpenses.length} spese • ${(t.participants || []).length} persone`;
+  document.getElementById('total-expenses').textContent = formatCurrency(total, cur);
+  document.getElementById('balance-sub').textContent = `${pluralizeIt(state.currentExpenses.length, 'spesa', 'spese')} • ${pluralizeIt((t.participants || []).length, 'persona', 'persone')}`;
 
   // Aggiorna anche il budget card (in caso si apra solo il tab spese)
   // Sincronizza state.expenses con state.currentExpenses per la budget card
@@ -7615,6 +8380,42 @@ async function deleteCurrentTrip() {
 }
 window.deleteCurrentTrip = deleteCurrentTrip;
 
+/* Abbandona un viaggio creato da un altro utente — rimuove solo la propria partecipazione,
+   il viaggio resta intatto per gli altri membri */
+async function leaveTrip() {
+  const t = state.currentTrip;
+  if (!t) return;
+  if (t.createdBy === state.user.uid) {
+    return showToast('Sei il creatore — puoi solo eliminare il viaggio', 'error');
+  }
+  if (!confirm(`Abbandonare "${t.name}"? Non vedrai più questo viaggio, ma resterà visibile agli altri partecipanti.`)) return;
+  try {
+    showLoader(true);
+    const myUid = state.user.uid;
+    const myInfo = (t.participantsInfo || []).find(p => p.uid === myUid);
+    await window.FB.updateDoc(window.FB.doc(window.FB.db, 'trips', t.id), {
+      participants: window.FB.arrayRemove(myUid),
+      participantsInfo: window.FB.arrayRemove(myInfo)
+    });
+    detachTripListeners();
+    showToast('Hai abbandonato il viaggio', 'success');
+    showPage('home');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
+}
+window.leaveTrip = leaveTrip;
+
+/* Popola il pulsante corretto: Elimina (creatore) oppure Abbandona (partecipante) */
+function renderTripDangerZone() {
+  const el = document.getElementById('trip-danger-zone');
+  if (!el || !state.currentTrip) return;
+  const isCreator = state.currentTrip.createdBy === state.user.uid;
+  el.innerHTML = isCreator
+    ? `<button class="btn btn-danger" onclick="deleteCurrentTrip()">🗑️ Elimina viaggio</button>`
+    : `<button class="btn btn-danger" onclick="leaveTrip()">🚪 Abbandona viaggio</button>`;
+}
+window.renderTripDangerZone = renderTripDangerZone;
+
 /* =================================================================
    CALENDAR + EVENTS
    ================================================================= */
@@ -7848,6 +8649,236 @@ function dateInRange(key, s, e) {
   if (!s || !e) return false;
   return key >= s && key <= e;
 }
+function addDaysToDate(ymd, days) {
+  if (!ymd) return null;
+  const [y, m, d] = ymd.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setDate(dt.getDate() + (days || 0));
+  return formatYMD(dt);
+}
+
+/* =================================================================
+   UTILITY GENERICHE (riusabili in tutta l'app)
+   ================================================================= */
+
+/* Tempo relativo in italiano: "ora", "5 min fa", "2 ore fa", "ieri", "3 giorni fa", data completa oltre la settimana */
+function timeAgo(date) {
+  if (!date) return '';
+  const now = new Date();
+  const diffSec = Math.floor((now - date) / 1000);
+  if (diffSec < 0) return 'ora'; // orologio client leggermente sfasato
+  if (diffSec < 60) return 'ora';
+  if (diffSec < 3600) { const m = Math.floor(diffSec / 60); return `${m} min fa`; }
+  if (diffSec < 86400) { const h = Math.floor(diffSec / 3600); return `${h} ${h === 1 ? 'ora' : 'ore'} fa`; }
+  if (diffSec < 172800) return 'ieri';
+  if (diffSec < 604800) { const d = Math.floor(diffSec / 86400); return `${d} giorni fa`; }
+  return date.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: now.getFullYear() !== date.getFullYear() ? 'numeric' : undefined });
+}
+
+/* Converte un valore Firestore (Timestamp, numero epoch, o già Date) in un oggetto Date JS */
+function toJsDate(val) {
+  if (!val) return null;
+  if (val.toDate) return val.toDate();
+  if (val instanceof Date) return val;
+  if (typeof val === 'number') return new Date(val);
+  return null;
+}
+
+/* Pluralizzazione italiana semplice: pluralizeIt(3, 'giorno', 'giorni') → "3 giorni" */
+function pluralizeIt(n, singular, plural) {
+  return `${n} ${n === 1 ? singular : plural}`;
+}
+
+/* Debounce generico — ritarda l'esecuzione di fn finché l'utente smette di digitare */
+function debounce(fn, delay) {
+  let timer = null;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+/* Copia testo negli appunti con fallback per browser meno recenti + toast di conferma */
+async function copyToClipboard(text, successMsg) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    showToast(successMsg || 'Copiato negli appunti 📋', 'success');
+    return true;
+  } catch (e) {
+    showToast('Impossibile copiare', 'error');
+    return false;
+  }
+}
+
+/* Formatta un importo con simbolo valuta, gestendo simboli prima/dopo il numero */
+function formatCurrency(amount, symbol) {
+  const cur = symbol || '€';
+  const n = Number(amount) || 0;
+  const formatted = n.toLocaleString('it-IT', { minimumFractionDigits: n % 1 !== 0 ? 2 : 0, maximumFractionDigits: 2 });
+  // Simboli che vanno dopo il numero per convenzione (es. "150 CHF")
+  return ['CHF', 'kr', 'zł'].includes(cur) ? `${formatted} ${cur}` : `${cur}${formatted}`;
+}
+
+/* Raggruppa un array in base al risultato di keyFn — utile per liste "per giorno" */
+function groupBy(arr, keyFn) {
+  const out = {};
+  (arr || []).forEach(item => {
+    const key = keyFn(item);
+    if (!out[key]) out[key] = [];
+    out[key].push(item);
+  });
+  return out;
+}
+
+/* Etichetta "Oggi / Ieri / [data]" per raggruppare liste cronologiche come il feed attività */
+function dayLabel(date) {
+  if (!date) return '';
+  const now = new Date();
+  const startOfDay = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const diffDays = Math.round((startOfDay(now) - startOfDay(date)) / 86400000);
+  if (diffDays === 0) return 'Oggi';
+  if (diffDays === 1) return 'Ieri';
+  if (diffDays < 7) return date.toLocaleDateString('it-IT', { weekday: 'long' });
+  return date.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' });
+}
+
+/* =================================================================
+   ACTIVITY FEED — homepage stile social con le novità degli amici
+   Firestore: activityFeed/{autoId} — {uid, name, photoURL, type, text, emoji, tripId, tripName, createdAt}
+   Un'attività viene scritta ai punti chiave (viaggio creato, tappa aggiunta, foto caricate, ecc.)
+   e letta filtrando per gli uid che seguo (query 'in' a blocchi di 10, limite Firestore).
+   ================================================================= */
+async function logActivity(type, opts) {
+  opts = opts || {};
+  if (!state.user) return;
+  try {
+    await window.FB.addDoc(window.FB.collection(window.FB.db, 'activityFeed'), {
+      uid: state.user.uid,
+      name: state.profile?.name || 'Utente',
+      photoURL: state.profile?.photoURL || '',
+      type,
+      text: opts.text || '',
+      emoji: opts.emoji || '✨',
+      tripId: opts.tripId || null,
+      tripName: opts.tripName || null,
+      createdAt: window.FB.serverTimestamp()
+    });
+  } catch (e) {
+    console.warn('logActivity error', e.message); // non bloccante — l'azione principale è già andata a buon fine
+  }
+}
+
+async function loadActivityFeed() {
+  const following = state.following || [];
+  if (!following.length) return [];
+  // Firestore 'in' supporta al massimo 10 valori — dividiamo in blocchi se servono di più
+  const chunks = [];
+  for (let i = 0; i < following.length; i += 10) chunks.push(following.slice(i, i + 10));
+  let all = [];
+  for (const chunk of chunks) {
+    try {
+      const q = window.FB.query(
+        window.FB.collection(window.FB.db, 'activityFeed'),
+        window.FB.where('uid', 'in', chunk),
+        window.FB.orderBy('createdAt', 'desc'),
+        window.FB.limit(25)
+      );
+      const snap = await window.FB.getDocs(q);
+      all = all.concat(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    } catch (e) { console.warn('loadActivityFeed chunk error', e.message); }
+  }
+  all.sort((a, b) => (toJsDate(b.createdAt)?.getTime() || 0) - (toJsDate(a.createdAt)?.getTime() || 0));
+  return all.slice(0, 30);
+}
+
+const ACTIVITY_TYPE_ICON = {
+  trip_created: '⛺',
+  stage_added: '📍',
+  photo_uploaded: '📷',
+  trip_joined: '🎉',
+  wish_added: '⭐'
+};
+
+async function renderActivityFeed() {
+  const container = document.getElementById('activity-feed-list');
+  const empty = document.getElementById('activity-feed-empty');
+  if (!container) return;
+  container.innerHTML = `<div style="text-align:center; padding:20px; color:var(--ink-faint); font-size:12px">Caricamento novità…</div>`;
+
+  const items = await loadActivityFeed();
+  if (!items.length) {
+    container.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  // Raggruppa per giorno (Oggi / Ieri / [data]) per una lettura più naturale
+  const groups = groupBy(items, item => dayLabel(toJsDate(item.createdAt)) || '—');
+  const orderedKeys = [...new Set(items.map(item => dayLabel(toJsDate(item.createdAt)) || '—'))];
+
+  container.innerHTML = orderedKeys.map(key => `
+    <div class="activity-day-label">${escapeHtml(key)}</div>
+    ${groups[key].map(a => activityCardHtml(a)).join('')}
+  `).join('');
+}
+window.renderActivityFeed = renderActivityFeed;
+
+function activityCardHtml(a) {
+  const d = toJsDate(a.createdAt);
+  const timeTxt = d ? timeAgo(d) : '';
+  const icon = a.emoji || ACTIVITY_TYPE_ICON[a.type] || '✨';
+  const clickable = a.tripId ? `onclick="openTrip('${a.tripId}')"` : `onclick="openUserProfile('${a.uid}')"`;
+  return `
+    <div class="activity-card" ${clickable}>
+      <div class="activity-avatar">${_avatarHtml({ name: a.name, photoURL: a.photoURL })}</div>
+      <div class="activity-icon-badge">${icon}</div>
+      <div class="activity-body">
+        <div class="activity-text"><strong>${escapeHtml(a.name || 'Utente')}</strong> ${escapeHtml(a.text || '')}${a.tripName ? ` <strong>${escapeHtml(a.tripName)}</strong>` : ''}</div>
+        <div class="activity-time">${timeTxt}</div>
+      </div>
+    </div>
+  `;
+}
+
+/* Biglietto verticale check-in / check-out per una tappa con data + durata impostate */
+function stageStayBoxHtml(s) {
+  if (!s.date || !s.days) return '';
+  const checkoutDate = addDaysToDate(s.date, s.days);
+  const [inY, inM, inD] = s.date.split('-').map(Number);
+  const inDt = new Date(inY, inM - 1, inD);
+  const [outY, outM, outD] = checkoutDate.split('-').map(Number);
+  const outDt = new Date(outY, outM - 1, outD);
+  const monthsIt = ['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+  return `
+    <div class="itin-stay-row">
+      <div class="itin-stay-box">
+        <div class="half in">
+          <div class="lbl">Check-in</div>
+          <div class="day">${inDt.getDate()}</div>
+          <div class="mon">${monthsIt[inDt.getMonth()]}</div>
+        </div>
+        <div class="half out">
+          <div class="lbl">Check-out</div>
+          <div class="day">${outDt.getDate()}</div>
+          <div class="mon">${monthsIt[outDt.getMonth()]}</div>
+        </div>
+      </div>
+      <div class="itin-stay-nights">🌙 <strong>${s.days}</strong> nott${s.days > 1 ? 'i' : 'e'}</div>
+    </div>
+  `;
+}
 
 // Show join card on auth screen only once an account is present? Per user request:
 // Join option should be visible ONLY after account creation/login. So we keep it hidden on the auth screen;
@@ -7856,7 +8887,7 @@ function dateInRange(key, s, e) {
 /* =================================================================
    IMGBB UPLOAD (per foto profilo e foto viaggi)
    ================================================================= */
-const IMGBB_API_KEY = 'e4660bfc2d38c3617e2bafc8230f3e37';
+const IMGBB_API_KEY = 'acba3a73ac3328de413595319e7a1519';
 
 async function uploadToImgBB(file) {
   // Converte il file in base64 e invia a ImgBB
@@ -8013,6 +9044,10 @@ async function saveWish() {
     document.getElementById('wish-notes').value = '';
     closeModal('new-wish-modal');
     showToast('Aggiunto alla wishlist ⭐', 'success');
+    logActivity('wish_added', {
+      text: `vuole visitare ${place}${country ? ', ' + country : ''}`,
+      emoji: '⭐'
+    });
   } catch (e) { showToast('Errore: ' + e.message, 'error'); }
 }
 window.saveWish = saveWish;
@@ -8038,6 +9073,7 @@ async function handleTripPhotoUpload(event) {
   const progressLabel = document.getElementById('photos-upload-label');
   const progressBar = document.getElementById('photos-upload-bar');
   progressEl.style.display = 'block';
+  let uploadedCount = 0;
   try {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -8058,9 +9094,18 @@ async function handleTripPhotoUpload(event) {
           createdAt: Date.now()
         }
       );
+      uploadedCount++;
     }
     progressBar.style.width = '100%';
     showToast('Foto caricate 📷', 'success');
+    if (uploadedCount > 0) {
+      logActivity('photo_uploaded', {
+        text: `ha caricato ${pluralizeIt(uploadedCount, 'foto', 'foto')} in`,
+        tripId: trip.id,
+        tripName: trip.name,
+        emoji: '📷'
+      });
+    }
   } catch (e) {
     console.error(e);
     showToast('Errore: ' + e.message, 'error');
@@ -8130,50 +9175,215 @@ async function deleteTripPhoto(id) {
 }
 window.deleteTripPhoto = deleteTripPhoto;
 
+/* Lightbox generalizzato — funziona sia per foto del viaggio che per foto di una tappa.
+   state.activePhotos: array corrente di foto mostrate
+   state.lightboxSource: { type: 'trip' } oppure { type: 'stage', stageId } — usato per salvare la didascalia nel posto giusto */
 function openLightbox(idx) {
   const photos = state.tripPhotos || [];
   if (!photos.length) return;
+  state.activePhotos = photos;
+  state.lightboxSource = { type: 'trip' };
   state._lightboxIdx = idx;
-  let box = document.getElementById('lightbox');
-  if (!box) {
-    box = document.createElement('div');
-    box.id = 'lightbox';
-    box.className = 'lightbox';
-    box.innerHTML = `
-      <button class="lightbox-close" onclick="closeLightbox()">×</button>
-      <button class="lightbox-nav lightbox-prev" onclick="lightboxNav(-1)">‹</button>
-      <img id="lightbox-img" src="" />
-      <button class="lightbox-nav lightbox-next" onclick="lightboxNav(1)">›</button>
-      <div class="lightbox-info" id="lightbox-info"></div>
-    `;
-    document.body.appendChild(box);
-    box.addEventListener('click', (e) => {
-      if (e.target === box) closeLightbox();
-    });
+  _openLightboxBox();
+}
+window.openLightbox = openLightbox;
+
+function openStageLightbox(stageId, idx) {
+  const photos = (state._stagePhotosCache && state._stagePhotosCache[stageId]) || [];
+  if (!photos.length) return;
+  state.activePhotos = photos;
+  state.lightboxSource = { type: 'stage', stageId };
+  state._lightboxIdx = idx;
+  _openLightboxBox();
+}
+window.openStageLightbox = openStageLightbox;
+
+function _openLightboxBox() {
+  const box = document.getElementById('lightbox');
+  if (!box) return;
+  document.getElementById('lightbox-details-panel')?.classList.remove('show');
+  const arrow = document.getElementById('lightbox-details-arrow');
+  if (arrow) arrow.style.transform = '';
+  if (!box._wildrClickBound) {
+    box.addEventListener('click', (e) => { if (e.target === box) closeLightbox(); });
+    _bindLightboxDrag(box);
+    box._wildrClickBound = true;
   }
   _updateLightbox();
   box.classList.add('active');
 }
+
 function _updateLightbox() {
-  const photos = state.tripPhotos || [];
+  const photos = state.activePhotos || [];
   const p = photos[state._lightboxIdx];
   if (!p) return;
   document.getElementById('lightbox-img').src = p.url;
   document.getElementById('lightbox-info').textContent =
-    `${state._lightboxIdx + 1}/${photos.length} · ${p.uploadedByName || 'Anonimo'}`;
+    `${state._lightboxIdx + 1}/${photos.length}${p.caption ? ' · ' + p.caption : ''}`;
+  const captionInput = document.getElementById('lightbox-caption-input');
+  if (captionInput) captionInput.value = p.caption || '';
+  const metaEl = document.getElementById('lightbox-meta-info');
+  if (metaEl) {
+    let dateTxt = '';
+    try {
+      const d = p.createdAt?.toDate ? p.createdAt.toDate() : (p.createdAt ? new Date(p.createdAt) : null);
+      if (d) dateTxt = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch (_) {}
+    metaEl.textContent = dateTxt ? `Caricata il ${dateTxt}` : '';
+  }
 }
+
 function lightboxNav(delta) {
-  const photos = state.tripPhotos || [];
+  const photos = state.activePhotos || [];
   state._lightboxIdx = (state._lightboxIdx + delta + photos.length) % photos.length;
   _updateLightbox();
 }
+window.lightboxNav = lightboxNav;
+
 function closeLightbox() {
   const box = document.getElementById('lightbox');
   if (box) box.classList.remove('active');
+  document.getElementById('lightbox-details-panel')?.classList.remove('show');
 }
-window.openLightbox = openLightbox;
-window.lightboxNav = lightboxNav;
 window.closeLightbox = closeLightbox;
+
+/* Pannello dettagli — tap sulla pillola "Dettagli" oppure trascina verso il basso l'immagine */
+function toggleLightboxDetails(forceShow) {
+  const panel = document.getElementById('lightbox-details-panel');
+  const arrow = document.getElementById('lightbox-details-arrow');
+  if (!panel) return;
+  const show = forceShow != null ? forceShow : !panel.classList.contains('show');
+  panel.classList.toggle('show', show);
+  if (arrow) arrow.style.transform = show ? 'rotate(180deg)' : '';
+}
+window.toggleLightboxDetails = toggleLightboxDetails;
+
+function _bindLightboxDrag(box) {
+  const img = document.getElementById('lightbox-img');
+  if (!img) return;
+  let startY = null;
+  let dragging = false;
+
+  const onStart = (y) => { startY = y; dragging = true; };
+  const onMove = (y) => {
+    if (!dragging || startY == null) return;
+    const delta = y - startY;
+    if (delta > 55) {
+      toggleLightboxDetails(true);
+      dragging = false;
+    } else if (delta < -55) {
+      toggleLightboxDetails(false);
+      dragging = false;
+    }
+  };
+  const onEnd = () => { dragging = false; startY = null; };
+
+  img.addEventListener('touchstart', (e) => onStart(e.touches[0].clientY), { passive: true });
+  img.addEventListener('touchmove', (e) => onMove(e.touches[0].clientY), { passive: true });
+  img.addEventListener('touchend', onEnd);
+
+  img.addEventListener('mousedown', (e) => onStart(e.clientY));
+  window.addEventListener('mousemove', (e) => { if (dragging) onMove(e.clientY); });
+  window.addEventListener('mouseup', onEnd);
+}
+
+async function saveLightboxCaption() {
+  const photos = state.activePhotos || [];
+  const p = photos[state._lightboxIdx];
+  if (!p || !state.lightboxSource) return;
+  const caption = document.getElementById('lightbox-caption-input').value.trim();
+  try {
+    showLoader(true);
+    const tripId = state.currentTripId;
+    let ref;
+    if (state.lightboxSource.type === 'stage') {
+      ref = window.FB.doc(window.FB.db, 'trips', tripId, 'stages', state.lightboxSource.stageId, 'photos', p.id);
+    } else {
+      ref = window.FB.doc(window.FB.db, 'trips', tripId, 'photos', p.id);
+    }
+    await window.FB.updateDoc(ref, { caption });
+    p.caption = caption;
+    _updateLightbox();
+    showToast('Didascalia salvata ✓', 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
+}
+window.saveLightboxCaption = saveLightboxCaption;
+
+/* =================================================================
+   FOTO TAPPA — upload e galleria per singola tappa (via ImgBB)
+   ================================================================= */
+async function handleStagePhotoUpload(event, stageId) {
+  const files = Array.from(event.target.files || []);
+  if (!files.length) return;
+  const tripId = state.currentTripId;
+  try {
+    showLoader(true);
+    for (const file of files) {
+      if (file.size > 10 * 1024 * 1024) { showToast('Foto troppo grande (max 10MB): ' + file.name, 'error'); continue; }
+      const result = await uploadToImgBB(file);
+      await window.FB.addDoc(window.FB.collection(window.FB.db, 'trips', tripId, 'stages', stageId, 'photos'), {
+        url: result.url,
+        thumbUrl: result.thumbUrl,
+        uploadedBy: state.user.uid,
+        uploadedByName: state.profile?.name || 'Utente',
+        caption: '',
+        createdAt: window.FB.serverTimestamp()
+      });
+    }
+    showToast('Foto caricate 📷', 'success');
+    renderStagePhotos(stageId);
+  } catch (e) {
+    showToast('Errore upload: ' + e.message, 'error');
+  } finally {
+    showLoader(false);
+    event.target.value = '';
+  }
+}
+window.handleStagePhotoUpload = handleStagePhotoUpload;
+
+async function renderStagePhotos(stageId) {
+  const grid = document.getElementById('stage-photos-grid-' + stageId);
+  if (!grid) return;
+  grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:10px; color:var(--ink-faint); font-size:12px">Caricamento…</div>`;
+  try {
+    let photos;
+    try {
+      const snap = await window.FB.getDocs(window.FB.query(
+        window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'stages', stageId, 'photos'),
+        window.FB.orderBy('createdAt', 'desc')
+      ));
+      photos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (_) {
+      const snap = await window.FB.getDocs(window.FB.collection(window.FB.db, 'trips', state.currentTripId, 'stages', stageId, 'photos'));
+      photos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    }
+    state._stagePhotosCache = state._stagePhotosCache || {};
+    state._stagePhotosCache[stageId] = photos;
+    if (!photos.length) {
+      grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:10px; color:var(--ink-faint); font-size:12px">Nessuna foto per questa tappa</div>`;
+      return;
+    }
+    grid.innerHTML = photos.map((p, idx) => `
+      <div class="photo-tile" onclick="openStageLightbox('${stageId}', ${idx})">
+        <img src="${p.thumbUrl || p.url}" alt="" loading="lazy" onerror="this.closest('.photo-tile').classList.add('photo-broken'); this.replaceWith(Object.assign(document.createElement('div'),{className:'photo-broken-icon',innerHTML:'🖼️'}))" />
+        ${p.uploadedBy === state.user.uid ? `<button class="photo-del" onclick="event.stopPropagation(); deleteStagePhoto('${stageId}','${p.id}')">×</button>` : ''}
+      </div>
+    `).join('');
+  } catch (e) {
+    grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:10px; color:var(--danger); font-size:12px">Errore caricamento foto</div>`;
+  }
+}
+window.renderStagePhotos = renderStagePhotos;
+
+async function deleteStagePhoto(stageId, photoId) {
+  if (!confirm('Eliminare questa foto?')) return;
+  try {
+    await window.FB.deleteDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'stages', stageId, 'photos', photoId));
+    renderStagePhotos(stageId);
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+window.deleteStagePhoto = deleteStagePhoto;
 
 /* =================================================================
    PACKING LIST
@@ -8306,7 +9516,7 @@ window.loadSuggestedPackingList = loadSuggestedPackingList;
    ================================================================= */
 // IMPORTANT: per usare il meteo, ottieni una API key gratuita su https://openweathermap.org/api
 // e incollala qui. Senza key il tab mostrerà un messaggio di configurazione.
-const OWM_API_KEY = ''; // <-- INSERIRE API KEY OpenWeatherMap
+const OWM_API_KEY = '6352850cd83271a262098e58a61a99f8'; // OpenWeatherMap
 
 async function loadWeatherForecast() {
   const trip = state.currentTrip;
@@ -8714,6 +9924,7 @@ window.setupV5UserListeners = function() {
   setupWishesListener();
   setupFollowingListener();
   ensurePublicProfile();
+  setupDmThreadsListener();
 };
 
 /* =================================================================
@@ -8887,6 +10098,327 @@ async function toggleFollow() {
   }
 }
 window.toggleFollow = toggleFollow;
+
+/* =================================================================
+   AMICI — pagina stile social (storie, messaggi, elenco amici)
+   ================================================================= */
+async function fetchPublicProfile(uid) {
+  state._profileCache = state._profileCache || {};
+  if (state._profileCache[uid]) return state._profileCache[uid];
+  try {
+    const snap = await window.FB.getDoc(window.FB.doc(window.FB.db, 'publicProfiles', uid));
+    const profile = snap.exists() ? snap.data() : { uid, name: 'Utente', photoURL: '' };
+    state._profileCache[uid] = profile;
+    return profile;
+  } catch (e) {
+    return { uid, name: 'Utente', photoURL: '' };
+  }
+}
+
+function _avatarHtml(profile, size) {
+  const initials = (profile?.name || 'U').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+  return profile?.photoURL
+    ? `<img src="${profile.photoURL}" alt="" onerror="this.parentElement.textContent='${initials}'" />`
+    : initials;
+}
+
+async function renderFriendsPage() {
+  const storiesRow = document.getElementById('friends-stories-row');
+  const friendsList = document.getElementById('friends-list');
+  const friendsEmpty = document.getElementById('friends-empty');
+  const myAvatarFallback = document.getElementById('friends-my-avatar-fallback');
+
+  if (myAvatarFallback) {
+    const name = state.profile?.name || 'U';
+    myAvatarFallback.parentElement.innerHTML = state.profile?.photoURL
+      ? `<img src="${state.profile.photoURL}" alt="" />`
+      : name.split(' ').map(s => s[0]).slice(0,2).join('').toUpperCase();
+  }
+
+  // Notification permission banner (una volta sola, se non ancora concesso/negato)
+  renderNotifPermissionBanner();
+
+  // Feed attività amici (asincrono, non blocca il resto della pagina)
+  renderActivityFeed();
+
+  const following = state.following || [];
+  if (!following.length) {
+    if (storiesRow) storiesRow.innerHTML = '';
+    if (friendsList) friendsList.innerHTML = '';
+    if (friendsEmpty) friendsEmpty.style.display = 'block';
+  } else {
+    if (friendsEmpty) friendsEmpty.style.display = 'none';
+    const profiles = await Promise.all(following.map(uid => fetchPublicProfile(uid)));
+
+    // Storie orizzontali in stile social
+    if (storiesRow) {
+      storiesRow.innerHTML = following.map((uid, i) => `
+        <div class="friend-story" onclick="openUserProfile('${uid}')">
+          <div class="friend-story-avatar">${_avatarHtml(profiles[i])}</div>
+          <div class="friend-story-name">${escapeHtml((profiles[i]?.name || 'Utente').split(' ')[0])}</div>
+        </div>
+      `).join('');
+    }
+
+    // Elenco amici con pulsante chat rapido
+    if (friendsList) {
+      friendsList.innerHTML = following.map((uid, i) => {
+        const p = profiles[i];
+        return `
+          <div class="friend-row">
+            <div class="participant-avatar" style="width:44px;height:44px" onclick="openUserProfile('${uid}')">${_avatarHtml(p)}</div>
+            <div class="friend-row-info" onclick="openUserProfile('${uid}')">
+              <div class="friend-row-name">${escapeHtml(p?.name || 'Utente')}</div>
+              <div class="friend-row-sub">${escapeHtml(p?.location || 'Esploratore Wildr')}</div>
+            </div>
+            <button class="friend-row-chat-btn" title="Invia messaggio" onclick="openDirectChat('${uid}')">💬</button>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  renderDmThreadsList();
+}
+window.renderFriendsPage = renderFriendsPage;
+
+/* =================================================================
+   MESSAGGI DIRETTI (chat 1:1 tra amici)
+   Firestore: directChats/{chatId}/messages/{msgId}
+              users/{uid}/dmThreads/{chatId} — inbox personale con anteprima
+   chatId = uid1_uid2 (ordine alfabetico, così è identico per entrambi)
+   ================================================================= */
+function _dmChatId(uidA, uidB) {
+  return [uidA, uidB].sort().join('_');
+}
+
+function setupDmThreadsListener() {
+  if (!state.user || state._dmThreadsListener) return;
+  const q = window.FB.query(
+    window.FB.collection(window.FB.db, 'users', state.user.uid, 'dmThreads'),
+    window.FB.orderBy('updatedAt', 'desc')
+  );
+  state._dmThreadsListener = window.FB.onSnapshot(q, (snap) => {
+    const prevThreads = state.dmThreads || [];
+    const newThreads = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    // Rileva nuovi messaggi in arrivo (per la notifica) confrontando con lo stato precedente
+    newThreads.forEach(nt => {
+      if (nt.lastSenderId === state.user.uid) return; // messaggio mio, non notificare
+      const prev = prevThreads.find(p => p.id === nt.id);
+      const isNew = !prev || (prev.lastMessage !== nt.lastMessage) || (prev.updatedAt?.seconds !== nt.updatedAt?.seconds);
+      if (isNew && state._dmThreadsInitialized) {
+        notifyIncomingMessage(nt);
+      }
+    });
+
+    state.dmThreads = newThreads;
+    state._dmThreadsInitialized = true;
+    updateFriendsUnreadBadge();
+    if (state.currentPage === 'friends') renderDmThreadsList();
+  }, err => console.warn('dmThreads listener error', err));
+}
+window.setupDmThreadsListener = setupDmThreadsListener;
+
+function updateFriendsUnreadBadge() {
+  const badge = document.getElementById('friends-unread-badge');
+  if (!badge) return;
+  const unreadCount = (state.dmThreads || []).filter(t => t.unread && t.lastSenderId !== state.user.uid).length;
+  if (unreadCount > 0) {
+    badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+    badge.style.display = 'flex';
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function renderDmThreadsList() {
+  const list = document.getElementById('dm-threads-list');
+  const empty = document.getElementById('dm-threads-empty');
+  if (!list) return;
+  const threads = state.dmThreads || [];
+  if (!threads.length) {
+    list.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  list.innerHTML = threads.map(t => {
+    const isUnread = t.unread && t.lastSenderId !== state.user.uid;
+    const timeTxt = timeAgo(toJsDate(t.updatedAt));
+    const preview = t.lastSenderId === state.user.uid ? `Tu: ${t.lastMessage || ''}` : (t.lastMessage || '');
+    return `
+      <div class="dm-thread-row ${isUnread ? 'unread' : ''}" onclick="openDirectChat('${t.otherUid}')">
+        <div class="participant-avatar" style="width:44px;height:44px">${_avatarHtml({ name: t.otherName, photoURL: t.otherPhoto })}</div>
+        <div class="dm-thread-info">
+          <div class="dm-thread-name">${escapeHtml(t.otherName || 'Utente')}</div>
+          <div class="dm-thread-preview">${escapeHtml(preview.length > 40 ? preview.slice(0,40)+'…' : preview)}</div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px">
+          <span class="dm-thread-time">${timeTxt}</span>
+          ${isUnread ? '<div class="dm-thread-dot"></div>' : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function openDirectChat(otherUid) {
+  if (!otherUid || otherUid === state.user.uid) return;
+  const chatId = _dmChatId(state.user.uid, otherUid);
+  state.currentDmChatId = chatId;
+  state.currentDmOtherUid = otherUid;
+  showPage('dmchat');
+
+  const profile = await fetchPublicProfile(otherUid);
+  document.getElementById('dm-header-name').textContent = profile.name || 'Utente';
+  document.getElementById('dm-header-avatar').innerHTML = _avatarHtml(profile);
+
+  // Segna come letto nel mio inbox
+  try {
+    await window.FB.setDoc(
+      window.FB.doc(window.FB.db, 'users', state.user.uid, 'dmThreads', chatId),
+      { unread: false },
+      { merge: true }
+    );
+  } catch (_) {}
+
+  // Attacca listener realtime sui messaggi di questa chat
+  if (state._dmMessagesListener) state._dmMessagesListener();
+  const q = window.FB.query(
+    window.FB.collection(window.FB.db, 'directChats', chatId, 'messages'),
+    window.FB.orderBy('createdAt', 'asc')
+  );
+  state._dmMessagesListener = window.FB.onSnapshot(q, (snap) => {
+    state.currentDmMessages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderDirectMessages();
+  }, err => console.warn('dm messages listener error', err));
+}
+window.openDirectChat = openDirectChat;
+
+function closeDirectChat() {
+  if (state._dmMessagesListener) { state._dmMessagesListener(); state._dmMessagesListener = null; }
+  showPage('friends');
+}
+window.closeDirectChat = closeDirectChat;
+
+function renderDirectMessages() {
+  const container = document.getElementById('dm-messages');
+  if (!container) return;
+  const msgs = state.currentDmMessages || [];
+  const myUid = state.user.uid;
+  container.innerHTML = msgs.map(m => {
+    const isMe = m.senderId === myUid;
+    let timeTxt = '';
+    try {
+      const d = m.createdAt?.toDate ? m.createdAt.toDate() : (m.createdAt ? new Date(m.createdAt) : null);
+      if (d) timeTxt = formatTime(d);
+    } catch (_) {}
+    return `
+      <div class="chat-msg ${isMe ? 'me' : 'other'}">
+        <div class="bubble">${escapeHtml(m.text || '')}</div>
+        <div class="time">${timeTxt}</div>
+      </div>
+    `;
+  }).join('');
+  setTimeout(() => { container.scrollTop = container.scrollHeight; }, 50);
+}
+
+async function sendDirectMessageUI() {
+  const input = document.getElementById('dm-input-field');
+  const text = input.value.trim();
+  if (!text || !state.currentDmOtherUid) return;
+  input.value = '';
+  await sendDirectMessage(state.currentDmOtherUid, text);
+}
+window.sendDirectMessageUI = sendDirectMessageUI;
+
+async function sendDirectMessage(otherUid, text) {
+  const myUid = state.user.uid;
+  const chatId = _dmChatId(myUid, otherUid);
+  try {
+    await window.FB.addDoc(window.FB.collection(window.FB.db, 'directChats', chatId, 'messages'), {
+      senderId: myUid,
+      text,
+      createdAt: window.FB.serverTimestamp()
+    });
+    const myProfile = { name: state.profile?.name || 'Utente', photoURL: state.profile?.photoURL || '' };
+    const otherProfile = await fetchPublicProfile(otherUid);
+    const now = window.FB.serverTimestamp();
+    await window.FB.setDoc(window.FB.doc(window.FB.db, 'users', myUid, 'dmThreads', chatId), {
+      otherUid, otherName: otherProfile.name || 'Utente', otherPhoto: otherProfile.photoURL || '',
+      lastMessage: text, lastSenderId: myUid, updatedAt: now, unread: false
+    }, { merge: true });
+    await window.FB.setDoc(window.FB.doc(window.FB.db, 'users', otherUid, 'dmThreads', chatId), {
+      otherUid: myUid, otherName: myProfile.name, otherPhoto: myProfile.photoURL,
+      lastMessage: text, lastSenderId: myUid, updatedAt: now, unread: true
+    }, { merge: true });
+  } catch (e) {
+    console.error(e);
+    showToast('Errore invio: ' + e.message, 'error');
+  }
+}
+window.sendDirectMessage = sendDirectMessage;
+
+/* =================================================================
+   NOTIFICHE — richiesta permesso + notifica in foreground/background tab.
+   IMPORTANTE: questa è una notifica "web" che funziona solo se il browser
+   (o l'app installata come PWA) è in esecuzione, anche se in background/minimizzata.
+   Per ricevere notifiche a telefono completamente SPENTO o app del tutto chiusa
+   serve Firebase Cloud Messaging + una Cloud Function lato server che invii il push
+   — infrastruttura che va oltre questo file HTML e richiede un deploy separato.
+   ================================================================= */
+function renderNotifPermissionBanner() {
+  const el = document.getElementById('notif-permission-banner');
+  if (!el || !('Notification' in window)) { if (el) el.style.display = 'none'; return; }
+  if (Notification.permission === 'granted' || Notification.permission === 'denied') {
+    el.style.display = 'none';
+    return;
+  }
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="card" style="border-left:4px solid var(--ochre); display:flex; align-items:center; gap:12px; margin-bottom:16px">
+      <div style="font-size:24px">🔔</div>
+      <div style="flex:1; font-size:13px; color:var(--ink-2); line-height:1.4">
+        Attiva le notifiche per sapere subito quando un amico ti scrive.
+      </div>
+      <button class="btn btn-sm btn-ochre" style="width:auto" onclick="requestNotificationPermission()">Attiva</button>
+    </div>
+  `;
+}
+window.renderNotifPermissionBanner = renderNotifPermissionBanner;
+
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) return showToast('Notifiche non supportate su questo browser', 'error');
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm === 'granted') {
+      showToast('Notifiche attivate 🔔', 'success');
+    } else {
+      showToast('Notifiche non attivate', 'error');
+    }
+  } catch (e) { console.warn(e); }
+  renderNotifPermissionBanner();
+}
+window.requestNotificationPermission = requestNotificationPermission;
+
+function notifyIncomingMessage(thread) {
+  // In-app toast, sempre (utile anche a permesso negato)
+  if (state.currentPage !== 'dmchat' || state.currentDmOtherUid !== thread.otherUid) {
+    showToast(`💬 ${thread.otherName || 'Un amico'}: ${(thread.lastMessage || '').slice(0, 40)}`, 'success');
+  }
+  // Notifica di sistema — funziona solo con app/tab aperta (anche in background), NON a telefono spento
+  if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+    try {
+      const n = new Notification(thread.otherName || 'Nuovo messaggio', {
+        body: thread.lastMessage || '',
+        icon: 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' rx=\'22\' fill=\'%23c2410c\'/%3E%3Ctext x=\'50\' y=\'66\' font-size=\'54\' text-anchor=\'middle\'%3E%F0%9F%A7%AD%3C/text%3E%3C/svg%3E',
+        tag: 'wildr-dm-' + thread.id
+      });
+      n.onclick = () => { window.focus(); openDirectChat(thread.otherUid); n.close(); };
+    } catch (e) { console.warn('Notification error', e); }
+  }
+}
 
 /* =================================================================
    MENTIONS (@nome in chat)
@@ -9272,6 +10804,8 @@ function searchTrips(query) {
   }).join('');
 }
 window.searchTrips = searchTrips;
+const debouncedSearchTrips = debounce(searchTrips, 250);
+window.debouncedSearchTrips = debouncedSearchTrips;
 
 /* =================================================================
    TRAVEL MAP — la mia mappa del mondo
@@ -9492,10 +11026,7 @@ function copyInviteLink() {
   const input = document.getElementById('qr-invite-link');
   if (!input) return;
   input.select();
-  try {
-    navigator.clipboard.writeText(input.value);
-    showToast('Link copiato 📋', 'success');
-  } catch { document.execCommand('copy'); }
+  copyToClipboard(input.value, 'Link copiato 📋');
 }
 window.copyInviteLink = copyInviteLink;
 
@@ -9736,6 +11267,9 @@ function openStageDetail(stageId) {
         </div>` : ''}
 
       ${hasCoords ? `
+        <div style="margin-bottom:14px">
+          <div id="stage-mini-map-${s.id}" class="stage-mini-map"></div>
+        </div>
         <button class="btn btn-secondary" style="margin-bottom:14px" onclick="openInMaps(${s.lat}, ${s.lng}, ${JSON.stringify(s.title||'')})">📍 Apri in Maps</button>
       ` : ''}
 
@@ -9753,6 +11287,7 @@ function openStageDetail(stageId) {
       </div>
     `;
     openModal('stage-detail-modal');
+    if (hasCoords) setTimeout(() => initStageMiniMap(s.id, s.lat, s.lng, s.title), 150);
     return;
   }
 
@@ -9810,6 +11345,9 @@ function openStageDetail(stageId) {
       <div style="background:var(--ochre-soft); border-left:4px solid var(--ochre); padding:12px 14px; border-radius:10px; margin-bottom:14px">
         <div style="font-size:10px; color:var(--ochre-dark); font-weight:800; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px">Coordinate</div>
         <div class="mono" style="font-size:13px; font-weight:700">${s.lat.toFixed(5)}, ${s.lng.toFixed(5)}</div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div id="stage-mini-map-${s.id}" class="stage-mini-map"></div>
       </div>` : `
       <div style="background:var(--surface-2); padding:12px 14px; border-radius:10px; margin-bottom:14px; text-align:center; font-size:13px; color:var(--ink-muted)">
         ⚠️ Coordinate non impostate — modifica la tappa per aggiungerle
@@ -9850,6 +11388,16 @@ function openStageDetail(stageId) {
       <button class="btn btn-secondary" style="margin-bottom:14px; border-style:dashed" onclick="closeModal('stage-detail-modal'); openNewStageModal('alternative','${s.id}')">🔀 Aggiungi tappa alternativa</button>
     `}
 
+    <!-- === FOTO TAPPA === -->
+    <div style="margin-bottom:14px">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px">
+        <div style="font-size:10px; color:var(--ink-muted); font-weight:800; text-transform:uppercase; letter-spacing:0.08em">📷 Foto</div>
+        <button class="btn btn-sm btn-secondary" style="width:auto; padding:6px 12px" onclick="document.getElementById('stage-photo-input').click()">+ Carica</button>
+        <input type="file" id="stage-photo-input" accept="image/*" multiple style="display:none" onchange="handleStagePhotoUpload(event, '${s.id}')" />
+      </div>
+      <div id="stage-photos-grid-${s.id}" class="photos-grid" style="min-height:4px"></div>
+    </div>
+
     <!-- Naviga tra tappe -->
     ${(prev || next) ? `
       <div style="display:flex; gap:8px; margin-bottom:14px">
@@ -9864,9 +11412,39 @@ function openStageDetail(stageId) {
     </div>
   `;
 
+  renderStagePhotos(s.id);
+
   openModal('stage-detail-modal');
+  if (hasCoords) setTimeout(() => initStageMiniMap(s.id, s.lat, s.lng, s.title), 150);
 }
 window.openStageDetail = openStageDetail;
+
+/* Mini-mappa Leaflet nel dettaglio tappa — mostra subito dove si trova, senza dover aprire il tab Mappa */
+let _stageMiniMapInstances = {};
+function initStageMiniMap(stageId, lat, lng, title) {
+  const container = document.getElementById('stage-mini-map-' + stageId);
+  if (!container || typeof L === 'undefined') return;
+  if (_stageMiniMapInstances[stageId]) {
+    try { _stageMiniMapInstances[stageId].remove(); } catch (_) {}
+    delete _stageMiniMapInstances[stageId];
+  }
+  try {
+    const map = L.map(container, {
+      zoomControl: true,
+      attributionControl: false,
+      scrollWheelZoom: false
+    }).setView([lat, lng], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+    const icon = L.divIcon({
+      html: `<div style="background:#c2410c;color:#fff;width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 4px 10px rgba(194,65,12,0.5);border:2px solid #fff"><span style="transform:rotate(45deg)">📍</span></div>`,
+      iconSize: [34, 34], iconAnchor: [17, 34], className: ''
+    });
+    L.marker([lat, lng], { icon }).addTo(map).bindPopup(escapeHtml(title || ''));
+    setTimeout(() => map.invalidateSize(), 150);
+    _stageMiniMapInstances[stageId] = map;
+  } catch (e) { console.warn('initStageMiniMap error', e); }
+}
+window.initStageMiniMap = initStageMiniMap;
 
 function openInMaps(lat, lng, label) {
   const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
