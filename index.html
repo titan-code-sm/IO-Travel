@@ -197,13 +197,64 @@
     position: absolute; top: 35%; left: -10%;
     font-size: 22px; color: rgba(42, 26, 14, 0.7);
     animation: birdFly 9s ease-in-out infinite;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
   }
   .splash-bird:nth-child(2) { top: 30%; animation-delay: 1.5s; font-size: 16px; }
+  .splash-bird:nth-child(3) { top: 42%; animation-delay: 3.2s; font-size: 13px; animation-duration: 11s; }
   @keyframes birdFly {
-    0% { left: -10%; transform: translateY(0); }
-    50% { transform: translateY(-15px); }
-    100% { left: 110%; transform: translateY(0); }
+    0%   { left: -10%;  transform: scaleX(-1) translateY(0); }
+    25%  { transform: scaleX(-1) translateY(-16px); }
+    50%  { transform: scaleX(-1) translateY(2px); }
+    75%  { transform: scaleX(-1) translateY(-10px); }
+    100% { left: 110%;  transform: scaleX(-1) translateY(0); }
   }
+
+  /* Nuvole soffici che scorrono lentamente, per profondità */
+  .splash-cloud {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 50px;
+    filter: blur(1px);
+    animation: cloudDrift linear infinite;
+  }
+  .splash-cloud::before, .splash-cloud::after {
+    content: '';
+    position: absolute;
+    background: inherit;
+    border-radius: 50%;
+  }
+  .splash-cloud-1 { width: 90px; height: 26px; top: 14%; left: -20%; animation-duration: 34s; }
+  .splash-cloud-1::before { width: 46px; height: 46px; top: -22px; left: 8px; }
+  .splash-cloud-1::after  { width: 34px; height: 34px; top: -14px; left: 46px; }
+  .splash-cloud-2 { width: 60px; height: 18px; top: 22%; left: -15%; animation-duration: 26s; animation-delay: 6s; opacity: 0.7; }
+  .splash-cloud-2::before { width: 30px; height: 30px; top: -14px; left: 6px; }
+  .splash-cloud-2::after  { width: 22px; height: 22px; top: -9px; left: 30px; }
+  @keyframes cloudDrift {
+    from { transform: translateX(0); }
+    to   { transform: translateX(150vw); }
+  }
+
+  /* Particelle luminose sospese, per un tocco magico da avventura */
+  .splash-particle {
+    position: absolute;
+    width: 4px; height: 4px;
+    background: #fff8e0;
+    border-radius: 50%;
+    box-shadow: 0 0 6px 2px rgba(255, 248, 224, 0.6);
+    animation: particleFloat ease-in-out infinite;
+  }
+  @keyframes particleFloat {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.25; }
+    50% { transform: translateY(-24px) scale(1.3); opacity: 0.9; }
+  }
+
+  /* Vignetta leggera per un effetto più cinematografico */
+  .splash-vignette {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(42, 26, 14, 0.28) 100%);
+    pointer-events: none;
+  }
+
   .splash-content {
     position: relative; text-align: center; z-index: 2;
     margin-top: -8vh;
@@ -217,8 +268,20 @@
     border-radius: 22px;
     font-size: 38px;
     margin-bottom: 22px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25), 0 0 0 8px rgba(255,255,255,0.06);
     animation: markFloat 3s ease-in-out infinite;
+    position: relative;
+  }
+  .splash-mark::after {
+    content: '';
+    position: absolute; inset: -2px;
+    border-radius: 24px;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    animation: markPulseRing 3s ease-out infinite;
+  }
+  @keyframes markPulseRing {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.4); opacity: 0; }
   }
   @keyframes markFloat {
     0%, 100% { transform: translateY(0) rotate(-3deg); }
@@ -229,7 +292,7 @@
     font-size: 56px; font-weight: 800;
     letter-spacing: -0.04em;
     color: #fff;
-    text-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    text-shadow: 0 4px 14px rgba(0, 0, 0, 0.3), 0 0 40px rgba(245, 176, 74, 0.4);
     margin-bottom: 6px;
     animation: slideDown 0.8s ease-out;
   }
@@ -528,6 +591,82 @@
     background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(10px);
     border: 2px solid rgba(255, 255, 255, 0.5);
+  }
+
+  /* === HOME STATS ROW (dentro l'hero, colpo d'occhio rapido) === */
+  .home-stats-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    position: relative;
+    z-index: 1;
+  }
+  .home-stat-pill {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 14px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .home-stat-pill .val {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .home-stat-pill .lbl {
+    font-size: 9.5px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+
+  /* === QUICK ACTIONS GRID (sostituisce la fila di chip a scorrimento) === */
+  .home-quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .qa-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    padding: 14px 6px 12px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.15s;
+  }
+  .qa-card:active { transform: scale(0.95); }
+  .qa-card:hover { border-color: var(--ochre); box-shadow: var(--shadow); }
+  .qa-card-icon {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+  .qa-card-primary .qa-card-icon {
+    background: var(--grad-sunset);
+    box-shadow: var(--shadow-warm);
+  }
+  .qa-card-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--ink-2);
+    text-align: center;
+    line-height: 1.25;
   }
 
   /* === BOTTOM NAV === */
@@ -908,6 +1047,11 @@
     border: 1.5px solid var(--border);
     transition: transform 0.1s, border-color 0.15s, box-shadow 0.15s;
     cursor: pointer;
+    animation: tripCardIn 0.35s cubic-bezier(0.2,0.9,0.3,1) backwards;
+  }
+  @keyframes tripCardIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   .trip-card:active { transform: scale(0.98); }
   .trip-card:hover {
@@ -3526,21 +3670,44 @@
     box-shadow: inset 0 2px 12px rgba(0,0,0,0.2), var(--shadow);
     border: 1px solid var(--border-strong);
   }
+  .stages-board-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
   .stages-board-hint {
+    flex: 1;
     font-size: 12px;
     color: #4a3520;
     background: rgba(255,255,255,0.55);
     padding: 8px 12px;
     border-radius: 10px;
-    margin-bottom: 10px;
     font-weight: 600;
     text-align: center;
+  }
+  #board-link-mode-btn {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.7);
+    border: 1.5px solid rgba(0,0,0,0.15);
+    color: #4a3520;
+    font-weight: 700;
+  }
+  #board-link-mode-btn.active {
+    background: #a8281c;
+    color: #fff;
+    border-color: #a8281c;
+  }
+  .board-card.board-card-link-selected {
+    outline: 3px solid #a8281c;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px rgba(168,40,28,0.25), 2px 4px 10px rgba(0,0,0,0.3);
   }
   .stages-board-scroll {
     position: relative;
     overflow: auto;
-    max-height: 60vh;
-    min-height: 320px;
+    max-height: 82vh;
+    min-height: 520px;
     border-radius: 12px;
     -webkit-overflow-scrolling: touch;
   }
@@ -3558,10 +3725,10 @@
   }
   .board-card {
     position: absolute;
-    width: 140px;
+    width: 175px;
     background: #fffdf8;
-    border-radius: 4px;
-    padding: 10px 10px 8px;
+    border-radius: 5px;
+    padding: 13px 13px 10px;
     box-shadow: 2px 4px 10px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.5) inset;
     cursor: grab;
     touch-action: none;
@@ -3880,11 +4047,20 @@
 <div id="splash-screen" class="splash-screen">
   <div class="splash-bg">
     <div class="splash-sun"></div>
+    <div class="splash-cloud splash-cloud-1"></div>
+    <div class="splash-cloud splash-cloud-2"></div>
     <div class="splash-mountain splash-mountain-back"></div>
     <div class="splash-mountain splash-mountain-mid"></div>
     <div class="splash-mountain splash-mountain-front"></div>
     <div class="splash-bird">🦅</div>
     <div class="splash-bird">🦅</div>
+    <div class="splash-bird">🦅</div>
+    <div class="splash-particle" style="left:15%; top:60%; animation-duration:3.2s"></div>
+    <div class="splash-particle" style="left:78%; top:70%; animation-duration:4s; animation-delay:0.8s"></div>
+    <div class="splash-particle" style="left:32%; top:75%; animation-duration:3.6s; animation-delay:1.6s"></div>
+    <div class="splash-particle" style="left:60%; top:65%; animation-duration:4.4s; animation-delay:0.4s"></div>
+    <div class="splash-particle" style="left:88%; top:55%; animation-duration:3.8s; animation-delay:2s"></div>
+    <div class="splash-vignette"></div>
   </div>
   <div class="splash-content">
     <div class="splash-mark">🧭</div>
@@ -3983,10 +4159,31 @@
           </div>
           <div class="avatar" id="user-avatar" onclick="showPage('profile')">?</div>
         </div>
+        <div class="home-stats-row" id="home-stats-row"></div>
       </header>
 
       <div class="home-section">
         <div id="active-trip-card"></div>
+        <div id="countdown-area"></div>
+
+        <div class="home-quick-grid" id="home-quick-grid">
+          <button class="qa-card qa-card-primary" onclick="openModal('new-trip-modal')">
+            <span class="qa-card-icon">⛺</span>
+            <span class="qa-card-label">Nuova avventura</span>
+          </button>
+          <button class="qa-card" onclick="openModal('join-trip-modal')">
+            <span class="qa-card-icon">🎟️</span>
+            <span class="qa-card-label">Codice invito</span>
+          </button>
+          <button class="qa-card" onclick="showPage('calendar')">
+            <span class="qa-card-icon">📅</span>
+            <span class="qa-card-label">Calendario</span>
+          </button>
+          <button class="qa-card" onclick="showPage('wishlist')">
+            <span class="qa-card-icon">⭐</span>
+            <span class="qa-card-label">Desideri</span>
+          </button>
+        </div>
 
         <div class="home-search">
           <span class="home-search-icon">
@@ -3994,23 +4191,6 @@
           </span>
           <input id="home-search-input" type="text" placeholder="Cerca tra i tuoi viaggi…" oninput="debouncedSearchTrips(this.value)" />
         </div>
-
-        <div class="quick-actions">
-          <button class="qa-chip" onclick="openModal('new-trip-modal')">
-            <span class="qa-chip-icon">⛺</span><span>Nuova avventura</span>
-          </button>
-          <button class="qa-chip" onclick="openModal('join-trip-modal')">
-            <span class="qa-chip-icon">🎟️</span><span>Codice invito</span>
-          </button>
-          <button class="qa-chip" onclick="showPage('calendar')">
-            <span class="qa-chip-icon">📅</span><span>Calendario</span>
-          </button>
-          <button class="qa-chip" onclick="showPage('wishlist')">
-            <span class="qa-chip-icon">⭐</span><span>Desideri</span>
-          </button>
-        </div>
-
-        <div id="countdown-area"></div>
 
         <div class="section-header">
           <h2 id="trips-section-title">I tuoi viaggi</h2>
@@ -4425,7 +4605,10 @@
         </div>
         <div id="stages-list"></div>
         <div id="stages-board" class="stages-board" style="display:none">
-          <div class="stages-board-hint">📌 Trascina le tappe per riorganizzarle · il filo rosso collega ogni alternativa alla sua tappa principale</div>
+          <div class="stages-board-toolbar">
+            <div class="stages-board-hint" id="stages-board-hint">📌 Trascina le tappe per riorganizzarle · il filo rosso collega ogni alternativa alla sua tappa principale</div>
+            <button class="btn btn-sm" id="board-link-mode-btn" onclick="toggleBoardLinkMode()">🔗 Collega tappe</button>
+          </div>
           <div class="stages-board-scroll">
             <svg id="stages-board-svg" class="stages-board-svg"></svg>
             <div id="stages-board-cards" class="stages-board-cards"></div>
@@ -5499,8 +5682,8 @@ function showSplashQuote() {
   const pick = TRAVEL_QUOTES[Math.floor(Math.random() * TRAVEL_QUOTES.length)];
   const qEl = document.getElementById('splash-quote');
   const aEl = document.getElementById('splash-author');
-  if (qEl) qEl.textContent = '"' + pick.q + '"';
-  if (aEl) aEl.textContent = pick.a;
+  if (qEl) qEl.textContent = '"' + pick.text + '"';
+  if (aEl) aEl.textContent = pick.author;
 }
 function hideSplash() {
   const splash = document.getElementById('splash-screen');
@@ -5774,10 +5957,47 @@ function renderHome() {
   renderActiveTripCard();
   renderTripsList(state.tripFilter || 'all');
   renderCountdown();
+  renderHomeStats();
 
   // Link caffè sulla home
   const cofHome = document.getElementById('coffee-link-home');
   if (cofHome && typeof COFFEE_URL !== 'undefined') cofHome.href = COFFEE_URL;
+}
+
+/* Riga statistiche rapide nell'header della home: numero viaggi, giorni totali in viaggio,
+   giorni al prossimo viaggio — dati già disponibili in memoria, nessuna chiamata di rete */
+function renderHomeStats() {
+  const row = document.getElementById('home-stats-row');
+  if (!row) return;
+  const trips = state.trips || [];
+  const now = Date.now();
+
+  const tripsCount = trips.length;
+
+  let totalDays = 0;
+  trips.forEach(t => {
+    if (t.startDate && t.endDate) totalDays += daysBetween(t.startDate, t.endDate);
+  });
+
+  const upcoming = trips
+    .filter(t => t.startDate && new Date(t.startDate).getTime() > now)
+    .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0];
+  const nextDaysVal = upcoming ? Math.ceil((new Date(upcoming.startDate).getTime() - now) / 86400000) : null;
+
+  row.innerHTML = `
+    <div class="home-stat-pill">
+      <div class="val">${tripsCount}</div>
+      <div class="lbl">Viaggi</div>
+    </div>
+    <div class="home-stat-pill">
+      <div class="val">${totalDays}</div>
+      <div class="lbl">Giorni totali</div>
+    </div>
+    <div class="home-stat-pill">
+      <div class="val">${nextDaysVal != null ? nextDaysVal : '—'}</div>
+      <div class="lbl">${nextDaysVal != null ? 'Al prossimo' : 'Nessun viaggio'}</div>
+    </div>
+  `;
 }
 
 function renderStoriesBar() {
@@ -5898,7 +6118,7 @@ function renderTripsList(filter) {
     return;
   }
 
-  list.innerHTML = trips.map(t => {
+  list.innerHTML = trips.map((t, idx) => {
     const type = TRIP_TYPES[t.type] || TRIP_TYPES.mixed;
     const dateRange = formatDateRange(t.startDate, t.endDate);
     const nPpl = (t.participants || []).length;
@@ -5917,7 +6137,7 @@ function renderTripsList(filter) {
       }
     }
     return `
-      <div class="trip-card" onclick="openTrip('${t.id}')">
+      <div class="trip-card" style="animation-delay:${Math.min(idx * 40, 300)}ms" onclick="openTrip('${t.id}')">
         <div class="trip-icon ${type.cls}">${type.emoji}</div>
         <div class="trip-info">
           <div class="trip-name">${escapeHtml(t.name)}</div>
@@ -7114,21 +7334,21 @@ function renderStagesBoard() {
   }
 
   // Assegna una posizione a griglia di default alle tappe che non hanno ancora una boardPos salvata
-  let gridX = 20, gridY = 24;
+  let gridX = 24, gridY = 28;
   const positions = {};
   stages.forEach(s => {
     if (s.boardPos && typeof s.boardPos.x === 'number' && typeof s.boardPos.y === 'number') {
       positions[s.id] = s.boardPos;
     } else {
       positions[s.id] = { x: gridX, y: gridY };
-      gridX += 158;
-      if (gridX > 780) { gridX = 20; gridY += 132; }
+      gridX += 195;
+      if (gridX > 980) { gridX = 24; gridY += 165; }
     }
   });
 
   // Dimensiona il canvas in base alla posizione più estrema
-  let maxX = 820, maxY = 380;
-  Object.values(positions).forEach(p => { maxX = Math.max(maxX, p.x + 180); maxY = Math.max(maxY, p.y + 160); });
+  let maxX = 1040, maxY = 560;
+  Object.values(positions).forEach(p => { maxX = Math.max(maxX, p.x + 220); maxY = Math.max(maxY, p.y + 200); });
   cardsContainer.style.width = maxX + 'px';
   cardsContainer.style.height = maxY + 'px';
   svg.setAttribute('width', maxX);
@@ -7164,16 +7384,184 @@ function redrawBoardLines() {
   const cardEls = {};
   cardsContainer.querySelectorAll('.board-card').forEach(el => { cardEls[el.dataset.id] = el; });
   let linesHtml = '';
+
+  // Fili rossi automatici: alternativa → tappa genitore
   (state.currentStages || []).filter(s => s.kind === 'alternative' && s.parentId).forEach(a => {
     const parentEl = cardEls[a.parentId];
     const altEl = cardEls[a.id];
     if (!parentEl || !altEl) return;
-    const x1 = parseFloat(parentEl.style.left) + 70, y1 = parseFloat(parentEl.style.top) + 38;
-    const x2 = parseFloat(altEl.style.left) + 70, y2 = parseFloat(altEl.style.top) + 38;
+    const x1 = parseFloat(parentEl.style.left) + 88, y1 = parseFloat(parentEl.style.top) + 46;
+    const x2 = parseFloat(altEl.style.left) + 88, y2 = parseFloat(altEl.style.top) + 46;
     linesHtml += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#a8281c" stroke-width="2.5" stroke-linecap="round" opacity="0.8"/>`;
   });
+
+  // Collegamenti manuali — colore ed emoji a scelta dell'utente, toccabili per modificarli/eliminarli
+  const manualConnections = state.currentTrip?.boardConnections || [];
+  manualConnections.forEach((conn, idx) => {
+    const fromEl = cardEls[conn.from];
+    const toEl = cardEls[conn.to];
+    if (!fromEl || !toEl) return;
+    const x1 = parseFloat(fromEl.style.left) + 88, y1 = parseFloat(fromEl.style.top) + 46;
+    const x2 = parseFloat(toEl.style.left) + 88, y2 = parseFloat(toEl.style.top) + 46;
+    const midX = (x1 + x2) / 2, midY = (y1 + y2) / 2;
+    const col = conn.color || '#a8281c';
+    // Linea "presa" invisibile più larga per facilitare il tap, sopra la linea visibile
+    linesHtml += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="transparent" stroke-width="18" pointer-events="stroke" style="cursor:pointer" onclick="openBoardConnectionEditor('${conn.from}','${conn.to}',${idx})"/>`;
+    linesHtml += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="3" stroke-linecap="round" opacity="0.88" pointer-events="none"/>`;
+    if (conn.emoji) {
+      linesHtml += `<circle cx="${midX}" cy="${midY}" r="12" fill="#fffdf8" stroke="${col}" stroke-width="1.5" pointer-events="none"/>`;
+      linesHtml += `<text x="${midX}" y="${midY}" font-size="14" text-anchor="middle" dominant-baseline="central" pointer-events="none">${conn.emoji}</text>`;
+    }
+  });
+
   svg.innerHTML = linesHtml;
 }
+
+/* =================================================================
+   COLLEGAMENTI MANUALI SULLA LAVAGNA — l'utente sceglie personalmente
+   quali tappe collegare, con colore ed emoji a piacere.
+   Salvati su trips/{id}.boardConnections = [{from, to, color, emoji}, ...]
+   ================================================================= */
+let boardLinkMode = false;
+let boardLinkFirstId = null;
+
+function toggleBoardLinkMode() {
+  boardLinkMode = !boardLinkMode;
+  boardLinkFirstId = null;
+  document.querySelectorAll('.board-card').forEach(c => c.classList.remove('board-card-link-selected'));
+  const btn = document.getElementById('board-link-mode-btn');
+  btn?.classList.toggle('active', boardLinkMode);
+  const hint = document.getElementById('stages-board-hint');
+  if (hint) {
+    hint.textContent = boardLinkMode
+      ? '🔗 Tocca due tappe in sequenza per collegarle con un filo personalizzato'
+      : '📌 Trascina le tappe per riorganizzarle · il filo rosso collega ogni alternativa alla sua tappa principale';
+  }
+}
+window.toggleBoardLinkMode = toggleBoardLinkMode;
+
+function handleBoardLinkTap(id, cardEl) {
+  if (!boardLinkFirstId) {
+    boardLinkFirstId = id;
+    cardEl.classList.add('board-card-link-selected');
+    showToast('Ora tocca la seconda tappa da collegare', 'success');
+  } else if (boardLinkFirstId === id) {
+    cardEl.classList.remove('board-card-link-selected');
+    boardLinkFirstId = null;
+  } else {
+    const fromId = boardLinkFirstId;
+    boardLinkFirstId = null;
+    document.querySelectorAll('.board-card').forEach(c => c.classList.remove('board-card-link-selected'));
+    openBoardConnectionEditor(fromId, id, null);
+  }
+}
+
+const BOARD_LINK_COLORS = [
+  { hex: '#a8281c', label: 'Rosso' },
+  { hex: '#c2410c', label: 'Ocra' },
+  { hex: '#5b6f3a', label: 'Muschio' },
+  { hex: '#2d6a7e', label: 'Fiume' },
+  { hex: '#d9a441', label: 'Sole' },
+  { hex: '#7c5cbf', label: 'Viola' },
+  { hex: '#2a8c82', label: 'Verde acqua' },
+  { hex: '#333333', label: 'Nero' }
+];
+const BOARD_LINK_EMOJIS = ['🧵', '📌', '❓', '⭐', '⚠️', '❤️', '🔥', '✔️'];
+
+function openBoardConnectionEditor(fromId, toId, existingIndex) {
+  const container = document.getElementById('stage-detail-content');
+  if (!container) return;
+  const fromStage = state.currentStages.find(s => s.id === fromId);
+  const toStage = state.currentStages.find(s => s.id === toId);
+  const existing = existingIndex != null ? (state.currentTrip?.boardConnections || [])[existingIndex] : null;
+  state._boardLinkDraft = {
+    from: fromId, to: toId,
+    color: existing?.color || '#a8281c',
+    emoji: existing?.emoji || '',
+    editIndex: existingIndex
+  };
+  container.innerHTML = `
+    <div style="text-align:center; padding:8px 0 14px; position:relative">
+      <div style="width:56px; height:56px; border-radius:50%; background:var(--grad-sunset); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:10px">🧵</div>
+      <h2 style="margin:0; font-size:19px; font-weight:800">Collega tappe</h2>
+      <p style="font-size:13px; color:var(--ink-muted); margin:8px 24px 0">${escapeHtml(fromStage?.title || '')} ↔ ${escapeHtml(toStage?.title || '')}</p>
+      <button class="modal-close" style="position:absolute; top:0; right:0" onclick="closeModal('stage-detail-modal')">×</button>
+    </div>
+    <div class="field">
+      <label>Colore del filo</label>
+      <div id="board-link-color-picker" class="stage-color-picker"></div>
+    </div>
+    <div class="field">
+      <label>Emoji (opzionale)</label>
+      <div id="board-link-emoji-picker" class="emoji-picker" style="grid-template-columns:repeat(8,1fr)"></div>
+    </div>
+    ${existingIndex != null ? `<button class="btn btn-danger" style="margin-bottom:10px" onclick="deleteBoardConnection(${existingIndex})">🗑️ Elimina collegamento</button>` : ''}
+    <button class="btn btn-ochre" onclick="saveBoardConnection()">✓ Salva collegamento</button>
+  `;
+  openModal('stage-detail-modal');
+  renderBoardLinkColorPicker(state._boardLinkDraft.color);
+  renderBoardLinkEmojiPicker(state._boardLinkDraft.emoji);
+}
+window.openBoardConnectionEditor = openBoardConnectionEditor;
+
+function renderBoardLinkColorPicker(selected) {
+  const picker = document.getElementById('board-link-color-picker');
+  if (!picker) return;
+  picker.innerHTML = BOARD_LINK_COLORS.map(c => `
+    <div class="stage-color-swatch ${selected === c.hex ? 'selected' : ''}" style="background:${c.hex}" title="${c.label}" onclick="selectBoardLinkColor('${c.hex}')"></div>
+  `).join('');
+}
+function selectBoardLinkColor(hex) {
+  if (state._boardLinkDraft) state._boardLinkDraft.color = hex;
+  renderBoardLinkColorPicker(hex);
+}
+window.selectBoardLinkColor = selectBoardLinkColor;
+
+function renderBoardLinkEmojiPicker(selected) {
+  const picker = document.getElementById('board-link-emoji-picker');
+  if (!picker) return;
+  picker.innerHTML = `<button class="${!selected ? 'selected' : ''}" onclick="selectBoardLinkEmoji('')" style="font-size:11px; font-weight:700">Nessuna</button>` +
+    BOARD_LINK_EMOJIS.map(e => `<button class="${selected === e ? 'selected' : ''}" onclick="selectBoardLinkEmoji('${e}')">${e}</button>`).join('');
+}
+function selectBoardLinkEmoji(e) {
+  if (state._boardLinkDraft) state._boardLinkDraft.emoji = e;
+  renderBoardLinkEmojiPicker(e);
+}
+window.selectBoardLinkEmoji = selectBoardLinkEmoji;
+
+async function saveBoardConnection() {
+  const draft = state._boardLinkDraft;
+  if (!draft) return;
+  try {
+    showLoader(true);
+    const connections = [...(state.currentTrip.boardConnections || [])];
+    const newConn = { from: draft.from, to: draft.to, color: draft.color, emoji: draft.emoji || '' };
+    if (draft.editIndex != null) connections[draft.editIndex] = newConn;
+    else connections.push(newConn);
+    await window.FB.updateDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId), { boardConnections: connections });
+    state.currentTrip.boardConnections = connections;
+    closeModal('stage-detail-modal');
+    showToast('Collegamento salvato 🧵', 'success');
+    renderStagesBoard();
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
+}
+window.saveBoardConnection = saveBoardConnection;
+
+async function deleteBoardConnection(index) {
+  try {
+    showLoader(true);
+    const connections = [...(state.currentTrip.boardConnections || [])];
+    connections.splice(index, 1);
+    await window.FB.updateDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId), { boardConnections: connections });
+    state.currentTrip.boardConnections = connections;
+    closeModal('stage-detail-modal');
+    showToast('Collegamento eliminato', 'success');
+    renderStagesBoard();
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
+}
+window.deleteBoardConnection = deleteBoardConnection;
 
 /* Trascinamento delle card — funziona con mouse e touch, salva la posizione al rilascio.
    Un tap senza spostamento apre il dettaglio della tappa (non interferisce col drag). */
@@ -7232,7 +7620,11 @@ function bindBoardDrag() {
         if (s) s.boardPos = { x, y };
       } catch (e) { console.warn('boardPos save error', e); }
     } else {
-      openStageDetail(id);
+      if (boardLinkMode) {
+        handleBoardLinkTap(id, activeCard);
+      } else {
+        openStageDetail(id);
+      }
     }
     activeCard = null;
   };
@@ -7769,6 +8161,56 @@ function selectStageColor(hex) {
   renderStageColorPicker(hex);
 }
 window.selectStageColor = selectStageColor;
+
+/* =================================================================
+   COLORE PERSONALIZZATO PER SEGMENTO DEL PERCORSO — indipendente dal colore
+   della tappa. Salvato su trips/{id}.routeSegmentColors[toStageId].
+   ================================================================= */
+function openSegmentColorPicker(toStageId) {
+  const container = document.getElementById('stage-detail-content');
+  if (!container) return;
+  const currentColor = state.currentTrip?.routeSegmentColors?.[toStageId] || null;
+  container.innerHTML = `
+    <div style="text-align:center; padding:8px 0 18px; position:relative">
+      <div style="width:56px; height:56px; border-radius:50%; background:var(--grad-sunset); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:26px; margin-bottom:10px">🎨</div>
+      <h2 style="margin:0; font-size:20px; font-weight:800">Colore della tratta</h2>
+      <p style="font-size:12px; color:var(--ink-muted); margin:6px 0 0">Vale solo per questo tratto di strada sulla mappa</p>
+      <button class="modal-close" style="position:absolute; top:0; right:0" onclick="closeModal('stage-detail-modal')">×</button>
+    </div>
+    <div id="segment-color-picker" class="stage-color-picker" style="justify-content:center; margin-bottom:18px"></div>
+    <button class="btn btn-secondary" onclick="closeModal('stage-detail-modal')">Chiudi</button>
+  `;
+  openModal('stage-detail-modal');
+  renderSegmentColorPicker(toStageId, currentColor);
+}
+window.openSegmentColorPicker = openSegmentColorPicker;
+
+function renderSegmentColorPicker(toStageId, selectedColor) {
+  const picker = document.getElementById('segment-color-picker');
+  if (!picker) return;
+  let html = `<div class="stage-color-swatch default-swatch ${!selectedColor ? 'selected' : ''}" title="Predefinito (rosso ocra)" onclick="setSegmentColor('${toStageId}', null)"></div>`;
+  html += STAGE_COLOR_PALETTE.map(c => `
+    <div class="stage-color-swatch ${selectedColor === c.hex ? 'selected' : ''}" style="background:${c.hex}" title="${c.label}" onclick="setSegmentColor('${toStageId}', '${c.hex}')"></div>
+  `).join('');
+  picker.innerHTML = html;
+}
+
+async function setSegmentColor(toStageId, hex) {
+  try {
+    showLoader(true);
+    const current = state.currentTrip.routeSegmentColors || {};
+    const updated = { ...current };
+    if (hex) updated[toStageId] = hex; else delete updated[toStageId];
+    await window.FB.updateDoc(window.FB.doc(window.FB.db, 'trips', state.currentTripId), { routeSegmentColors: updated });
+    state.currentTrip.routeSegmentColors = updated;
+    renderSegmentColorPicker(toStageId, hex);
+    showToast('Colore tratta aggiornato 🎨', 'success');
+    if (state.currentTab === 'map') renderMap();
+  } catch (e) {
+    showToast('Errore: ' + e.message, 'error');
+  } finally { showLoader(false); }
+}
+window.setSegmentColor = setSegmentColor;
 
 async function saveStage() {
   const title = document.getElementById('ns-title').value.trim();
@@ -8349,7 +8791,8 @@ async function drawRoadRoute(points) {
     const isWaypointSeg = a.kind === 'waypoint' || b.kind === 'waypoint';
     // Il colore del segmento segue il colore personalizzato della tappa di ARRIVO, se impostato;
     // altrimenti il fallback standard (fiume per le secondarie, ocra per le principali)
-    const color = b.color || a.color || (isWaypointSeg ? '#2d6a7e' : '#c2410c');
+    // Priorità colore segmento: override manuale del segmento > colore della tappa di arrivo > default
+    const color = state.currentTrip?.routeSegmentColors?.[b.id] || b.color || (isWaypointSeg ? '#2d6a7e' : '#c2410c');
 
     // Linea provvisoria mentre carica
     const provisional = L.polyline([[a.lat, a.lng], [b.lat, b.lng]], {
@@ -8376,7 +8819,7 @@ async function drawRoadRoute(points) {
       L.polyline(line, { color, weight: 10, opacity: 0.16, lineCap: 'round', lineJoin: 'round' }).addTo(state.mapInstance);
       // Linea principale
       const mainLine = L.polyline(line, { color, weight: 5, opacity: 0.9, lineCap: 'round', lineJoin: 'round' }).addTo(state.mapInstance);
-      mainLine.bindPopup(`<strong>${isWaypointSeg ? '📌' : '🛣️'} ${escapeHtml(a.title || '')} → ${escapeHtml(b.title || '')}</strong><br>📏 ${distanceKm} km<br>⏱️ ~${durationTxt}`);
+      mainLine.bindPopup(`<strong>${isWaypointSeg ? '📌' : '🛣️'} ${escapeHtml(a.title || '')} → ${escapeHtml(b.title || '')}</strong><br>📏 ${distanceKm} km<br>⏱️ ~${durationTxt}<br><button style="margin-top:6px;color:#c1504a;background:none;border:none;cursor:pointer;font-weight:700;font-size:12px" onclick="openSegmentColorPicker('${b.id}')">🎨 Cambia colore tratta</button>`);
 
       // Etichetta tempo al centro del segmento (se toggle attivo)
       if (mapState.showSegTimes) {
@@ -8542,7 +8985,7 @@ function renderMap() {
           iconSize: [28, 28], iconAnchor: [14, 28], className: ''
         });
     const marker = L.marker([s.lat, s.lng], { icon }).addTo(state.mapInstance)
-      .bindPopup(`<strong>${isWaypoint ? '📌 ' : ''}${escapeHtml(s.title)}</strong>${s.date ? '<br/>📅 ' + formatDate(s.date) : ''}${s.notes ? '<br/>' + escapeHtml(s.notes) : ''}`);
+      .bindPopup(`<strong>${isWaypoint ? '📌 ' : ''}${escapeHtml(s.title)}</strong>${s.date ? '<br/>📅 ' + formatDate(s.date) : ''}${s.notes ? '<br/>' + escapeHtml(s.notes) : ''}<br><button style="margin-top:6px;color:#c2410c;background:none;border:none;cursor:pointer;font-weight:700;font-size:12px" onclick="openStageDetail('${s.id}')">📖 Apri tappa</button>`);
     if (mapState.showStageNames) {
       marker.bindTooltip(escapeHtml(s.title || ''), { permanent: true, direction: 'top', offset: [0, isWaypoint ? -14 : -20], className: 'stage-name-tooltip' });
     }
@@ -8562,7 +9005,7 @@ function renderMap() {
       iconSize: [24, 24], iconAnchor: [12, 12], className: ''
     });
     const altMarker = L.marker([a.lat, a.lng], { icon: altIcon }).addTo(state.mapInstance)
-      .bindPopup(`<strong>🔀 ${escapeHtml(a.title || 'Alternativa')}</strong><br/><em style="font-size:12px">Alternativa a: ${escapeHtml(parent?.title || '—')}</em>${a.notes ? '<br/>' + escapeHtml(a.notes) : ''}`);
+      .bindPopup(`<strong>🔀 ${escapeHtml(a.title || 'Alternativa')}</strong><br/><em style="font-size:12px">Alternativa a: ${escapeHtml(parent?.title || '—')}</em>${a.notes ? '<br/>' + escapeHtml(a.notes) : ''}<br><button style="margin-top:6px;color:#c2410c;background:none;border:none;cursor:pointer;font-weight:700;font-size:12px" onclick="openStageDetail('${a.id}')">📖 Apri tappa</button>`);
     if (mapState.showStageNames) {
       altMarker.bindTooltip(escapeHtml(a.title || ''), { permanent: true, direction: 'top', offset: [0, -12], className: 'stage-name-tooltip stage-name-tooltip-alt' });
     }
