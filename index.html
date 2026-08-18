@@ -3420,47 +3420,60 @@
   }
 
   /* === ITINERARY NODES (con connettore verticale) === */
+  /* ─── Nodo tappa: card con binario temporale a sinistra ─── */
   .itin-node {
     position: relative;
     display: flex;
-    gap: 14px;
-    padding: 14px 14px 14px 4px;
-    margin-bottom: 8px;
+    gap: 13px;
+    padding: 15px 10px 15px 6px;
+    margin-bottom: 10px;
     background: var(--surface);
-    border-radius: var(--radius);
-    border: 1.5px solid var(--border);
-    box-shadow: var(--shadow-sm);
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 2px rgba(74,49,34,0.05), 0 4px 12px rgba(74,49,34,0.05);
     cursor: pointer;
-    transition: transform 0.1s, border-color 0.15s, box-shadow 0.15s;
+    transition: transform 0.12s, border-color 0.18s, box-shadow 0.18s;
     align-items: flex-start;
   }
-  .itin-node:active { transform: scale(0.98); }
+  .itin-node:active { transform: scale(0.985); }
   .itin-node:hover {
     border-color: var(--ochre);
-    box-shadow: var(--shadow);
+    box-shadow: 0 2px 4px rgba(194,65,12,0.06), 0 8px 22px rgba(194,65,12,0.10);
   }
   .itin-node.itin-origin {
     border-color: var(--moss);
-    border-left-width: 4px;
-    background: linear-gradient(135deg, var(--moss-soft) 0%, var(--surface) 45%);
+    background: linear-gradient(140deg, var(--moss-soft) 0%, var(--surface) 42%);
   }
-  .itin-node.itin-origin:hover { border-color: var(--moss-dark); }
-  .itin-node.itin-last {
-    border-left-width: 4px;
-    border-left-color: var(--ochre);
+  .itin-node.itin-origin:hover {
+    border-color: var(--moss-dark);
+    box-shadow: 0 2px 4px rgba(91,111,58,0.06), 0 8px 22px rgba(91,111,58,0.12);
   }
-  /* Vertical connector between nodes */
+  .itin-node.itin-last::after {
+    content: '';
+    position: absolute;
+    left: 27px; bottom: -10px;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--ochre);
+    transform: translateX(-50%);
+    box-shadow: 0 0 0 3px var(--bg);
+  }
+
+  /* Binario verticale continuo che collega i nodi */
   .itin-connector {
     position: absolute;
-    top: -12px;
-    left: 27px; /* aligns with badge center */
+    top: -11px;
+    left: 27px;
     width: 2px;
     height: 12px;
-    background: repeating-linear-gradient(to bottom, var(--ink-faint) 0, var(--ink-faint) 3px, transparent 3px, transparent 6px);
+    background: var(--border-strong);
+    opacity: 0.55;
+    border-radius: 2px;
     z-index: 0;
   }
+
   .itin-badge {
-    width: 42px; height: 42px;
+    width: 40px; height: 40px;
     border-radius: 50%;
     background: var(--grad-sunset);
     color: #fff;
@@ -3469,94 +3482,105 @@
     justify-content: center;
     font-family: 'Fraunces', serif;
     font-weight: 800;
-    font-size: 17px;
+    font-size: 16px;
     flex-shrink: 0;
-    box-shadow: var(--shadow-warm);
-    margin-left: 6px;
-    margin-top: 2px;
+    box-shadow: 0 3px 10px rgba(194,65,12,0.28);
+    margin-left: 7px;
+    margin-top: 1px;
     z-index: 1;
-    border: 2px solid var(--surface);
+    border: 2.5px solid var(--surface);
   }
   .itin-badge-origin {
     background: var(--moss);
-    box-shadow: 0 4px 12px rgba(91,111,58,0.35);
-    font-size: 20px;
+    box-shadow: 0 3px 10px rgba(91,111,58,0.3);
+    font-size: 19px;
   }
+
   .itin-body {
     flex: 1;
     min-width: 0;
+    padding-top: 1px;
   }
   .itin-eyebrow {
-    font-size: 10px;
-    color: var(--ink-muted);
+    font-size: 9.5px;
+    color: var(--ink-faint);
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 3px;
+    letter-spacing: 0.11em;
+    margin-bottom: 4px;
   }
   .itin-title {
     font-family: 'Fraunces', serif;
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 700;
-    letter-spacing: -0.015em;
-    margin-bottom: 6px;
-    line-height: 1.2;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    line-height: 1.22;
     color: var(--ink);
   }
   .itin-meta-row {
     display: flex;
-    gap: 6px;
+    gap: 5px;
     flex-wrap: wrap;
+    align-items: center;
   }
   .itin-meta {
-    font-size: 11px;
+    font-size: 10.5px;
     color: var(--ink-muted);
     background: var(--surface-2);
     padding: 3px 8px;
-    border-radius: 8px;
+    border-radius: 7px;
     font-weight: 700;
+    white-space: nowrap;
   }
   .itin-meta-coord {
     background: var(--moss-soft);
     color: var(--moss-dark);
   }
   .itin-meta-warn {
-    background: rgba(217, 119, 6, 0.15);
+    background: rgba(217, 119, 6, 0.14);
     color: var(--warning);
   }
   .itin-note {
-    font-size: 13px;
-    color: var(--ink-2);
-    line-height: 1.4;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px dashed var(--border);
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    line-height: 1.45;
+    margin-top: 9px;
+    padding-top: 9px;
+    border-top: 1px solid var(--border);
     font-style: italic;
   }
   .itin-arrow {
-    font-size: 24px;
+    font-size: 22px;
     color: var(--ink-faint);
     align-self: center;
-    margin-right: 8px;
+    margin-right: 6px;
     flex-shrink: 0;
     font-weight: 300;
   }
+
+  /* ─── Azioni: colonna compatta, discreta a riposo ─── */
   .itin-side {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 6px;
-    margin-right: 6px;
+    gap: 4px;
     align-self: center;
     flex-shrink: 0;
+    opacity: 0.55;
+    transition: opacity 0.18s;
   }
+  .itin-node:hover .itin-side { opacity: 1; }
+  @media (hover: none) { .itin-side { opacity: 1; } }
+
   .itin-reorder {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    flex-direction: row;
+    gap: 3px;
   }
   .itin-reorder-btn {
-    width: 22px; height: 17px;
-    border-radius: 5px;
+    width: 26px; height: 22px;
+    border-radius: 7px;
     background: var(--surface-2);
     color: var(--ink-muted);
     display: flex;
@@ -3571,18 +3595,18 @@
     color: var(--ochre-dark);
   }
   .itin-reorder-btn:disabled {
-    opacity: 0.25;
+    opacity: 0.22;
     cursor: default;
   }
   .itin-quick-btn {
-    width: 34px; height: 34px;
-    border-radius: 10px;
+    width: 30px; height: 30px;
+    border-radius: 9px;
     background: var(--surface-2);
     color: var(--ink-muted);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: 13px;
     transition: all 0.15s;
     border: 1px solid transparent;
   }
@@ -3591,7 +3615,11 @@
     color: var(--ochre-dark);
     border-color: var(--ochre);
   }
-  .itin-eye-btn { font-size: 14px; }
+  .itin-quick-row {
+    display: flex;
+    gap: 4px;
+  }
+  .itin-eye-btn { font-size: 13px; }
 
   /* Tappa nascosta — rimpicciolita e sfocata, esclusa dal percorso ma recuperabile */
   .itin-node.itin-node-hidden {
@@ -3609,17 +3637,21 @@
 
   /* Tappa intermedia (waypoint) — stile compatto colore fiume */
   .itin-node.itin-waypoint {
-    background: var(--river-soft);
-    border-color: var(--river);
-    padding-top: 11px;
-    padding-bottom: 11px;
+    background: linear-gradient(140deg, var(--river-soft) 0%, var(--surface) 55%);
+    border-color: rgba(45,106,126,0.45);
+    padding-top: 12px;
+    padding-bottom: 12px;
   }
-  .itin-node.itin-waypoint:hover { border-color: var(--river); box-shadow: 0 4px 14px rgba(45,106,126,0.18); }
+  .itin-node.itin-waypoint:hover {
+    border-color: var(--river);
+    box-shadow: 0 2px 4px rgba(45,106,126,0.06), 0 8px 20px rgba(45,106,126,0.14);
+  }
   .itin-badge-waypoint {
-    width: 36px; height: 36px;
+    width: 32px; height: 32px;
     background: var(--river);
-    font-size: 16px;
-    box-shadow: 0 4px 10px rgba(45,106,126,0.35);
+    font-size: 14px;
+    box-shadow: 0 3px 9px rgba(45,106,126,0.32);
+    margin-left: 11px;
   }
   .itin-eyebrow-waypoint { color: var(--river); }
   .itin-meta-river {
@@ -4122,10 +4154,10 @@
 
   .itin-add-btn {
     width: 100%;
-    padding: 14px;
+    padding: 15px;
     background: transparent;
-    border: 2px dashed var(--border-strong);
-    border-radius: var(--radius);
+    border: 1.5px dashed var(--border-strong);
+    border-radius: 18px;
     color: var(--ochre);
     font-weight: 700;
     font-size: 14px;
@@ -4134,13 +4166,14 @@
     justify-content: center;
     gap: 8px;
     cursor: pointer;
-    transition: all 0.15s;
-    margin-top: 4px;
+    transition: all 0.18s;
+    margin-top: 6px;
   }
   .itin-add-btn:hover {
     background: var(--ochre-soft);
     border-color: var(--ochre);
     border-style: solid;
+    transform: translateY(-1px);
   }
 
   /* === QUICK ITIN (in tab overview — elenco compatto guida) === */
@@ -7573,12 +7606,14 @@ function renderStages() {
             <div id="itin-weather-${s.id}" class="itin-weather-slot"></div>
           </div>
           <div class="itin-side">
-            ${eyeBtn}
             <div class="itin-reorder">
               <button class="itin-reorder-btn" title="Sposta su" ${canMoveUp ? '' : 'disabled'} onclick="event.stopPropagation(); moveStage('${s.id}','up')">▲</button>
               <button class="itin-reorder-btn" title="Sposta giù" ${canMoveDown ? '' : 'disabled'} onclick="event.stopPropagation(); moveStage('${s.id}','down')">▼</button>
             </div>
-            <button class="itin-quick-btn" title="Modifica" onclick="event.stopPropagation(); openEditStage('${s.id}')">✏️</button>
+            <div class="itin-quick-row">
+              ${eyeBtn}
+              <button class="itin-quick-btn" title="Modifica" onclick="event.stopPropagation(); openEditStage('${s.id}')">✏️</button>
+            </div>
           </div>
         </div>
       `;
@@ -7600,13 +7635,15 @@ function renderStages() {
             ${s.notes ? `<div class="itin-note">${escapeHtml(s.notes.length > 90 ? s.notes.slice(0,90)+'…' : s.notes)}</div>` : ''}
           </div>
           <div class="itin-side">
-            ${eyeBtn}
-            ${(!isLast && !isHidden) ? `<button class="itin-quick-btn" title="Affianca alla prossima tappa" onclick="event.stopPropagation(); pairStageWithNext('${s.id}')">⬌</button>` : ''}
             <div class="itin-reorder">
               <button class="itin-reorder-btn" title="Sposta su" ${canMoveUp ? '' : 'disabled'} onclick="event.stopPropagation(); moveStage('${s.id}','up')">▲</button>
               <button class="itin-reorder-btn" title="Sposta giù" ${canMoveDown ? '' : 'disabled'} onclick="event.stopPropagation(); moveStage('${s.id}','down')">▼</button>
             </div>
-            <button class="itin-quick-btn" title="Modifica" onclick="event.stopPropagation(); openEditStage('${s.id}')">✏️</button>
+            <div class="itin-quick-row">
+              ${eyeBtn}
+              ${(!isLast && !isHidden) ? `<button class="itin-quick-btn" title="Affianca alla prossima tappa come piano B" onclick="event.stopPropagation(); pairStageWithNext('${s.id}')">⬌</button>` : ''}
+              <button class="itin-quick-btn" title="Modifica" onclick="event.stopPropagation(); openEditStage('${s.id}')">✏️</button>
+            </div>
           </div>
         </div>
       `;
