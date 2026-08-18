@@ -3675,9 +3675,10 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 10px;
+    flex-wrap: wrap;
   }
   .stages-board-hint {
-    flex: 1;
+    flex: 1 1 100%;
     font-size: 12px;
     color: #4a3520;
     background: rgba(255,255,255,0.55);
@@ -3780,10 +3781,140 @@
     font-weight: 600;
     margin-top: 4px;
   }
+  .board-card-dates {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed rgba(0,0,0,0.12);
+  }
+  .board-card-date-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
+  .board-card-date-row .bcd-lbl {
+    color: #8a7358;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-size: 8.5px;
+  }
+  .board-card-date-row .bcd-val {
+    color: #2a1a0e;
+    font-weight: 700;
+  }
+  .board-card-notes {
+    font-size: 10px;
+    color: #6b5a45;
+    line-height: 1.35;
+    margin-top: 6px;
+    font-style: italic;
+  }
+  .board-card-tags {
+    margin-top: 7px;
+    display: flex;
+    gap: 4px;
+  }
+  .board-card-tag {
+    font-size: 8.5px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+  .board-card-tag-gps { background: rgba(91,111,58,0.18); color: #3f4f26; }
+  .board-card-tag-warn { background: rgba(217,119,6,0.18); color: #92650f; }
   .board-card.board-card-alt {
     border: 1.5px dashed #d9a441;
   }
   .board-card.board-card-hidden { opacity: 0.45; }
+
+  /* === TAPPE AFFIANCATE (impostate manualmente dall'utente nell'elenco normale) === */
+  .itin-pair-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .itin-pair-card {
+    flex: 1;
+    min-width: 0;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 12px 10px;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.15s;
+  }
+  .itin-pair-card:hover { border-color: var(--ochre); }
+  .itin-pair-card.itin-pair-card-hidden { opacity: 0.5; filter: grayscale(0.3); }
+  .itin-pair-badge {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--grad-sunset);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 6px rgba(194,65,12,0.3);
+  }
+  .itin-pair-title {
+    font-weight: 700;
+    font-size: 13px;
+    line-height: 1.25;
+    color: var(--ink);
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .itin-pair-dates {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 10.5px;
+    color: var(--ink-muted);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .itin-pair-tags { display: flex; gap: 4px; }
+  .itin-pair-tag-ok, .itin-pair-tag-warn {
+    font-size: 11px;
+  }
+  .itin-pair-edit {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 24px; height: 24px;
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+  .itin-pair-unlink {
+    position: absolute;
+    top: -8px; left: 50%;
+    transform: translateX(-50%);
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    box-shadow: var(--shadow-sm);
+    z-index: 2;
+  }
 
   /* === TAPPE ALTERNATIVE (affiancate al genitore) === */
   .itin-alt-row {
@@ -4608,6 +4739,7 @@
           <div class="stages-board-toolbar">
             <div class="stages-board-hint" id="stages-board-hint">📌 Trascina le tappe per riorganizzarle · il filo rosso collega ogni alternativa alla sua tappa principale</div>
             <button class="btn btn-sm" id="board-link-mode-btn" onclick="toggleBoardLinkMode()">🔗 Collega tappe</button>
+            <button class="btn btn-sm" onclick="resetBoardLayout()" title="Riordina tutte le tappe in un elenco verticale">↕️ Verticale</button>
           </div>
           <div class="stages-board-scroll">
             <svg id="stages-board-svg" class="stages-board-svg"></svg>
@@ -5318,9 +5450,10 @@
     signOut, onAuthStateChanged, updateProfile
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import {
-    getFirestore, collection, doc, addDoc, setDoc, getDoc, getDocs,
+    initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+    collection, doc, addDoc, setDoc, getDoc, getDocs,
     updateDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp,
-    arrayUnion, arrayRemove, writeBatch, limit
+    arrayUnion, arrayRemove, writeBatch, limit, waitForPendingWrites
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -5335,7 +5468,19 @@
 
   const fbApp = initializeApp(firebaseConfig);
   const auth = getAuth(fbApp);
-  const db = getFirestore(fbApp);
+  // Persistenza offline: i dati letti restano disponibili senza connessione e le scritture
+  // fatte offline vengono messe in coda e sincronizzate automaticamente al ritorno online.
+  // persistentMultipleTabManager evita errori se l'app è aperta in più schede contemporaneamente.
+  let db;
+  try {
+    db = initializeFirestore(fbApp, {
+      localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+    });
+  } catch (e) {
+    console.warn('Persistenza offline non disponibile, uso Firestore standard:', e.message);
+    const { getFirestore } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    db = getFirestore(fbApp);
+  }
 
   // Expose everything needed on window so the rest of the code (inline onclick handlers) can reach them
   window.FB = {
@@ -5344,7 +5489,7 @@
     onAuthStateChanged, updateProfile,
     collection, doc, addDoc, setDoc, getDoc, getDocs,
     updateDoc, deleteDoc, query, where, orderBy, onSnapshot, serverTimestamp,
-    arrayUnion, arrayRemove, writeBatch, limit
+    arrayUnion, arrayRemove, writeBatch, limit, waitForPendingWrites
   };
 
   // Signal ready
@@ -5768,19 +5913,30 @@ function updateOnlineStatus() {
   const banner = document.getElementById('offline-banner');
   if (!banner) return;
   if (!navigator.onLine) {
-    banner.textContent = '📡 Sei offline — le modifiche verranno sincronizzate al ritorno online';
+    banner.textContent = '📡 Sei offline — puoi continuare a lavorare, verrà sincronizzato al ritorno online';
     banner.classList.remove('back');
     banner.classList.add('show');
     _wasOffline = true;
   } else if (_wasOffline) {
-    banner.textContent = '✅ Connessione ripristinata';
-    banner.classList.add('back');
-    banner.classList.add('show');
-    setTimeout(() => {
-      banner.classList.remove('show');
-      banner.classList.remove('back');
-    }, 2500);
     _wasOffline = false;
+    banner.textContent = '🔄 Sincronizzazione in corso…';
+    banner.classList.remove('back');
+    banner.classList.add('show');
+    // Aspetta che le eventuali modifiche fatte offline vengano effettivamente inviate al server,
+    // così il messaggio riflette la realtà invece di limitarsi a dire "sei di nuovo online"
+    if (window.FB?.waitForPendingWrites && window.FB?.db) {
+      window.FB.waitForPendingWrites(window.FB.db)
+        .then(() => {
+          banner.textContent = '✅ Tutto sincronizzato';
+          banner.classList.add('back');
+          setTimeout(() => { banner.classList.remove('show'); banner.classList.remove('back'); }, 2500);
+        })
+        .catch(() => { banner.classList.remove('show'); });
+    } else {
+      banner.textContent = '✅ Connessione ripristinata';
+      banner.classList.add('back');
+      setTimeout(() => { banner.classList.remove('show'); banner.classList.remove('back'); }, 2500);
+    }
   }
 }
 window.addEventListener('online', updateOnlineStatus);
@@ -7119,6 +7275,52 @@ async function saveChecklistItem(sectionIdx, itemIdx, checked) {
   } catch (e) { console.error('saveChecklistItem', e); }
 }
 window.saveChecklistItem = saveChecklistItem;
+/* Mini-card compatta per una tappa mostrata affiancata a un'altra nell'elenco normale */
+function pairedMiniCardHtml(s, num) {
+  const isHidden = !!s.hidden;
+  const hasCoords = s.lat != null && s.lng != null;
+  const customColorStyle = s.color ? `background:${s.color};` : '';
+  let datesHtml = '';
+  if (s.date && s.days) {
+    datesHtml = `<div class="itin-pair-dates"><span>🛬 ${formatDateShort(s.date)}</span><span>🛫 ${formatDateShort(addDaysToDate(s.date, s.days))}</span></div>`;
+  } else if (s.date) {
+    datesHtml = `<div class="itin-pair-dates"><span>📅 ${formatDateShort(s.date)}</span></div>`;
+  }
+  return `
+    <div class="itin-pair-card ${isHidden ? 'itin-pair-card-hidden' : ''}" onclick="openStageDetail('${s.id}')">
+      <div class="itin-pair-badge" style="${customColorStyle}">${isHidden ? '—' : num}</div>
+      <div class="itin-pair-title">${escapeHtml(s.title || 'Senza nome')}</div>
+      ${datesHtml}
+      <div class="itin-pair-tags">${hasCoords ? '<span class="itin-pair-tag-ok">📍</span>' : '<span class="itin-pair-tag-warn">⚠️</span>'}</div>
+      <button class="itin-pair-edit" title="Modifica" onclick="event.stopPropagation(); openEditStage('${s.id}')">✏️</button>
+    </div>
+  `;
+}
+
+/* Affianca questa tappa alla prossima nella sequenza (mostrate una accanto all'altra nell'elenco).
+   La coppia si "scioglie" automaticamente se le due smettono di essere consecutive dopo un riordino. */
+async function pairStageWithNext(id) {
+  try {
+    await window.FB.updateDoc(
+      window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'stages', id),
+      { pairedWithNext: true }
+    );
+    showToast('Tappe affiancate ⬌', 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+window.pairStageWithNext = pairStageWithNext;
+
+async function unpairStage(id) {
+  try {
+    await window.FB.updateDoc(
+      window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'stages', id),
+      { pairedWithNext: false }
+    );
+    showToast('Tappe separate', 'success');
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+}
+window.unpairStage = unpairStage;
+
 function renderStages() {
   const list = document.getElementById('stages-list');
   const trip = state.currentTrip;
@@ -7184,7 +7386,21 @@ function renderStages() {
   }
 
   let stageCounter = 0;
+
+  // Precalcola quali indici sono "consumati" da una coppia affiancata (impostata dall'utente
+  // con il pulsante ⬌): solo tra due tappe principali consecutive, mai con le secondarie/nascoste
+  const pairSkip = new Set();
   mainStages.forEach((s, i) => {
+    if (s.kind === 'waypoint' || s.hidden || pairSkip.has(i)) return;
+    const next = mainStages[i + 1];
+    if (s.pairedWithNext && next && next.kind !== 'waypoint' && !next.hidden) {
+      pairSkip.add(i + 1);
+    }
+  });
+
+  mainStages.forEach((s, i) => {
+    if (pairSkip.has(i)) return; // già mostrata come metà di una coppia affiancata precedente
+
     const isWaypoint = s.kind === 'waypoint';
     const isHidden = !!s.hidden;
     if (!isWaypoint && !isHidden) stageCounter++;
@@ -7195,6 +7411,22 @@ function renderStages() {
     const alts = altsByParent[s.id] || [];
     const customColorStyle = s.color ? `background:${s.color} !important;` : '';
     const eyeBtn = `<button class="itin-quick-btn itin-eye-btn" title="${isHidden ? 'Mostra tappa' : 'Nascondi tappa'}" onclick="event.stopPropagation(); toggleStageHidden('${s.id}')">${isHidden ? '🙈' : '👁️'}</button>`;
+
+    // ── Tappa impostata per essere affiancata alla prossima: rendi una riga a due colonne ──
+    if (!isWaypoint && !isHidden && s.pairedWithNext && pairSkip.has(i + 1)) {
+      const s2 = mainStages[i + 1];
+      stageCounter++; // conta anche la seconda tappa della coppia
+      const num2 = stageCounter;
+      const num1 = num2 - 1;
+      html += `
+        <div class="itin-pair-row">
+          ${pairedMiniCardHtml(s, num1)}
+          ${pairedMiniCardHtml(s2, num2)}
+          <button class="itin-pair-unlink" title="Separa le due tappe" onclick="event.stopPropagation(); unpairStage('${s.id}')">✕</button>
+        </div>
+      `;
+      return;
+    }
 
     if (isWaypoint) {
       // Nodo tappa secondaria — stile compatto, colore fiume (o colore personalizzato)
@@ -7241,6 +7473,7 @@ function renderStages() {
           </div>
           <div class="itin-side">
             ${eyeBtn}
+            ${(!isLast && !isHidden) ? `<button class="itin-quick-btn" title="Affianca alla prossima tappa" onclick="event.stopPropagation(); pairStageWithNext('${s.id}')">⬌</button>` : ''}
             <div class="itin-reorder">
               <button class="itin-reorder-btn" title="Sposta su" ${canMoveUp ? '' : 'disabled'} onclick="event.stopPropagation(); moveStage('${s.id}','up')">▲</button>
               <button class="itin-reorder-btn" title="Sposta giù" ${canMoveDown ? '' : 'disabled'} onclick="event.stopPropagation(); moveStage('${s.id}','down')">▼</button>
@@ -7341,14 +7574,14 @@ function renderStagesBoard() {
       positions[s.id] = s.boardPos;
     } else {
       positions[s.id] = { x: gridX, y: gridY };
-      gridX += 195;
-      if (gridX > 980) { gridX = 24; gridY += 165; }
+      gridX += 205;
+      if (gridX > 1020) { gridX = 24; gridY += 210; }
     }
   });
 
   // Dimensiona il canvas in base alla posizione più estrema
-  let maxX = 1040, maxY = 560;
-  Object.values(positions).forEach(p => { maxX = Math.max(maxX, p.x + 220); maxY = Math.max(maxY, p.y + 200); });
+  let maxX = 1080, maxY = 600;
+  Object.values(positions).forEach(p => { maxX = Math.max(maxX, p.x + 230); maxY = Math.max(maxY, p.y + 250); });
   cardsContainer.style.width = maxX + 'px';
   cardsContainer.style.height = maxY + 'px';
   svg.setAttribute('width', maxX);
@@ -7360,12 +7593,32 @@ function renderStagesBoard() {
     const isWaypoint = s.kind === 'waypoint';
     const badgeColor = s.color || (isAlt ? '#f5b04a' : isWaypoint ? '#2d6a7e' : '#c2410c');
     const icon = isAlt ? '🔀' : isWaypoint ? '📌' : '📍';
+    const hasCoords = s.lat != null && s.lng != null;
+
+    // Date di check-in/check-out — se c'è la durata mostra entrambe, altrimenti solo la data disponibile
+    let datesHtml = '';
+    if (s.date && s.days) {
+      const checkout = addDaysToDate(s.date, s.days);
+      datesHtml = `
+        <div class="board-card-dates">
+          <div class="board-card-date-row"><span class="bcd-lbl">Arrivo</span><span class="bcd-val">${formatDateShort(s.date)}</span></div>
+          <div class="board-card-date-row"><span class="bcd-lbl">Partenza</span><span class="bcd-val">${formatDateShort(checkout)}</span></div>
+        </div>`;
+    } else if (s.date) {
+      datesHtml = `<div class="board-card-date">📅 ${formatDateShort(s.date)}</div>`;
+    }
+
+    const notesPreview = s.notes ? `<div class="board-card-notes">${escapeHtml(s.notes.length > 46 ? s.notes.slice(0,46) + '…' : s.notes)}</div>` : '';
+    const gpsTag = hasCoords ? `<span class="board-card-tag board-card-tag-gps">📍 GPS</span>` : `<span class="board-card-tag board-card-tag-warn">⚠️ no GPS</span>`;
+
     return `
       <div class="board-card ${isAlt ? 'board-card-alt' : ''} ${s.hidden ? 'board-card-hidden' : ''}" data-id="${s.id}" style="left:${pos.x}px; top:${pos.y}px">
         <div class="board-card-pin"></div>
         <div class="board-card-badge" style="background:${badgeColor}">${icon}</div>
         <div class="board-card-title">${escapeHtml(s.title || 'Senza nome')}</div>
-        ${s.date ? `<div class="board-card-date">📅 ${formatDate(s.date)}</div>` : ''}
+        ${datesHtml}
+        ${notesPreview}
+        <div class="board-card-tags">${gpsTag}</div>
       </div>
     `;
   }).join('');
@@ -7424,6 +7677,30 @@ function redrawBoardLines() {
    ================================================================= */
 let boardLinkMode = false;
 let boardLinkFirstId = null;
+
+/* Rimette tutte le tappe in un elenco verticale ordinato, una sotto l'altra e ben separate —
+   utile per "fare ordine" dopo aver trascinato le card in giro sulla lavagna */
+async function resetBoardLayout() {
+  if (!confirm('Riordinare tutte le tappe in un elenco verticale pulito?')) return;
+  const stages = state.currentStages || [];
+  if (!stages.length) return;
+  try {
+    showLoader(true);
+    const batch = window.FB.writeBatch(window.FB.db);
+    let y = 24;
+    stages.forEach(s => {
+      const pos = { x: 24, y };
+      batch.update(window.FB.doc(window.FB.db, 'trips', state.currentTripId, 'stages', s.id), { boardPos: pos });
+      s.boardPos = pos; // aggiornamento ottimistico locale
+      y += 210;
+    });
+    await batch.commit();
+    showToast('Tappe riordinate in verticale ↕️', 'success');
+    renderStagesBoard();
+  } catch (e) { showToast('Errore: ' + e.message, 'error'); }
+  finally { showLoader(false); }
+}
+window.resetBoardLayout = resetBoardLayout;
 
 function toggleBoardLinkMode() {
   boardLinkMode = !boardLinkMode;
@@ -9760,6 +10037,14 @@ function addDaysToDate(ymd, days) {
   const dt = new Date(y, m - 1, d);
   dt.setDate(dt.getDate() + (days || 0));
   return formatYMD(dt);
+}
+
+/* Data breve stile "15 ago" — usata nelle card della lavagna investigativa */
+function formatDateShort(ymd) {
+  if (!ymd) return '—';
+  const [y, m, d] = ymd.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  return dt.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
 }
 
 /* =================================================================
