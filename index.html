@@ -3885,9 +3885,6 @@
     margin-bottom: 6px;
   }
   .itin-pair-tags { display: flex; gap: 4px; }
-  .itin-pair-tag-ok, .itin-pair-tag-warn {
-    font-size: 11px;
-  }
   .itin-pair-edit {
     position: absolute;
     top: 8px; right: 8px;
@@ -3900,6 +3897,112 @@
     justify-content: center;
     font-size: 11px;
   }
+  /* === CAMPEGGI IN ZONA + PODIO === */
+  .campground-result {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 10px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .campground-result:hover { border-color: var(--moss); background: var(--moss-soft); }
+  .campground-result .cg-icon { font-size: 15px; flex-shrink: 0; }
+  .campground-result .cg-name {
+    flex: 1; min-width: 0;
+    font-size: 12.5px; font-weight: 600; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .campground-result .cg-dist {
+    font-size: 10.5px; font-weight: 700; color: var(--ink-muted); flex-shrink: 0;
+  }
+  .campground-result .cg-add {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--moss); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .podium-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 10px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    position: relative;
+  }
+  .podium-item-top {
+    background: linear-gradient(135deg, rgba(245,176,74,0.12), var(--surface) 60%);
+    border-color: var(--sun);
+  }
+  .podium-rank { font-size: 17px; flex-shrink: 0; width: 24px; text-align: center; font-weight: 800; }
+  .podium-info { flex: 1; min-width: 0; }
+  .podium-name {
+    font-size: 12.5px; font-weight: 700; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .podium-dist { font-size: 10px; color: var(--ink-muted); font-weight: 600; margin-top: 1px; }
+  .podium-actions { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; }
+  .podium-remove {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--surface-2); color: var(--ink-muted);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+  }
+  .podium-remove:hover { background: var(--danger); color: #fff; }
+
+  .itin-pair-plan {
+    font-size: 8.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: var(--ochre-dark);
+    margin-bottom: 4px;
+  }
+  .itin-pair-card-bis .itin-pair-plan { color: #7c5cbf; }
+  .itin-pair-card-bis {
+    border-style: dashed;
+    border-color: #b9a3e0;
+    background: linear-gradient(160deg, rgba(124,92,191,0.06), var(--surface) 60%);
+  }
+  .itin-pair-card-bis:hover { border-color: #7c5cbf; }
+  .itin-pair-notes {
+    font-size: 10.5px;
+    color: var(--ink-muted);
+    line-height: 1.35;
+    font-style: italic;
+    margin-bottom: 6px;
+  }
+  .itin-pair-tag-ok, .itin-pair-tag-warn {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+  .itin-pair-tag-ok { background: var(--moss-soft); color: var(--moss-dark); }
+  .itin-pair-tag-warn { background: rgba(217,119,6,0.15); color: var(--warning); }
+  .itin-pair-vs {
+    align-self: center;
+    flex-shrink: 0;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-faint);
+    background: var(--bg);
+    padding: 4px 2px;
+    border-radius: 8px;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 0.05em;
+  }
+  .leaflet-tooltip.stage-name-tooltip-bis { color: #7c5cbf; font-style: italic; }
   .itin-pair-unlink {
     position: absolute;
     top: -8px; left: 50%;
@@ -5049,6 +5152,16 @@
       <div style="font-size:12px; color:var(--ink-muted); margin-top:8px; line-height:1.5">
         💡 <strong>Non la trovi?</strong> Tocca <strong>"Sulla mappa"</strong> e seleziona il punto esatto.
       </div>
+    </div>
+
+    <div class="field">
+      <label>🏕️ Campeggi in zona</label>
+      <button class="btn btn-secondary btn-sm" style="width:100%" onclick="searchNearbyCampgrounds()">🔎 Cerca campeggi vicino a questa posizione</button>
+      <div style="font-size:11px; color:var(--ink-muted); margin-top:6px; line-height:1.4">
+        Imposta prima le coordinate, poi cerca: potrai aggiungere i campeggi al podio e ordinarli per preferenza.
+      </div>
+      <div id="campground-results" style="display:none; margin-top:10px"></div>
+      <div id="campground-podium" style="margin-top:10px"></div>
     </div>
     <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
       <div class="field"><label>Data arrivo</label><input id="ns-date" type="date" /></div>
@@ -7275,11 +7388,24 @@ async function saveChecklistItem(sectionIdx, itemIdx, checked) {
   } catch (e) { console.error('saveChecklistItem', e); }
 }
 window.saveChecklistItem = saveChecklistItem;
+/* Una tappa è "bis" (piano B) se la tappa principale immediatamente precedente
+   nella sequenza l'ha marcata come affiancata. Le bis non entrano nel percorso
+   sulla mappa né nella numerazione: sono un'alternativa alla tappa che le precede. */
+function isBisStage(stageId) {
+  const mainStages = (state.currentStages || []).filter(s => s.kind !== 'alternative' && !s.hidden);
+  const idx = mainStages.findIndex(s => s.id === stageId);
+  if (idx <= 0) return false;
+  const prev = mainStages[idx - 1];
+  return !!(prev && prev.pairedWithNext && prev.kind !== 'waypoint');
+}
+window.isBisStage = isBisStage;
+
 /* Mini-card compatta per una tappa mostrata affiancata a un'altra nell'elenco normale */
 function pairedMiniCardHtml(s, num) {
   const isHidden = !!s.hidden;
   const hasCoords = s.lat != null && s.lng != null;
-  const customColorStyle = s.color ? `background:${s.color};` : '';
+  const isBis = String(num).includes('bis');
+  const customColorStyle = s.color ? `background:${s.color};` : (isBis ? 'background:#7c5cbf;' : '');
   let datesHtml = '';
   if (s.date && s.days) {
     datesHtml = `<div class="itin-pair-dates"><span>🛬 ${formatDateShort(s.date)}</span><span>🛫 ${formatDateShort(addDaysToDate(s.date, s.days))}</span></div>`;
@@ -7287,11 +7413,14 @@ function pairedMiniCardHtml(s, num) {
     datesHtml = `<div class="itin-pair-dates"><span>📅 ${formatDateShort(s.date)}</span></div>`;
   }
   return `
-    <div class="itin-pair-card ${isHidden ? 'itin-pair-card-hidden' : ''}" onclick="openStageDetail('${s.id}')">
+    <div class="itin-pair-card ${isHidden ? 'itin-pair-card-hidden' : ''} ${isBis ? 'itin-pair-card-bis' : ''}" onclick="openStageDetail('${s.id}')">
       <div class="itin-pair-badge" style="${customColorStyle}">${isHidden ? '—' : num}</div>
+      <div class="itin-pair-plan">${isBis ? 'Piano B' : 'Piano A'}</div>
       <div class="itin-pair-title">${escapeHtml(s.title || 'Senza nome')}</div>
       ${datesHtml}
-      <div class="itin-pair-tags">${hasCoords ? '<span class="itin-pair-tag-ok">📍</span>' : '<span class="itin-pair-tag-warn">⚠️</span>'}</div>
+      ${s.notes ? `<div class="itin-pair-notes">${escapeHtml(s.notes.length > 42 ? s.notes.slice(0,42)+'…' : s.notes)}</div>` : ''}
+      <div class="itin-pair-tags">${hasCoords ? '<span class="itin-pair-tag-ok">📍 GPS</span>' : '<span class="itin-pair-tag-warn">⚠️ no GPS</span>'}</div>
+      <div id="itin-weather-${s.id}" class="itin-weather-slot"></div>
       <button class="itin-pair-edit" title="Modifica" onclick="event.stopPropagation(); openEditStage('${s.id}')">✏️</button>
     </div>
   `;
@@ -7412,16 +7541,15 @@ function renderStages() {
     const customColorStyle = s.color ? `background:${s.color} !important;` : '';
     const eyeBtn = `<button class="itin-quick-btn itin-eye-btn" title="${isHidden ? 'Mostra tappa' : 'Nascondi tappa'}" onclick="event.stopPropagation(); toggleStageHidden('${s.id}')">${isHidden ? '🙈' : '👁️'}</button>`;
 
-    // ── Tappa impostata per essere affiancata alla prossima: rendi una riga a due colonne ──
+    // ── Tappa impostata per essere affiancata alla prossima: la seconda è il "piano B" (bis)
+    //    della stessa tappa, quindi condivide il numero e NON incrementa il contatore ──
     if (!isWaypoint && !isHidden && s.pairedWithNext && pairSkip.has(i + 1)) {
       const s2 = mainStages[i + 1];
-      stageCounter++; // conta anche la seconda tappa della coppia
-      const num2 = stageCounter;
-      const num1 = num2 - 1;
       html += `
         <div class="itin-pair-row">
-          ${pairedMiniCardHtml(s, num1)}
-          ${pairedMiniCardHtml(s2, num2)}
+          ${pairedMiniCardHtml(s, String(stageCounter))}
+          <div class="itin-pair-vs">oppure</div>
+          ${pairedMiniCardHtml(s2, stageCounter + ' bis')}
           <button class="itin-pair-unlink" title="Separa le due tappe" onclick="event.stopPropagation(); unpairStage('${s.id}')">✕</button>
         </div>
       `;
@@ -7928,7 +8056,7 @@ function buildOrderedRoutePoints() {
     points.push({ id: '__origin__', lat: trip.originLat, lng: trip.originLng, kind: 'origin', title: trip.origin || 'Partenza' });
   }
   (state.currentStages || []).forEach(s => {
-    if (s.kind === 'alternative' || s.hidden) return; // non instradata
+    if (s.kind === 'alternative' || s.hidden || isBisStage(s.id)) return; // non instradata
     if (s.lat != null && s.lng != null) {
       points.push({ id: s.id, lat: s.lat, lng: s.lng, kind: s.kind === 'waypoint' ? 'waypoint' : 'stage', title: s.title, color: s.color || null });
     }
@@ -8326,7 +8454,7 @@ function showOriginInfo() {
         🏠
       </div>
       <div style="font-family:'Fraunces',serif; font-style:italic; font-size:12px; color:var(--ink-muted); margin-bottom:2px; letter-spacing:0.05em">Punto di partenza</div>
-      <h2 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.02em; padding:0 30px">${escapeHtml(trip.origin)}</h2>
+      <h2 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.02em; padding:0 30px; ${hasCoords ? 'cursor:pointer; color:var(--ochre); text-decoration:underline; text-decoration-style:dotted; text-underline-offset:4px;' : ''}" ${hasCoords ? `onclick="openInMaps(${trip.originLat}, ${trip.originLng}, ${JSON.stringify(trip.origin||'')})" title="Apri in Maps"` : ''}>${escapeHtml(trip.origin)}${hasCoords ? ' 🧭' : ''}</h2>
       <button class="modal-close" style="position:absolute; top:0; right:0" onclick="closeModal('stage-detail-modal')">×</button>
     </div>
     ${trip.startDate ? `
@@ -8509,7 +8637,7 @@ async function saveStage() {
   // (non blocca il salvataggio, chiede solo conferma — utile per errori di battitura sulla data)
   if (date && kind !== 'alternative') {
     const isEdit = !!state.editingStageId;
-    const mainStages = state.currentStages.filter(s => s.kind !== 'alternative' && s.id !== state.editingStageId);
+    const mainStages = state.currentStages.filter(s => s.kind !== 'alternative' && !s.hidden && s.id !== state.editingStageId);
     let predecessor = null;
     if (isEdit) {
       const editingStage = state.currentStages.find(s => s.id === state.editingStageId);
@@ -8533,7 +8661,7 @@ async function saveStage() {
   try {
     showLoader(true);
     const isEdit = !!state.editingStageId;
-    const data = { title, date, days, notes, kind, color: state.newStageColor || null };
+    const data = { title, date, days, notes, kind, color: state.newStageColor || null, campgrounds: state.newStageCampgrounds || [] };
     data.parentId = kind === 'alternative' ? parentId : null;
     if (state.newStageData) {
       data.lat = state.newStageData.lat;
@@ -8587,6 +8715,8 @@ function openEditStage(stageId) {
   document.getElementById('ns-days').value = s.days || 1;
   document.getElementById('ns-notes').value = s.notes || '';
   state.newStageColor = s.color || null;
+  state.newStageCampgrounds = Array.isArray(s.campgrounds) ? [...s.campgrounds] : [];
+  renderCampgroundPodium();
   renderStageColorPicker(state.newStageColor);
   const kind = ['waypoint', 'alternative'].includes(s.kind) ? s.kind : 'stage';
   selectStageKind(kind);
@@ -8625,6 +8755,10 @@ function closeStageModal() {
   document.getElementById('ns-notes').value = '';
   state.newStageColor = null;
   renderStageColorPicker(null);
+  state.newStageCampgrounds = [];
+  renderCampgroundPodium();
+  const cgRes = document.getElementById('campground-results');
+  if (cgRes) { cgRes.style.display = 'none'; cgRes.innerHTML = ''; }
   document.getElementById('ns-coords').textContent = 'Nessuna';
   document.getElementById('stage-search-results').style.display = 'none';
   document.getElementById('ns-modal-title').innerHTML = '📍 Nuova tappa';
@@ -8637,7 +8771,8 @@ window.closeStageModal = closeStageModal;
    tappa inserita (data + giorni), o la sua data se non ha una durata, o la data di
    partenza del viaggio se non c'è ancora nessuna tappa */
 function getSuggestedNextStageDate() {
-  const mainStages = (state.currentStages || []).filter(s => s.kind !== 'alternative');
+  // Esclude le tappe nascoste dal calcolo — "come se non ci fossero"
+  const mainStages = (state.currentStages || []).filter(s => s.kind !== 'alternative' && !s.hidden);
   if (mainStages.length) {
     const last = mainStages[mainStages.length - 1];
     if (last.date) return last.days ? addDaysToDate(last.date, last.days) : last.date;
@@ -8653,6 +8788,8 @@ function openNewStageModal(presetKind, presetParentId) {
   document.getElementById('ns-save-btn').textContent = 'Salva tappa';
   state.newStageColor = null;
   renderStageColorPicker(null);
+  state.newStageCampgrounds = [];
+  renderCampgroundPodium();
   selectStageKind(presetKind === 'alternative' || presetKind === 'waypoint' ? presetKind : 'stage');
   if (presetKind === 'alternative' && presetParentId) {
     setTimeout(() => {
@@ -8738,6 +8875,130 @@ async function moveStage(id, direction) {
 window.moveStage = moveStage;
 
 /* Location search via Nominatim (OpenStreetMap) */
+/* =================================================================
+   CAMPEGGI IN ZONA — cerca i campeggi vicini alle coordinate della tappa
+   (via Overpass API su dati OpenStreetMap) e permette di costruire un
+   "podio" di preferenza, riordinabile, salvato insieme alla tappa.
+   ================================================================= */
+async function searchNearbyCampgrounds() {
+  const coords = state.newStageData;
+  if (!coords || coords.lat == null || coords.lng == null) {
+    return showToast('Imposta prima le coordinate della tappa 📍', 'error');
+  }
+  const resultsEl = document.getElementById('campground-results');
+  if (!resultsEl) return;
+  resultsEl.style.display = 'block';
+  resultsEl.innerHTML = `<div style="text-align:center; padding:14px; color:var(--ink-muted); font-size:12px">🔎 Cerco campeggi nel raggio di 15 km…</div>`;
+
+  // Overpass QL: campeggi e aree camper nel raggio di 15 km
+  const radius = 15000;
+  const q = `[out:json][timeout:20];(
+    node["tourism"="camp_site"](around:${radius},${coords.lat},${coords.lng});
+    way["tourism"="camp_site"](around:${radius},${coords.lat},${coords.lng});
+    node["tourism"="caravan_site"](around:${radius},${coords.lat},${coords.lng});
+    way["tourism"="caravan_site"](around:${radius},${coords.lat},${coords.lng});
+  );out center 30;`;
+
+  try {
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: 'data=' + encodeURIComponent(q)
+    });
+    const data = await res.json();
+    const items = (data.elements || []).map(el => {
+      const lat = el.lat ?? el.center?.lat;
+      const lng = el.lon ?? el.center?.lon;
+      if (lat == null || lng == null) return null;
+      const tags = el.tags || {};
+      return {
+        id: String(el.id),
+        name: tags.name || (tags.tourism === 'caravan_site' ? 'Area camper senza nome' : 'Campeggio senza nome'),
+        type: tags.tourism === 'caravan_site' ? 'camper' : 'tenda',
+        lat, lng,
+        distanceKm: haversineKm(coords.lat, coords.lng, lat, lng)
+      };
+    }).filter(Boolean).sort((a, b) => a.distanceKm - b.distanceKm).slice(0, 15);
+
+    state._campgroundResults = items;
+    if (!items.length) {
+      resultsEl.innerHTML = `<div style="text-align:center; padding:14px; color:var(--ink-muted); font-size:12px">Nessun campeggio trovato nel raggio di 15 km.</div>`;
+      return;
+    }
+    resultsEl.innerHTML = `
+      <div style="font-size:11px; color:var(--ink-muted); font-weight:700; margin-bottom:6px">${pluralizeIt(items.length, 'campeggio trovato', 'campeggi trovati')} — tocca per aggiungere al podio</div>
+      ${items.map(c => `
+        <div class="campground-result" onclick="addCampgroundToPodium('${c.id}')">
+          <span class="cg-icon">${c.type === 'camper' ? '🚐' : '⛺'}</span>
+          <span class="cg-name">${escapeHtml(c.name)}</span>
+          <span class="cg-dist">${c.distanceKm.toFixed(1)} km</span>
+          <span class="cg-add">+</span>
+        </div>
+      `).join('')}
+    `;
+  } catch (e) {
+    console.warn('Overpass error', e);
+    resultsEl.innerHTML = `<div style="text-align:center; padding:14px; color:var(--danger); font-size:12px">Servizio non raggiungibile, riprova tra poco.</div>`;
+  }
+}
+window.searchNearbyCampgrounds = searchNearbyCampgrounds;
+
+function addCampgroundToPodium(id) {
+  const found = (state._campgroundResults || []).find(c => c.id === id);
+  if (!found) return;
+  state.newStageCampgrounds = state.newStageCampgrounds || [];
+  if (state.newStageCampgrounds.some(c => c.id === id)) {
+    return showToast('Già nel podio', 'error');
+  }
+  state.newStageCampgrounds.push({ ...found });
+  renderCampgroundPodium();
+  showToast('Aggiunto al podio 🏆', 'success');
+}
+window.addCampgroundToPodium = addCampgroundToPodium;
+
+function removeCampgroundFromPodium(id) {
+  state.newStageCampgrounds = (state.newStageCampgrounds || []).filter(c => c.id !== id);
+  renderCampgroundPodium();
+}
+window.removeCampgroundFromPodium = removeCampgroundFromPodium;
+
+function moveCampgroundInPodium(id, dir) {
+  const list = state.newStageCampgrounds || [];
+  const i = list.findIndex(c => c.id === id);
+  if (i === -1) return;
+  const j = dir === 'up' ? i - 1 : i + 1;
+  if (j < 0 || j >= list.length) return;
+  [list[i], list[j]] = [list[j], list[i]];
+  renderCampgroundPodium();
+}
+window.moveCampgroundInPodium = moveCampgroundInPodium;
+
+const PODIUM_MEDALS = ['🥇', '🥈', '🥉'];
+
+function renderCampgroundPodium() {
+  const el = document.getElementById('campground-podium');
+  if (!el) return;
+  const list = state.newStageCampgrounds || [];
+  if (!list.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div style="font-size:11px; color:var(--ink-muted); font-weight:700; margin-bottom:6px">🏆 Il tuo podio — riordina in base alla preferenza</div>
+    ${list.map((c, i) => `
+      <div class="podium-item ${i < 3 ? 'podium-item-top' : ''}">
+        <span class="podium-rank">${PODIUM_MEDALS[i] || (i + 1)}</span>
+        <div class="podium-info">
+          <div class="podium-name">${c.type === 'camper' ? '🚐' : '⛺'} ${escapeHtml(c.name)}</div>
+          <div class="podium-dist">${c.distanceKm.toFixed(1)} km dalla tappa</div>
+        </div>
+        <div class="podium-actions">
+          <button class="itin-reorder-btn" ${i === 0 ? 'disabled' : ''} onclick="moveCampgroundInPodium('${c.id}','up')">▲</button>
+          <button class="itin-reorder-btn" ${i === list.length - 1 ? 'disabled' : ''} onclick="moveCampgroundInPodium('${c.id}','down')">▼</button>
+        </div>
+        <button class="podium-remove" onclick="removeCampgroundFromPodium('${c.id}')">×</button>
+      </div>
+    `).join('')}
+  `;
+}
+window.renderCampgroundPodium = renderCampgroundPodium;
+
 async function searchLocation() {
   const q = document.getElementById('ns-search').value.trim();
   const resultsEl = document.getElementById('stage-search-results');
@@ -9199,7 +9460,9 @@ function renderMap() {
   const trip = state.currentTrip;
   const hasOrigin = trip?.originLat != null && trip?.originLng != null;
   const allStagesWithCoords = state.currentStages.filter(s => s.lat != null && s.lng != null && !s.hidden);
-  const stagesWithCoords = allStagesWithCoords.filter(s => s.kind !== 'alternative'); // esclude le alternative dal routing
+  // Le "bis" (piani B affiancati) sono mostrate sulla mappa ma escluse dal percorso, come le alternative
+  const stagesWithCoords = allStagesWithCoords.filter(s => s.kind !== 'alternative' && !isBisStage(s.id));
+  const bisWithCoords = allStagesWithCoords.filter(s => s.kind !== 'alternative' && isBisStage(s.id));
   const altsWithCoords = allStagesWithCoords.filter(s => s.kind === 'alternative');
 
   // Punti ordinati per il routing: partenza (se presente) + tappe/secondarie in ordine (NO alternative)
@@ -9239,7 +9502,7 @@ function renderMap() {
       iconSize: [30, 30], iconAnchor: [15, 15], className: ''
     });
     const originMarker = L.marker([trip.originLat, trip.originLng], { icon: homeIcon }).addTo(state.mapInstance)
-      .bindPopup(`<strong>🏠 Partenza</strong><br/>${escapeHtml(trip.origin || '')}${trip.startDate ? '<br/>📅 ' + formatDate(trip.startDate) : ''}`);
+      .on('click', () => showOriginInfo());
     if (mapState.showStageNames) {
       originMarker.bindTooltip('Partenza', { permanent: true, direction: 'top', offset: [0, -16], className: 'stage-name-tooltip stage-name-tooltip-origin' });
     }
@@ -9262,9 +9525,36 @@ function renderMap() {
           iconSize: [28, 28], iconAnchor: [14, 28], className: ''
         });
     const marker = L.marker([s.lat, s.lng], { icon }).addTo(state.mapInstance)
-      .bindPopup(`<strong>${isWaypoint ? '📌 ' : ''}${escapeHtml(s.title)}</strong>${s.date ? '<br/>📅 ' + formatDate(s.date) : ''}${s.notes ? '<br/>' + escapeHtml(s.notes) : ''}<br><button style="margin-top:6px;color:#c2410c;background:none;border:none;cursor:pointer;font-weight:700;font-size:12px" onclick="openStageDetail('${s.id}')">📖 Apri tappa</button>`);
+      .on('click', () => openStageDetail(s.id));
     if (mapState.showStageNames) {
       marker.bindTooltip(escapeHtml(s.title || ''), { permanent: true, direction: 'top', offset: [0, isWaypoint ? -14 : -20], className: 'stage-name-tooltip' });
+    }
+  });
+
+  // ── Tappe "BIS" (piani B affiancati) — marker con etichetta "bis", non instradate ──
+  bisWithCoords.forEach(b => {
+    const mainList = (state.currentStages || []).filter(x => x.kind !== 'alternative' && !x.hidden);
+    const bIdx = mainList.findIndex(x => x.id === b.id);
+    const twin = bIdx > 0 ? mainList[bIdx - 1] : null;
+    // Numero condiviso con la tappa gemella: conta le tappe non-bis fino a quella
+    let num = 0;
+    for (let k = 0; k <= bIdx - 1; k++) {
+      if (mainList[k].kind !== 'waypoint' && !isBisStage(mainList[k].id)) num++;
+    }
+    const bisIcon = L.divIcon({
+      html: `<div style="background:${b.color || '#7c5cbf'};color:#fff;width:28px;height:28px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:9px;box-shadow:0 3px 8px rgba(124,92,191,0.5);border:2px dashed #fff"><span style="transform:rotate(45deg)">${num}b</span></div>`,
+      iconSize: [28, 28], iconAnchor: [14, 28], className: ''
+    });
+    const bisMarker = L.marker([b.lat, b.lng], { icon: bisIcon }).addTo(state.mapInstance)
+      .on('click', () => openStageDetail(b.id));
+    // Linea tratteggiata verso la tappa gemella, per mostrare che sono la stessa scelta
+    if (twin && twin.lat != null && twin.lng != null) {
+      L.polyline([[twin.lat, twin.lng], [b.lat, b.lng]], {
+        color: '#7c5cbf', weight: 2.5, opacity: 0.7, dashArray: '3, 7', lineCap: 'round'
+      }).addTo(state.mapInstance);
+    }
+    if (mapState.showStageNames) {
+      bisMarker.bindTooltip(escapeHtml(b.title || '') + ' (bis)', { permanent: true, direction: 'top', offset: [0, -20], className: 'stage-name-tooltip stage-name-tooltip-bis' });
     }
   });
 
@@ -9282,7 +9572,7 @@ function renderMap() {
       iconSize: [24, 24], iconAnchor: [12, 12], className: ''
     });
     const altMarker = L.marker([a.lat, a.lng], { icon: altIcon }).addTo(state.mapInstance)
-      .bindPopup(`<strong>🔀 ${escapeHtml(a.title || 'Alternativa')}</strong><br/><em style="font-size:12px">Alternativa a: ${escapeHtml(parent?.title || '—')}</em>${a.notes ? '<br/>' + escapeHtml(a.notes) : ''}<br><button style="margin-top:6px;color:#c2410c;background:none;border:none;cursor:pointer;font-weight:700;font-size:12px" onclick="openStageDetail('${a.id}')">📖 Apri tappa</button>`);
+      .on('click', () => openStageDetail(a.id));
     if (mapState.showStageNames) {
       altMarker.bindTooltip(escapeHtml(a.title || ''), { permanent: true, direction: 'top', offset: [0, -12], className: 'stage-name-tooltip stage-name-tooltip-alt' });
     }
@@ -12863,7 +13153,7 @@ function openStageDetail(stageId) {
           🔀
         </div>
         <div style="font-family:'Fraunces',serif; font-style:italic; font-size:12px; color:var(--ink-muted); margin-bottom:2px; letter-spacing:0.05em">Tappa alternativa</div>
-        <h2 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.02em; padding:0 30px">${escapeHtml(s.title || 'Alternativa senza nome')}</h2>
+        <h2 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.02em; padding:0 30px; ${hasCoords ? 'cursor:pointer; color:var(--ochre); text-decoration:underline; text-decoration-style:dotted; text-underline-offset:4px;' : ''}" ${hasCoords ? `onclick="openInMaps(${s.lat}, ${s.lng}, ${JSON.stringify(s.title||'')})" title="Apri in Maps"` : ''}>${escapeHtml(s.title || 'Alternativa senza nome')}${hasCoords ? ' 🧭' : ''}</h2>
         <button class="modal-close" style="position:absolute; top:0; right:0" onclick="closeModal('stage-detail-modal')">×</button>
       </div>
 
@@ -12953,7 +13243,7 @@ function openStageDetail(stageId) {
         ${stageNum}
       </div>
       <div style="font-family:'Fraunces',serif; font-style:italic; font-size:12px; color:var(--ink-muted); margin-bottom:2px; letter-spacing:0.05em">Tappa ${stageNum} di ${total}${s.kind === 'waypoint' ? ' · secondaria' : ''}</div>
-      <h2 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.02em; padding:0 30px">${escapeHtml(s.title || 'Tappa senza nome')}</h2>
+      <h2 style="margin:0; font-size:24px; font-weight:800; letter-spacing:-0.02em; padding:0 30px; ${hasCoords ? 'cursor:pointer; color:var(--ochre); text-decoration:underline; text-decoration-style:dotted; text-underline-offset:4px;' : ''}" ${hasCoords ? `onclick="openInMaps(${s.lat}, ${s.lng}, ${JSON.stringify(s.title||'')})" title="Apri in Maps"` : ''}>${escapeHtml(s.title || 'Tappa senza nome')}${hasCoords ? ' 🧭' : ''}</h2>
       <button class="modal-close" style="position:absolute; top:0; right:0" onclick="closeModal('stage-detail-modal')">×</button>
     </div>
 
@@ -13020,6 +13310,20 @@ function openStageDetail(stageId) {
       </div>` : `
       <button class="btn btn-secondary" style="margin-bottom:14px; border-style:dashed" onclick="closeModal('stage-detail-modal'); openNewStageModal('alternative','${s.id}')">🔀 Aggiungi tappa alternativa</button>
     `}
+
+    ${(Array.isArray(s.campgrounds) && s.campgrounds.length) ? `
+      <div style="margin-bottom:14px">
+        <div style="font-size:10px; color:var(--ink-muted); font-weight:800; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px">🏆 Podio campeggi</div>
+        ${s.campgrounds.map((c, i) => `
+          <div class="podium-item ${i < 3 ? 'podium-item-top' : ''}" style="cursor:pointer" onclick="openInMaps(${c.lat}, ${c.lng}, ${JSON.stringify(c.name || '')})">
+            <span class="podium-rank">${PODIUM_MEDALS[i] || (i + 1)}</span>
+            <div class="podium-info">
+              <div class="podium-name">${c.type === 'camper' ? '🚐' : '⛺'} ${escapeHtml(c.name)}</div>
+              <div class="podium-dist">${Number(c.distanceKm).toFixed(1)} km · tocca per aprire in Maps</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>` : ''}
 
     <!-- === FOTO TAPPA === -->
     <div style="margin-bottom:14px">
